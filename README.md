@@ -20,6 +20,13 @@
 | 目的 | 公共工事を「何の工事か / なぜ必要か / どこで / いつまで / 現在の段階 / 生活への影響 / 完成後に何が変わるか / 誰が公開しているか / いつ確認されたか」の 9 点で理解できるようにする |
 | 対象フェーズ | PoC〜MVP |
 | MVP スコープ | 1 地区（田園調布周辺）、24 案件、道路・広場・下水道・公園・建築・土木 |
+| **3D 基盤** | **CesiumJS + 日本3Dビル相当（PLATEAU / Cesium ion）＋ 地理院タイル ＋ PLATEAU-Terrain** |
+| **住所検索** | **公的ジオコーダー（国土地理院 住所検索API）** |
+| **業務検索** | **自社現場台帳（現場ID・発注番号・工事件名・発注者・元請・JV・工種・工期）** |
+| **施工範囲** | **PostGIS 3.6（工区・規制・迂回路・歩道切替の空間検索）** |
+
+> 4 つの構成要素（CesiumJS 3D基盤 / 公的ジオコーダー / 自社現場台帳 / PostGIS 施工範囲）の
+> 役割分担・構築手順・検証方法は [`docs/MVP-ENVIRONMENT.md`](docs/MVP-ENVIRONMENT.md) にまとめています。
 
 ### 画面構成
 
@@ -46,19 +53,46 @@
 |---|---|
 | フレームワーク | Next.js 16 (App Router) / React 19 |
 | 言語 | TypeScript 5（strict） |
-| 3D | Three.js 0.186 / React Three Fiber 9 / @react-three/drei 10 |
-| 3D Tiles | 3d-tiles-renderer 0.5（PLATEAU 用・動的 import） |
+| **3D（主題）** | **CesiumJS 1.146（日本3Dビル / PLATEAU 3D Tiles / 地理院タイル / PLATEAU-Terrain）** |
+| 3D（内蔵） | Three.js 0.186 / React Three Fiber 9 / @react-three/drei 10 |
+| 3D Tiles（内蔵） | 3d-tiles-renderer 0.5（PLATEAU 用・動的 import） |
 | 2D 地図 | MapLibre GL JS 6（スタイルはローカル定義・外部タイル非依存） |
+| **地理空間DB** | **PostgreSQL 16 + PostGIS 3.6（スキーマ `twin`）** |
+| **ジオコーダー** | **国土地理院 住所検索API（APIキー不要）** |
 | 状態管理 | Zustand 5 |
 | スキーマ検証 | Zod 4 |
-| 地理演算 | 自前実装（`lib/geo`）、@turf/turf も導入済み |
+| 地理演算 | 自前実装（`lib/geo`）＋ PostGIS（`ST_DWithin` / `ST_Intersects`） |
 | API | Next.js Route Handlers（REST） |
-| データ | JSON / GeoJSON（`public/data/**`） |
-| テスト | Vitest 3（98 テスト） |
+| データ | JSON / GeoJSON（`public/data/**`）＋ PostGIS（`twin` スキーマ） |
+| テスト | Vitest 3（148 テスト） |
 
 ---
 
 ## 3. セットアップ
+
+### 3.1 MVP 環境（PostGIS を含む一式）
+
+```bash
+sudo bash scripts/mvp-setup.sh
+```
+
+依存インストール → PostGIS 初期化 → systemd への環境ファイル受け渡し →
+データ生成 → PostGIS 投入 → ビルド → サービス再起動 → 到達確認を順に実行します（すべて冪等）。
+
+個別に実行する場合:
+
+```bash
+sudo bash scripts/db-init.sh      # ロール・DB・スキーマ・環境ファイル
+sudo bash scripts/service-env.sh  # systemd drop-in（DATABASE_URL をサービスへ）
+sudo bash scripts/db-ingest.sh    # 工事データを PostGIS へ投入
+sudo bash scripts/deploy.sh       # 停止 → 検証 → ビルド → 起動
+```
+
+PostGIS を用意しなくてもアプリは動作します。`DATABASE_URL` が未設定・到達不能の場合は
+API が静的データ（`public/data/**`）で同じ検索意味を返し、応答の `source` と画面表示で
+どちらを使ったかを明示します。
+
+### 3.2 フロントエンドのみ
 
 ```bash
 npm install
@@ -66,7 +100,12 @@ npm install
 
 Node.js 22 以上を推奨します（開発時は v22.22.3 で検証）。
 
-### データの再生成（任意）
+`npm run build` / `npm run dev` は先に `scripts/copy-cesium.mjs` を実行し、
+CesiumJS の静的アセット（Workers / Assets / Widgets）を `public/cesium` へ複製します。
+Next.js 16 は Turbopack が既定で webpack プラグインが使えないため、
+バンドラ設定ではなくスクリプトで複製しています。
+
+### 3.3 データの再生成（任意）
 
 `public/data/**` の JSON / GeoJSON はリポジトリにコミット済みです。
 `lib/data/**` を変更した場合のみ再生成してください。
@@ -144,19 +183,39 @@ sudo journalctl -u construction-public-twin-portal -f
 ## 5. 検証コマンド
 
 ```bash
-npm run lint        # ESLint（0 error）
+npm run lint        # ESLint（0 error / 0 warning）
 npm run typecheck   # tsc --noEmit
-npm test            # Vitest 98 テスト
-npm run build       # 本番ビルド
+npm test            # Vitest 148 テスト
+npm run build       # 本番ビルド（Cesium アセット複製を含む）
 
 # 実ブラウザ検証（headless Chrome + CDP。dev／start サーバを起動した状態で実行）
 npm run verify:browser
 ```
 
+### 4 要素の疎通確認
+
+```bash
+curl -s http://192.168.0.185:43100/api/health | jq .
+curl -s "http://192.168.0.185:43100/api/geocode?q=東京都千代田区丸の内一丁目9番" | jq '.count, .candidates[0]'
+curl -s "http://192.168.0.185:43100/api/ledger?keyword=田園調布" | jq '.total, .source'
+curl -s "http://192.168.0.185:43100/api/geo/nearby?lng=139.668&lat=35.593&radius=500" | jq '.count, .source'
+curl -s "http://192.168.0.185:43100/api/geo/contains?lng=139.6679&lat=35.593" | jq '.features[0]'
+```
+
 `verify:browser` は実際に Chrome を起動してページを読み込み・操作し、
-検索 / フィルタ / 工事選択 / 2D・3D 切替 / レイヤー切替 / 時間軸 / 現場ビューア /
+検索 / フィルタ / 工事選択 / 2D・3D 切替 / **CesiumJS ビューアの既定描画と出典表示** /
+**内蔵3Dへのエンジン切替** / 現場・地区スコープ / レイヤー切替 / 時間軸 / 現場ビューア /
 モバイル幅での横スクロール有無 / Console エラー・失敗リクエストを機械的に判定します。
 結果は `tmp-verify/browser-report.json` とスクリーンショット（`tmp-verify/*.png`）に出力されます。
+
+CesiumJS は npm から import せず `public/cesium/Cesium.js`（UMD）を読み込んでいます。
+**この方式を崩すとビルドは成功するのにブラウザで 3D が起動しません**（理由は
+[`docs/MVP-ENVIRONMENT.md`](docs/MVP-ENVIRONMENT.md) §8 を参照）。単体で確認するには:
+
+```bash
+node scripts/probe-cesium.mjs --url http://127.0.0.1:43100
+# canvas / .cesium-viewer の有無、例外、失敗リクエストを出力する
+```
 
 ---
 
@@ -179,39 +238,61 @@ npm run verify:browser
 
 ```
 app/
-  page.tsx                      トップ（検索 + 地図/3D + 詳細）
+  page.tsx                      トップ（検索 + 3D/2D + 詳細）
   layout.tsx                    ルートレイアウト
   globals.css                   デザイントークン + 共有プリミティブ
   projects/[slug]/page.tsx      工事個別ページ（SSG）
   api/                          Route Handlers
+    geocode/                    公的ジオコーダー（国土地理院 住所検索API）
+    ledger/                     自社現場台帳検索
+    geo/nearby/                 周辺の施工現場（PostGIS ST_DWithin）
+    geo/contains/               地点を含む施工範囲（PostGIS ST_Intersects）
+    health/                     構成状態（DB・ジオコーダー・ビューア・データ）
 components/
   layout/                       TopBar / Sidebar / StatusBar / Legend /
                                 ViewportControls / MapNote / MobileProjectSheet /
                                 Toast / HelpModal
-  map/                          ProjectSearch / ProjectFilter / ProjectList /
-                                FallbackMap（MapLibre 2D）
-  viewer/                       PublicTwinViewer（R3F 3D）/ PlateauTileset /
+  map/                          ProjectSearch（統合検索）/ ProjectFilter / ProjectList /
+                                FallbackMap（MapLibre 2D）/ GeoContextPanel（住所から探す）
+  viewer/                       CesiumJapanViewer（CesiumJS 3D・主題）/
+                                PublicTwinViewer（R3F 内蔵3D）/ PlateauTileset /
                                 WorkZoneLayer / ImpactLayer / DetourLayer /
                                 CompletionModel / CameraController /
                                 LayerControl / TimelineControl
   project/                      ProjectDetailCard / ImpactPanel / ProjectTimeline /
                                 OfficialSourceLink / Disclaimer / SiteViewer
 lib/
-  schemas/                      Zod スキーマ（project / impact）
-  geo/                          WGS84 ⇄ シーンローカル変換 / GeoJSON 型・検証
-  data/                         サンプルデータ原表・組立・検索・GeoJSON 生成
+  schemas/                      Zod スキーマ（project / impact / ledger）
+  geo/                          WGS84 ⇄ シーンローカル変換 / GeoJSON 型・検証 /
+                                住所正規化（address.ts）/ 国土地理院ジオコーダー（gsi.ts）/
+                                距離・包含判定（measure.ts）
+  db/                           PostGIS 接続（client.ts）/ 問い合わせ（queries.ts）
+  data/                         サンプルデータ原表・組立・検索・GeoJSON 生成 /
+                                現場台帳の静的フォールバック（ledger.ts）
   store/                        Zustand ストア / レイヤー定義 / 時間軸
-  viewer/                       tileConfig / cameraPresets / sceneBuilder / mapStyle
+  viewer/                       cesiumConfig / tileConfig / cameraPresets /
+                                sceneBuilder / mapStyle
+db/
+  schema.sql                    PostGIS スキーマ（twin）・空間検索関数・公開ビュー
+  seed.sql                      db-ingest が生成する投入 SQL（コミット対象外）
 public/
   data/projects/                工事 JSON（1 案件 1 ファイル + index.json）
   data/impacts/                 影響イベント JSON
   data/geo/{slug}/              工区・規制・迂回路・歩道切替の GeoJSON
   data/geo/all/                 全案件を統合した GeoJSON
   images/                       サンプル写真（Wikimedia Commons・クレジット保持）
+  cesium/                       CesiumJS 静的アセット（copy-cesium が生成。コミット対象外）
 scripts/
+  mvp-setup.sh                  MVP 環境の一式セットアップ
+  db-init.sh                    PostGIS のロール・DB・スキーマ・環境ファイル
+  db-ingest.sh / db-ingest.mjs  工事データの PostGIS 投入
+  service-env.sh                systemd へ環境ファイルを渡す drop-in
+  copy-cesium.mjs               CesiumJS 静的アセットの複製
+  deploy.sh / install-service.sh 本番デプロイ・サービス登録
   export-data.ts                静的データ書き出し
   verify-browser.mjs            headless Chrome による実操作検証
 docs/
+  MVP-ENVIRONMENT.md            MVP 環境の構成・構築手順・検証・ライセンス
   CONTRACTS.md                  実装契約（凍結インターフェース）
   goal-progress.md              開発ラウンド記録
 WebUI/                          デザインハンドオフ（視覚契約の原本）
@@ -327,9 +408,16 @@ Zod スキーマ `lib/schemas/project.ts` で検証します。主なフィー�
 | `GET /api/impacts` | 影響イベント一覧。`projectId` `type` `activeAt` |
 | `GET /api/search` | 検索サジェスト。`q` |
 | `GET /api/tilesets` | 利用可能な 3D Tiles 設定 |
+| **`GET /api/geocode`** | **公的ジオコーダー（国土地理院 住所検索API）。`q` `limit`。号は解決しないため到達レベルを明示** |
+| **`GET /api/ledger`** | **自社現場台帳検索。`keyword` `category` `status` `municipality` `owner` `contractor` `workType` `jv` `from` `to` `limit` `offset`** |
+| **`GET /api/geo/nearby`** | **周辺の施工現場（PostGIS `ST_DWithin`）。`lng` `lat` `radius` `limit`** |
+| **`GET /api/geo/contains`** | **地点を含む施工範囲（PostGIS `ST_Intersects`）。`lng` `lat` `kinds` `limit`** |
+| **`GET /api/health`** | **構成状態（DB・ジオコーダー・ビューア・データ件数）。`probe=1` でジオコーダー到達確認** |
 
 - **公開状態（`publicationState`）が `published` 以外の案件は一切返しません。**
 - 不正なクエリは `400 { error }`、未発見は `404 { error }`。
+- 新 API は応答に `source`（`postgis` / `static`）と `sourceLabel` を含み、
+  PostGIS を使えなかった場合は `notice` に理由を入れます。画面にも同じ内容を表示します。
 
 ---
 
@@ -349,6 +437,16 @@ Zod スキーマ `lib/schemas/project.ts` で検証します。主なフィー�
 | — | 完成予想 | 8 種の手続き生成モデル。「現在 / 完成予想 / 比較（半透明）」 |
 | — | 出典表示 | 情報提供元 / 公式 URL / 確認日時 / 最終更新日時 / 免責事項 |
 | — | モバイル | 640px 以下は詳細をボトムシート化。横スクロールなし |
+
+### 4 要素の統合（住所 → 現場 → 施工範囲）
+
+| 機能 | 実装 |
+|---|---|
+| 統合検索 | 1 つの入力欄で「自社現場台帳」と「公的ジオコーダー」を同時に検索。候補は `[工事]` `[住所]` を区別して表示 |
+| 住所検索 | 国土地理院 住所検索API。**号は原則解決しない**ため、到達した粒度（丁目 / 番地）を明示し、「◯◯までの一致です」と表示 |
+| 住所から探す | 住所候補を選ぶと `GeoContextPanel` が開き、**周辺の施工現場**（PostGIS `ST_DWithin`、半径 200m〜2km 切替）と**その地点が含まれる施工範囲**（`ST_Intersects`）を表示 |
+| 現場台帳検索 | 現場ID・発注番号・工事件名・発注者・元請・JV・工種・工期で検索（`/api/ledger`）。JV 案件のみの絞り込みも可能 |
+| 空間検索の由来表示 | 応答の `source` が `postgis` / `static` のどちらかを画面に表示。「使っていないものを使用中と書かない」 |
 
 ### 3D レイヤー
 
@@ -412,19 +510,45 @@ WebGL 利用不可       → 「3Dを表示できません」+ 2D 切替ボタ�
   ライセンス条件（CC BY / CC BY-SA / CC0）を満たすため、作者・ライセンス・原典 URL を表示しています。
 - 自治体ポータルの URL は実在するページですが、**案件個別のページではありません**。
 - 公開状態の管理（下書き / 公開待ち / 承認 / 公開 / 公開停止 / 再確認期限切れ）は
-  スキーマと API のフィルタとして実装していますが、**管理画面（CRUD UI）は MVP 対象外**です。
-- 監査ログ（REQ-F-012）は MVP 対象外です。
+  スキーマ・PostGIS・API のフィルタとして実装していますが、**管理画面（CRUD UI）は MVP 対象外**です。
+- **発注番号・JV・工種細分類は、サンプル案件に実データが無いため現場IDから決定的に生成した補完値**です
+  （PostGIS の `ledger_is_sample = true`、画面にも注記を表示）。実データ接続時は
+  `lib/schemas/ledger.ts` の生成関数と `scripts/db-ingest.mjs` の該当箇所を差し替えます。
+- 監査ログのテーブル（`twin.audit_log`）はデータ投入時に記録していますが、
+  公開・承認などの操作 UI は MVP 対象外です。
 
 ### 3D
 
-- PLATEAU の `tileset.json` URL は環境変数で供給する必要があります。
-  **本リポジトリでは到達性を検証した URL を同梱していないため、既定は内蔵の手続き生成都市モデルです。**
-- 完成予想モデルは GLB ではなく手続き生成の簡易モデルです（`visual.modelUrl` は将来用の枠）。
-- 3D Tiles の LOD / Screen Space Error の詳細制御は 3d-tiles-renderer の既定に委ねています。
+- 主題ビューアは CesiumJS です。背景は地理院タイル（トークン不要）、地形は PLATEAU-Terrain（トークン不要）、
+  3D建物は ion または PLATEAU 3D Tiles です。
+- `NEXT_PUBLIC_CESIUM_ION_TOKEN` も `NEXT_PUBLIC_PLATEAU_TILESET_URL` も未設定の場合、
+  **3D建物は表示されません**（地理院タイルの画像と施工範囲は表示されます）。画面にも未構成の理由を表示します。
+  収録している 24 案件の自治体は大半が架空のため、PLATEAU のデータセットが引けないことが原因です。
+- 完成予想モデルは、`visual.modelUrl`（glTF/GLB）がある案件のみ CesiumJS 上で描画します。
+  サンプル 24 案件には GLB が無いため、完成予想は内蔵3Dビューアの手続き生成モデルで表示します。
+- CesiumJS の初期化に失敗した場合（WebGL 不可・チャンク読込失敗など）は、
+  自動的に内蔵の Three.js ビューアへ切り替わり、トーストで通知します。
+
+### ジオコーダー
+
+- 国土地理院 住所検索API は **号を原則として解決しません**（`東京都千代田区丸の内一丁目9番1号` → `…一丁目９番`）。
+- 存在しない番地でも **エラーにならず親レベルの代表点を返します**。そのため本実装は到達レベルを入力と比較し、
+  浅い場合は「◯◯までの一致です」と明示します（`lib/geo/address.ts` の `validateGeocode`）。
+- 語句の部分一致で無関係な地点を返すことがあるため、都道府県＋市区町村の一致を必須にしています。
+- **国土地理院に逆ジオコーディングAPIは存在しません**（2022年に uPlace REST API 終了）。本 MVP は逆ジオコーディングを実装していません。
+- 住所の代表点は番地レベルの代表点であり、建物（号）の位置ではありません。施工範囲の確定には使用しないでください。
+
+### ライセンス
+
+- Cesium ion の Community プランは個人・非商用向けで、利用規約上「government project」では有償ライセンスが必要とされ、
+  第三者へのサービス提供も制限されます。そのため **トークン不要の経路（地理院タイル + PLATEAU-Terrain + PLATEAU 3D Tiles）を既定**とし、
+  ion（Japan 3D Buildings / Japan Regional Terrain）は `NEXT_PUBLIC_CESIUM_ION_TOKEN` を設定した場合のみ使用します。
+- 出典表示は `docs/MVP-ENVIRONMENT.md` §7 の表に従い、**実際に読み込めた供給元のみ**を画面に表示します。
 
 ### 運用
 
-- データストアは静的ファイル（`public/data/**`）です。PostgreSQL / PostGIS は将来候補です。
+- データストアは静的ファイル（`public/data/**`）と PostGIS（スキーマ `twin`）の二系統です。
+  PostGIS が未構成・到達不能でもアプリは動作し、静的データで同じ検索意味を返します。
 - 認証・権限（Viewer / Editor / Reviewer / Publisher / Administrator）は MVP 対象外です。
 
 ---

@@ -336,3 +336,71 @@ COMPLETE
 COMPLETE
 
 
+
+
+---
+
+## Round 7 — MVP 環境構築（CesiumJS / 公的ジオコーダー / 現場台帳 / PostGIS）
+
+### Observe
+
+- 要望: 「Japan Buildings（CesiumJS）＋ 公的ジオコーダー ＋ 自社現場台帳検索 ＋ PostGIS の施工範囲データ」を
+  主題として統合した MVP 環境を構築する。
+- 既存 MVP は Three.js + 静的 JSON。CesiumJS・ジオコーダー・PostGIS はいずれも未接続だった。
+- 対象ホスト `kensan1969` (192.168.0.185) を調査:
+  PostgreSQL 16 + PostGIS 3.6.4 導入済み、Node v22.22.3、systemd サービス稼働（:43100）、
+  地理院タイル・住所検索API・npm registry へ到達可、sudo 可。
+- 外部仕様を実測で確定:
+  - Sandcastle "Japan Buildings" は ion アセット **2602291**（3D建物）と **2767062**（地形）。
+    現行版は `Terrain.fromWorldTerrain()` ではなく `CesiumTerrainProvider.fromIonAssetId` を使う。
+  - Cesium ion の Community プランは個人・非商用向けで、政府案件では有償が必要。
+    → **トークン不要経路（地理院タイル + PLATEAU-Terrain + PLATEAU 3D Tiles）を既定**とする。
+  - 国土地理院 住所検索API は応答が素の配列・`[経度,緯度]`・**号を原則解決しない**・
+    **存在しない番地でも親レベルを 200 で返す**。
+  - GSI に逆ジオコーディングAPIは存在しない（2022年に uPlace REST API 終了）。
+
+### Plan
+
+役割分担を「住所＝ナビゲーション / 施工範囲＝工事管理上の正解」として分離し、4層を実装する。
+DB が無くても動くこと（既存契約 §0-4）を全 API の必須条件とする。
+
+### Implement
+
+- **PostGIS**: `db/schema.sql`（スキーマ `twin`、7テーブル、空間検索関数3種、公開ビュー2種）、
+  `scripts/db-init.sh` / `db-ingest.sh` / `db-ingest.mjs` / `service-env.sh` / `mvp-setup.sh`。
+- **API**: `/api/geocode`（GSI・24hキャッシュ・親レベル判定）、`/api/ledger`、
+  `/api/geo/nearby`・`/api/geo/contains`、`/api/health`。すべて `source: postgis|static` を返す。
+- **CesiumJS**: `components/viewer/CesiumJapanViewer.tsx` / `lib/viewer/cesiumConfig.ts`。
+  地形は PLATEAU-Terrain、3D建物は ion → PLATEAU カタログ → 未構成の順に解決。
+- **UI**: 統合検索（現場＋住所を1欄）、`GeoContextPanel`（周辺現場＋含まれる施工範囲）、
+  ViewportControls に3Dエンジン切替。
+- **テスト**: `tests/address.test.ts` / `measure.test.ts` / `geocode.test.ts` / `ledger.test.ts`（50件追加）。
+
+### Test
+
+- `npm run lint` / `npm run typecheck` / `npm test`（**148 テスト**）: すべて成功
+- `npm run build`: 成功
+- 実 API 実測: `/api/health` → PostGIS 3.6.4 / 24案件 / 71地物、
+  `/api/ledger` → `source: postgis`、`/api/geo/nearby` → 距離順5件、
+  `/api/geocode` → 139.767242/35.681252、存在しない番地 → `resolvedToRequested: false`
+- `verify-browser.mjs`（39項目）→ **39 PASS / 0 FAIL**
+
+### Result
+
+4要素が実データで結線され、`http://192.168.0.185:43100/` で稼働。
+
+#### 収束させた問題
+
+| 事象 | 原因 | 対応 |
+|---|---|---|
+| スキーマ適用が `Permission denied` | プロジェクトがホーム配下にあり postgres ユーザーから読めない | `-f` をやめ stdin リダイレクトへ |
+| 投入が `permission denied for table audit_log` | TRUNCATE 権限がアプリロールに無い | DELETE へ変更（FK の子から順に） |
+| `null value in column "city"` | 空文字を NULL に変換していた | 空文字許容の `qText()` を追加 |
+| ジオコーダーが存在しない番地を成功扱い | GSI が親レベルを 200 で返す | 到達レベルを入力と比較し `resolvedToRequested` を返す |
+| `.next.bak` を lint が走査しデプロイ失敗 | 退避コピーが lint 対象だった | `eslint.config.mjs` / `.gitignore` で除外 |
+| **CesiumJS がブラウザで起動しない** | Cesium は WASM をタグ付きテンプレート（`\0asm`）で埋め込む。Turbopack がタグ関数をインライン化する際にタグを落とし `SyntaxError: Octal escape sequences are not allowed in template strings.` になる | npm から import せず `public/cesium/Cesium.js`（UMD）を `<script>` で読み込み `window.Cesium` を使う。`scripts/probe-cesium.mjs` で回帰検知 |
+| 操作パネルが工事一覧と重なる | 同一座標（left:16 / bottom:46）に配置 | left:328 / bottom:110 へ移動し、住所パネル表示中は非表示 |
+
+### Decision
+
+COMPLETE

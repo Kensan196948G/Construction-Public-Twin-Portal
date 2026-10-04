@@ -11,6 +11,7 @@ import { Toast } from "@/components/layout/Toast";
 import { TopBar } from "@/components/layout/TopBar";
 import { ViewportControls } from "@/components/layout/ViewportControls";
 import layout from "@/components/layout/layout.module.css";
+import { GeoContextPanel } from "@/components/map/GeoContextPanel";
 import { ProjectDetailCard } from "@/components/project/ProjectDetailCard";
 import { SiteViewer } from "@/components/project/SiteViewer";
 import { TimelineControl } from "@/components/viewer/TimelineControl";
@@ -34,6 +35,16 @@ function ViewerFallback({ label }: { label: string }) {
 const PublicTwinViewer = dynamic(
   () => import("@/components/viewer/PublicTwinViewer").then((m) => m.PublicTwinViewer),
   { ssr: false, loading: () => <ViewerFallback label="3Dビューア" /> },
+);
+
+/**
+ * 主題の3Dビューア（CesiumJS + 日本3Dビル + 公的タイル + 施工範囲）。
+ * 初期化に失敗した場合はビューア自身が `viewerEngine` を "three" へ戻し、
+ * 内蔵の Three.js ビューアへ自動フォールバックする。
+ */
+const CesiumJapanViewer = dynamic(
+  () => import("@/components/viewer/CesiumJapanViewer").then((m) => m.CesiumJapanViewer),
+  { ssr: false, loading: () => <ViewerFallback label="3D都市ビュー（CesiumJS）" /> },
 );
 
 const FallbackMap = dynamic(
@@ -73,6 +84,7 @@ function EmptyDetail() {
 
 export default function Page() {
   const viewMode = useAppStore((s) => s.viewMode);
+  const viewerEngine = useAppStore((s) => s.viewerEngine);
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
 
   return (
@@ -81,13 +93,20 @@ export default function Page() {
 
       <div className={layout.workspace}>
         <div className={layout.viewport}>
-          {viewMode === "3d" ? <PublicTwinViewer /> : <FallbackMap />}
+          {viewMode === "2d" ? (
+            <FallbackMap />
+          ) : viewerEngine === "cesium" ? (
+            <CesiumJapanViewer />
+          ) : (
+            <PublicTwinViewer />
+          )}
 
           <MapNote />
           <Sidebar />
           <ViewportControls />
           <Legend />
           <TimelineControl />
+          <GeoContextPanel />
         </div>
 
         <aside className={layout.detailPane} aria-label="工事の詳細">

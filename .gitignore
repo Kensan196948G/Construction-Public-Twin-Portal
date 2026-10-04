@@ -5,6 +5,7 @@
 
 # next.js
 /.next/
+/.next.bak*
 /out/
 next-env.d.ts
 
@@ -38,3 +39,9 @@ yarn-error.log*
 # local verification artifacts
 /tmp-verify
 /screenshots
+
+# CesiumJS 静的アセット（scripts/copy-cesium.mjs が生成。約80MB）
+/public/cesium
+
+# データベース投入 SQL（scripts/db-ingest.mjs が生成）
+/db/seed.sql

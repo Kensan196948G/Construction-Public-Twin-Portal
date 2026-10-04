@@ -1,0 +1,183 @@
+/* CesiumJapanViewer — CesiumJS ビューアと、その上に重ねる操作パネル・出典表示 */
+
+.wrap {
+  position: absolute;
+  inset: 0;
+}
+
+/* Cesium は親要素のサイズをそのまま使うため、明示的に全面へ広げる */
+.canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.canvas :global(.cesium-viewer) {
+  width: 100%;
+  height: 100%;
+}
+
+/* Cesium 既定のクレジットは自前の出典表示に置き換える */
+.canvas :global(.cesium-viewer-bottom) {
+  display: none;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: color-mix(in oklch, white 72%, transparent);
+  z-index: 24;
+}
+
+.overlayText {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/*
+ * 表示設定パネル。
+ * 左の工事一覧（left:16 / width:296）と、下中央の時間軸（bottom:16）を避けて置く。
+ * 同じ位置を使う「住所から探す」パネルが出ている間は、コンポーネント側で非表示にする。
+ */
+.panel {
+  left: 328px;
+  bottom: 110px;
+  width: 288px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: min(340px, calc(100% - 240px));
+  overflow-y: auto;
+  z-index: 22;
+}
+
+.panelLabel {
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+  font-family: var(--font-mono);
+}
+
+.toggleRow {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+
+.panelNote {
+  margin: 0;
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+/* 影響イベントの一覧（有効 / 期間外を日本語で示す） */
+.impactList {
+  list-style: none;
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+}
+
+.impactList li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.impactType {
+  flex: 0 0 auto;
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.impactState {
+  flex: 0 0 auto;
+  padding: 0 5px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 9.5px;
+  line-height: 15px;
+}
+
+.impactState[data-active="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.impactTitle {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * 出典表示（ライセンス上、常時表示する）。
+ * 下中央の時間軸（x: 300〜）と重ならない幅に抑え、判読できるよう薄いカードにする。
+ */
+.credits {
+  position: absolute;
+  left: 16px;
+  bottom: 14px;
+  max-width: min(276px, calc(100% - 32px));
+  display: grid;
+  gap: 2px;
+  padding: 5px 7px;
+  border-radius: 8px;
+  background: color-mix(in oklch, white 86%, transparent);
+  border: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  line-height: 1.45;
+  color: var(--faint);
+  pointer-events: none;
+  z-index: 14;
+}
+
+.credits span {
+  overflow-wrap: anywhere;
+}
+
+.credits strong {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.credits a {
+  color: inherit;
+  text-decoration: underline;
+  /* 親が pointer-events: none のため、リンクだけ操作可能に戻す */
+  pointer-events: auto;
+}
+
+@media (max-width: 900px) {
+  .panel {
+    left: 12px;
+    width: min(288px, calc(100% - 24px));
+    bottom: 104px;
+    max-height: 40%;
+  }
+
+  .credits {
+    max-width: calc(100% - 32px);
+  }
+}

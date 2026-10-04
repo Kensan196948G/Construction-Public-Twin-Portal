@@ -318,6 +318,73 @@ try {
   await setInputValue(searchSelector, "");
   await sleep(1200);
 
+  /* ---------- 住所検索（公的ジオコーダー → PostGIS 空間検索） ---------- */
+
+  // サンプル地区（大田区田園調布）の住所。GSI は丁目レベルまで解決できる。
+  const addressQuery = "東京都大田区田園調布一丁目";
+  await setInputValue(searchSelector, addressQuery);
+  await sleep(3000);
+
+  const addressCandidates = await cdp.eval(`(() => {
+    const buttons = [...document.querySelectorAll("[role='option'], [role='listbox'] button")];
+    return buttons
+      .map((b) => b.textContent.replace(/\\s+/g, " ").trim())
+      .filter((t) => t.startsWith("住所") || t.includes("国土地理院"));
+  })()`);
+  record(
+    "住所候補がジオコーダーから提示される",
+    addressCandidates.length > 0,
+    addressCandidates[0]?.slice(0, 90) || "候補なし",
+  );
+
+  const addressClicked = await cdp.eval(`(() => {
+    const buttons = [...document.querySelectorAll("[role='option'], [role='listbox'] button")];
+    const target = buttons.find((b) => b.textContent.includes("国土地理院"));
+    if (!target) return false;
+    target.click();
+    return true;
+  })()`);
+  await sleep(3500);
+
+  const geoPanel = await cdp.eval(`(() => {
+    const panel = document.querySelector('[aria-label="住所から探す"]');
+    if (!panel) return null;
+    const text = panel.innerText || "";
+    return {
+      text: text.replace(/\\s+/g, " ").slice(0, 220),
+      hasSpatial: text.includes("周辺の施工現場"),
+      source: text.includes("PostGIS 空間検索") ? "postgis" : text.includes("静的データ検索") ? "static" : "unknown",
+      hasAttribution: text.includes("国土地理院"),
+      projectButtons: panel.querySelectorAll("button[class*='item']").length,
+    };
+  })()`);
+  record(
+    "住所を選ぶと「住所から探す」パネルが開く",
+    addressClicked && geoPanel !== null,
+    geoPanel ? geoPanel.text.slice(0, 110) : "パネルなし",
+  );
+  record(
+    "周辺の施工現場が PostGIS 空間検索で表示される",
+    !!geoPanel && geoPanel.hasSpatial && geoPanel.source === "postgis" && geoPanel.projectButtons > 0,
+    geoPanel ? `source=${geoPanel.source} 項目=${geoPanel.projectButtons}` : "n/a",
+  );
+  record(
+    "住所検索の出典（国土地理院）が表示される",
+    !!geoPanel && geoPanel.hasAttribution,
+    geoPanel?.hasAttribution ? "出典表示あり" : "出典表示なし",
+  );
+  await screenshot("02b-geocode");
+
+  // 住所パネルを閉じて検索をクリア
+  await cdp.eval(`(() => {
+    const panel = document.querySelector('[aria-label="住所から探す"]');
+    const close = panel ? [...panel.querySelectorAll("button")].find((b) => b.textContent.trim() === "×") : null;
+    if (close) close.click();
+  })()`);
+  await sleep(900);
+  await setInputValue(searchSelector, "");
+  await sleep(1200);
+
   /* ---------- フィルタ ---------- */
 
   const chipClicked = await clickByText("button[class*='fchip'], button.fchip", "着工前");
@@ -561,6 +628,21 @@ try {
     }, 0);
   const SAMPLE_TOTAL = 32 * 24;
 
+  // ここから先は **内蔵3Dビューア固有** の機能（現場/地区スコープ・データレイヤー）を検証する。
+  // 既定の3Dエンジンは CesiumJS（日本3Dビル）なので、まず内蔵3Dへ切り替える。
+  const toThree = await cdp.eval(`(() => {
+    const b = [...document.querySelectorAll("button")].find((x) => x.textContent.trim() === "内蔵3D");
+    if (!b) return false;
+    b.click();
+    return true;
+  })()`);
+  await sleep(4000);
+  record(
+    "内蔵3Dエンジンへ切り替えられる",
+    toThree,
+    toThree ? "内蔵3D" : "「内蔵3D」ボタンが見つからない",
+  );
+
   // 表示スコープ（現場 / 地区全体）は 3D ビューア側のバーが持つ。
   // ストア状態は注記（MapNote）の文言で確認する。
   const noteText = await cdp.eval(`(document.querySelector('[class*="mapNote"]')?.innerText) ?? ""`);
@@ -650,6 +732,34 @@ try {
   await sleep(1200);
   await clickByText("button[role='tab']", "工事一覧");
   await sleep(700);
+
+  // 既定の CesiumJS ビューア（日本3Dビル）へ戻し、実際に描画されることを確認する。
+  const backToCesium = await cdp.eval(`(() => {
+    const b = [...document.querySelectorAll("button")].find((x) => x.textContent.trim() === "日本3Dビル");
+    if (!b) return false;
+    b.click();
+    return true;
+  })()`);
+  await sleep(6000);
+  const cesiumState = await cdp.eval(`(() => {
+    const canvas = document.querySelector(".cesium-widget canvas") ?? document.querySelector("canvas");
+    return {
+      viewer: !!document.querySelector(".cesium-viewer"),
+      canvas: canvas ? [canvas.clientWidth, canvas.clientHeight] : null,
+      creditText: (document.body.innerText || "").includes("国土地理院"),
+    };
+  })()`);
+  record(
+    "CesiumJS（日本3Dビル）ビューアが既定で描画される",
+    backToCesium && cesiumState.viewer && !!cesiumState.canvas,
+    `viewer=${cesiumState.viewer} canvas=${JSON.stringify(cesiumState.canvas)}`,
+  );
+  record(
+    "出典（国土地理院）が画面に表示される",
+    cesiumState.creditText,
+    cesiumState.creditText ? "出典表示あり" : "出典表示なし",
+  );
+  await screenshot("11-cesium-japan");
 
   /* ---------- 現場ギャラリー（24現場それぞれの3D） ---------- */
 

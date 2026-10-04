@@ -299,3 +299,95 @@ export function Site3DGallery(props: {
 `gl.domElement.toDataURL()` で画像化 → 24枚の `<img>` として表示する。
 画像化に失敗したタイルは `visual.thumbnailUrl`（サンプル写真）へフォールバックし、必ず何か表示する。
 
+---
+
+# 第3次契約（MVP 環境: CesiumJS / 公的ジオコーダー / 現場台帳 / PostGIS）
+
+追加日: 2026-10-04
+目的: 4 つの構成要素を統合した MVP 環境を構築し、サーバー上で稼働させる。
+詳細な構築手順・検証・ライセンスは [`MVP-ENVIRONMENT.md`](MVP-ENVIRONMENT.md) を参照。
+
+## 10. 追加した共有基盤
+
+| モジュール | 提供内容 |
+|---|---|
+| `lib/store/useAppStore.ts` | `viewerEngine`(`"three"｜"cesium"`、既定 `"cesium"`) / `setViewerEngine` / `geocodePin`(`GeocodePin｜null`) / `setGeocodePin` |
+| `lib/geo/address.ts` | `normalizeAddress` / `addressKey` / `precisionOf` / `validateGeocode` / `sharesMunicipality` / `ADDRESS_PRECISION_LABEL` |
+| `lib/geo/gsi.ts` | `geocodeAddress(q, limit)` / `GSI_GEOCODER_ATTRIBUTION` / `GSI_GEOCODER_SOURCE` |
+| `lib/geo/measure.ts` | `distanceMeters` / `pointInPolygon` / `distanceToLineString`（PostGIS が無い環境用） |
+| `lib/db/client.ts` | `query()` → `DbOutcome<T>`（例外を投げない）/ `dbHealth()` / `isDbConfigured()` |
+| `lib/db/queries.ts` | `queryLedger` / `queryLedgerFacets` / `queryNearby` / `queryContaining` / `queryImpactsActiveAt` |
+| `lib/data/ledger.ts` | `staticLedgerEntries` / `searchStaticLedger` / `staticNearby` / `staticContaining`（DB 無しでの同一意味の検索） |
+| `lib/schemas/ledger.ts` | `SiteLedgerEntry` / `ledgerFromProject` / `LEDGER_SAMPLE_NOTE` |
+| `lib/viewer/cesiumConfig.ts` | `GSI_TILES` / `PLATEAU_TERRAIN_URL` / `ION_ASSETS` / `planBuildings` / `CESIUM_ATTRIBUTION` |
+| `db/schema.sql` | PostGIS スキーマ `twin`・空間検索関数・公開ビュー |
+
+## 11. 凍結インターフェース（第3次）
+
+```tsx
+// components/viewer/CesiumJapanViewer.tsx
+export function CesiumJapanViewer(): React.ReactElement;
+// CesiumJS の主題ビューア。`dynamic(..., { ssr: false })` で読み込む。
+// 初期化に失敗した場合は setViewerEngine("three") + showToast() で内蔵3Dへ自動フォールバックする。
+// 例外を投げてはならない。
+
+// components/map/GeoContextPanel.tsx
+export function GeoContextPanel(): React.ReactElement | null;
+// geocodePin が null なら null。周辺の施工現場と、地点を含む施工範囲を表示する。
+```
+
+### API の応答形（第3次で凍結）
+
+```jsonc
+// GET /api/geocode?q=&limit=
+{ "query": "…", "normalizedQuery": "…", "count": 1, "filteredOut": 0,
+  "candidates": [ { "id": "gsi-…", "title": "…", "longitude": 139.7, "latitude": 35.6,
+                    "precision": "block", "precisionLabel": "番地",
+                    "resolvedToRequested": true, "note": "…" } ],
+  "error": "（到達不能時のみ）", "attribution": "出典：国土地理院…", "source": { … } }
+
+// GET /api/ledger?keyword=&category=&status=&municipality=&owner=&contractor=&workType=&jv=&from=&to=&limit=&offset=
+{ "count": 5, "total": 5, "offset": 0, "limit": 50,
+  "source": "postgis" | "static", "sourceLabel": "PostGIS (construction_twin)",
+  "notice": "（フォールバック時のみ）", "note": "…補完値です…",
+  "entries": [ /* SiteLedgerEntry[] */ ], "facets": { "categories": [], … } }
+
+// GET /api/geo/nearby?lng=&lat=&radius=&limit=
+{ "origin": { "longitude": 139.668, "latitude": 35.593 }, "radiusM": 500,
+  "count": 5, "source": "postgis" | "static", "sourceLabel": "…", "notice": "…",
+  "projects": [ { "projectId": "tokyo-demo-002", "publicTitle": "…", "statusLabel": "施工中",
+                  "distanceM": 0, "insideWorkZone": true, … } ] }
+
+// GET /api/geo/contains?lng=&lat=&kinds=&limit=
+{ "point": { … }, "count": 1, "source": "postgis" | "static", "sourceLabel": "…",
+  "features": [ { "featureId": "…", "projectId": "…", "featureKind": "workzone",
+                  "featureKindLabel": "工区", "name": "…", "geometryType": "Polygon", "distanceM": 0 } ] }
+
+// GET /api/health?probe=1
+{ "status": "ok" | "degraded", "degraded": [], "database": { … }, "geocoder": { … },
+  "viewer": { … }, "data": { "projects": 24, "impacts": 36, "geoJsonFeatures": 71 } }
+```
+
+## 12. 第3次で守るルール
+
+1. **`source` を必ず返し、画面にも表示する。** PostGIS を使っていないのに「使用中」と書かない。
+   同様に、読み込めていない3D供給元を「表示中」と書かない。
+2. **ジオコーダーの結果を施工範囲として扱わない。** 号は原則解決されないため、
+   `resolvedToRequested` と `precisionLabel` を UI に出す。
+3. **DB 障害でアプリを止めない。** `lib/db/client.ts` は例外を投げず `DbOutcome` を返す。
+   呼び出し側は必ず静的フォールバックを持つ。
+4. **`DATABASE_URL` はリポジトリに置かない。** `/etc/construction-public-twin-portal/env`
+   （`scripts/db-init.sh` が生成、0640）に置き、systemd drop-in で渡す。
+5. **Cesium ion を既定にしない。** トークン未設定でも地理院タイル + PLATEAU-Terrain で動作すること。
+6. `.next.bak*` のようなビルド成果物の退避コピーを lint 対象にしない（`eslint.config.mjs` で除外済み）。
+
+## 13. 第3次の完了条件
+
+- `npm run lint` / `npm run typecheck` / `npm test` がすべて成功する
+- `npm run build` が成功する
+- `/api/health` が `database.reachable = true` と PostGIS バージョン・件数を返す
+- `/api/ledger` が `source: "postgis"` を返す
+- `/api/geo/nearby` が距離順に、`/api/geo/contains` が該当工区を返す
+- `/api/geocode` が実住所を解決し、存在しない番地では `resolvedToRequested: false` を返す
+- `http://192.168.0.185:43100/` がブラウザで表示され、CesiumJS タイルが読み込まれる
+

@@ -258,6 +258,31 @@ export type ViewMode = "3d" | "2d";
 /** 3D 背景の供給元。local = MVP 用手続き生成都市、plateau = 外部 3D Tiles */
 export type Base3dSource = "local" | "plateau";
 
+/**
+ * 3D ビューアのエンジン。
+ *   cesium … CesiumJS。日本3Dビル（PLATEAU/ion）＋公的タイル＋施工範囲を地球座標で表示
+ *   three  … 内蔵の Three.js ビューア。外部ネットワーク不要で必ず描画できる
+ *
+ * 既定は cesium（本ポータルの主題）。初期化に失敗した場合は
+ * ビューア自身が `three` へ自動フォールバックし、トーストで通知する。
+ */
+export type ViewerEngine = "three" | "cesium";
+
+/* ------------------------------------------------------------------ *
+ * 住所検索（公的ジオコーダー）の結果ピン
+ * ------------------------------------------------------------------ */
+
+export interface GeocodePin {
+  longitude: number;
+  latitude: number;
+  /** 表示用の住所（ジオコーダーが返した表題） */
+  label: string;
+  /** 住所の粒度: prefecture | municipality | town | block | parcel | unknown */
+  precision: string;
+  /** 出典（例: 国土地理院 住所検索API） */
+  attribution: string;
+}
+
 /* ------------------------------------------------------------------ *
  * Store
  * ------------------------------------------------------------------ */
@@ -286,6 +311,10 @@ export interface AppState {
   siteViewerIndex: number;
   completionMode: CompletionMode;
   base3dSource: Base3dSource;
+  /** 3D ビューアのエンジン（CesiumJS / 内蔵 Three.js） */
+  viewerEngine: ViewerEngine;
+  /** 住所検索で得た地点（公的ジオコーダー）。未検索なら null。 */
+  geocodePin: GeocodePin | null;
   mobileSheetOpen: boolean;
   toast: { id: number; message: string } | null;
 
@@ -312,6 +341,8 @@ export interface AppState {
   setSiteViewerIndex: (index: number) => void;
   setCompletionMode: (mode: CompletionMode) => void;
   setBase3dSource: (source: Base3dSource) => void;
+  setViewerEngine: (engine: ViewerEngine) => void;
+  setGeocodePin: (pin: GeocodePin | null) => void;
   setMobileSheetOpen: (open: boolean) => void;
   showToast: (message: string) => void;
   clearToast: () => void;
@@ -339,6 +370,8 @@ export const useAppStore = create<AppState>((set) => ({
   siteViewerIndex: 0,
   completionMode: "current",
   base3dSource: "local",
+  viewerEngine: "cesium",
+  geocodePin: null,
   mobileSheetOpen: false,
   toast: null,
 
@@ -401,6 +434,8 @@ export const useAppStore = create<AppState>((set) => ({
   setSiteViewerIndex: (siteViewerIndex) => set({ siteViewerIndex }),
   setCompletionMode: (completionMode) => set({ completionMode }),
   setBase3dSource: (base3dSource) => set({ base3dSource }),
+  setViewerEngine: (viewerEngine) => set({ viewerEngine }),
+  setGeocodePin: (geocodePin) => set({ geocodePin }),
   setMobileSheetOpen: (mobileSheetOpen) => set({ mobileSheetOpen }),
 
   showToast: (message) => set({ toast: { id: Date.now(), message } }),
