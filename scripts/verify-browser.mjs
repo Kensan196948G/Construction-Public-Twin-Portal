@@ -404,12 +404,59 @@ try {
     btn.click();
     return true;
   })()`);
-  await sleep(5000);
-  const map2dPresent = await cdp.eval(`(() => {
-    const el = document.querySelector('.maplibregl-map, [class*="maplibregl"], canvas');
-    return el ? el.className || "canvas" : "";
+  await sleep(6000);
+
+  // MapLibre のコンテナが実際に高さを持っているか。
+  // （maplibre-gl.css の `.maplibregl-map{position:relative}` が
+  //   `position:absolute; inset:0` を上書きすると高さ 0 に潰れ、
+  //   工区は描画されるのに地図が見えなくなる。過去に実際に発生した。）
+  const mapBox = await cdp.eval(`(() => {
+    const el = document.querySelector('[class*="maplibregl-map"]');
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    const c = el.querySelector("canvas");
+    return {
+      className: el.className,
+      w: Math.round(r.width),
+      h: Math.round(r.height),
+      canvasH: c ? c.clientHeight : 0,
+      canvasW: c ? c.clientWidth : 0,
+    };
   })()`);
-  record("2D地図へ切り替えられる", to2d && Boolean(map2dPresent), String(map2dPresent).slice(0, 80));
+  record(
+    "2D地図へ切り替えられる",
+    to2d && mapBox !== null,
+    mapBox ? String(mapBox.className).slice(0, 60) : "MapLibre コンテナなし",
+  );
+  record(
+    "2D地図のコンテナが実サイズを持つ",
+    mapBox !== null && mapBox.w > 300 && mapBox.h > 200 && mapBox.canvasH > 200,
+    mapBox ? `container ${mapBox.w}x${mapBox.h} / canvas ${mapBox.canvasW}x${mapBox.canvasH}` : "n/a",
+  );
+
+  // ビューポートのピクセルを採取し、デバッグ色（マゼンタ）が露出していないことを確認する。
+  const { data: shot } = await cdp.send("Page.captureScreenshot", { format: "png" });
+  const pixels = await cdp.eval(`(async () => {
+    const img = new Image();
+    img.src = "data:image/png;base64,${shot}";
+    await img.decode();
+    const c = document.createElement("canvas");
+    c.width = img.width; c.height = img.height;
+    const ctx = c.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+    const pick = (fx, fy) => {
+      const d = ctx.getImageData(Math.floor(img.width * fx), Math.floor(img.height * fy), 1, 1).data;
+      return ((d[0] << 16) | (d[1] << 8) | d[2]).toString(16).padStart(6, "0");
+    };
+    return [pick(0.45, 0.45), pick(0.35, 0.6), pick(0.55, 0.3), pick(0.4, 0.75)];
+  })()`);
+  const magentaCount = pixels.filter((p) => p.toLowerCase() === "ff00ff").length;
+  record(
+    "2D地図にデバッグ色（マゼンタ）が露出していない",
+    magentaCount === 0,
+    `採取色: ${pixels.map((p) => `#${p}`).join(", ")}`,
+  );
+
   await screenshot("05-2d");
 
   const to3d = await cdp.eval(`(() => {

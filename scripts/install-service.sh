@@ -13,6 +13,8 @@
 #
 # 再実行は安全（既存ユニットを上書きする）。ポートを固定したい場合は
 #   SERVICE_PORT=43100 sudo bash scripts/install-service.sh
+#
+# 更新時は scripts/deploy.sh を使うこと（停止してからビルドするため）。
 set -euo pipefail
 
 UNIT_NAME="${UNIT_NAME:-construction-public-twin-portal}"

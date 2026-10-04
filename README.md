@@ -97,6 +97,50 @@ PORT=3100 npm run dev
 
 ---
 
+## 4.1 MVP 環境（systemd 常時配信）
+
+このリポジトリの MVP は **systemd サービスとして登録済み**です。
+IP アドレスは実行環境の自動割当 IP、ポートは競合しない空きポートを自動選択します。
+
+| 項目 | 値 |
+|---|---|
+| **環境URL** | **http://192.168.0.185:43100/** |
+| ローカル | http://127.0.0.1:43100/ |
+| ユニット名 | `construction-public-twin-portal.service` |
+| ユニット定義 | `/etc/systemd/system/construction-public-twin-portal.service` |
+| 自動起動 | `enabled`（`WantedBy=multi-user.target`） |
+| 待受 | `0.0.0.0:43100`（全インターフェース） |
+
+### セットアップ / 再登録
+
+```bash
+# 初回登録（空きポートを自動選択。SERVICE_PORT=43100 で固定も可能）
+sudo bash scripts/install-service.sh
+
+# 更新デプロイ（停止 → lint/typecheck/test → build → 起動 → 到達確認）
+sudo bash scripts/deploy.sh
+```
+
+`deploy.sh` が**サービスを止めてからビルドする**のは意図的です。
+稼働中の `next start` が参照している `.next` を書き換えると、
+実行中プロセスのクライアント参照マニフェストが失われ
+`InvariantError: The client reference manifest for route "/_not-found" does not exist`
+が発生し、以後 502/500 を返し続けます。
+
+### 操作
+
+```bash
+sudo systemctl status construction-public-twin-portal
+sudo systemctl restart construction-public-twin-portal
+sudo systemctl stop construction-public-twin-portal
+sudo journalctl -u construction-public-twin-portal -f
+```
+
+`scripts/install-service.sh` は `43100`〜`43200` を走査して最初の空きポートを使います。
+固定したい場合は `SERVICE_PORT=43100 sudo bash scripts/install-service.sh` のように指定します。
+
+---
+
 ## 5. 検証コマンド
 
 ```bash
@@ -255,6 +299,22 @@ Zod スキーマ `lib/schemas/project.ts` で検証します。主なフィー�
 `app/globals.css` の `:root` に定義。出典は `WebUI/koji-mieru-map-3d.html`（デザインハンドオフ）で、
 色・角丸・影・タイポグラフィ・余白はその原本に一致させています。
 `components/**` は CSS Modules でレイアウト固有のスタイルを持ち、色は必ずトークンを参照します。
+
+### 7.5 スタイルの正（Source of truth）
+
+**UI の見た目は `WebUI/` フォルダの内容を正とします。**
+
+| 原本 | 実装での扱い |
+|---|---|
+| `WebUI/koji-mieru-map-3d.html` の `:root`（22トークン） | `app/globals.css` の `:root` に**同名・同値で移植**（監査済み: 原本トークンの欠落 0） |
+| 同ファイルのコンポーネント CSS（`.topbar` `.fchip` `.pcard` `.detail` `.imp` `.siteviewer` など） | 各コンポーネントの CSS Modules へ移植 |
+| 同ファイルの HTML 文言・ラベル・サンプルデータ | `lib/data/source.ts` に原文のまま保持 |
+| `WebUI/DESIGN-MANIFEST.json` | レスポンシブ検証ビューポート（360〜1920px）の根拠 |
+| `WebUI/DESIGN-HANDOFF.md` | 「視覚契約」として扱い、実装判断に迷った場合は原本の挙動を優先 |
+
+`WebUI/` は**参照専用**です（ビルド対象外。`eslint.config.mjs` / `tsconfig.json` で除外）。
+レイアウト専用に追加したトークンは `--topbar-h` / `--statusbar-h` / `--detail-w` の 3 つのみで、
+いずれも原本の寸法（60px / 38px / 396px）を定数化したものです。
 
 ---
 
