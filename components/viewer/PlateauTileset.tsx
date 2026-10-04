@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * PLATEAU 3D Tiles（外部 3D 都市モデル）の描画。
+ * PLATEAU 3D Tiles（外部 3D 都市モデル）の実描画。
  *
  * 方針（仕様書 #19/#23）:
  *   - NEXT_PUBLIC_PLATEAU_TILESET_URL が設定されている場合のみ試行する。
@@ -10,6 +10,11 @@
  *   - 失敗・タイムアウト時は呼び出し側（PublicTwinViewer）が内蔵背景を表示し、
  *     バッジに「取得不可 → 内蔵背景」と正直に出す。
  *   - PLATEAU は CC BY 4.0 のため、TilesAttributionOverlay で出典を表示する。
+ *
+ * このコンポーネントは「1 回の読み込み試行」だけを担当する。
+ * 再試行したい場合は呼び出し側で key を変えて再マウントする
+ * （内部にリセット用の state を持たないため、effect 内での同期 setState が不要）。
+ * `disabled` / `unconfigured` は呼び出し側が導出する。
  *
  * 座標系:
  *   ReorientationPlugin は「X = 西, Z = 北」のローカル座標系へ再配置する
@@ -30,7 +35,11 @@ const DEG2RAD = Math.PI / 180;
  */
 const PLATEAU_GROUND_HEIGHT_M = 30;
 
-/** PLATEAU 背景の状態。バッジ表示にそのまま使う。 */
+/**
+ * PLATEAU 背景の状態。バッジ表示にそのまま使う。
+ * このコンポーネントが報告するのは loading / rendering / unavailable / timeout のみ。
+ * disabled / unconfigured は呼び出し側（PublicTwinViewer）が導出する。
+ */
 export type PlateauStatus =
   | "disabled"
   | "unconfigured"
@@ -51,9 +60,7 @@ export interface PlateauTilesetProps {
   /** 3D背景として PLATEAU が選択されているか */
   enabled: boolean;
   /**
-   * 状態通知。
-   * PublicTwinViewer 側で useState の setter、または useCallback で
-   * 参照が安定した関数を渡すこと（再レンダリングのたびに再読み込みさせないため）。
+   * 状態通知。呼び出し側で参照が安定した関数（useCallback / useState の setter）を渡すこと。
    */
   onStatus: (status: PlateauStatus) => void;
 }
@@ -61,26 +68,16 @@ export interface PlateauTilesetProps {
 export function PlateauTileset({ enabled, onStatus }: PlateauTilesetProps) {
   const [modules, setModules] = useState<LoadedModules | null>(null);
   const [abandoned, setAbandoned] = useState(false);
-  const loadedRef = useRef(false);
+  const readyRef = useRef(false);
   const configured = PLATEAU_TILESET.configured;
 
-  // 動的 import（失敗してもアプリ全体を落とさない）
+  // 動的 import（失敗してもアプリ全体を落とさない）。
+  // setState はすべて async コールバック内で行う。
   useEffect(() => {
-    if (!enabled) {
-      setModules(null);
-      setAbandoned(false);
-      loadedRef.current = false;
-      onStatus("disabled");
-      return;
-    }
-    if (!configured) {
-      onStatus("unconfigured");
-      return;
-    }
+    if (!enabled || !configured) return;
 
     let cancelled = false;
-    setAbandoned(false);
-    loadedRef.current = false;
+    readyRef.current = false;
     onStatus("loading");
 
     void (async () => {
@@ -89,8 +86,7 @@ export function PlateauTileset({ enabled, onStatus }: PlateauTilesetProps) {
           import("3d-tiles-renderer/r3f"),
           import("3d-tiles-renderer/three/plugins"),
         ]);
-        if (cancelled) return;
-        setModules({ r3f, plugins });
+        if (!cancelled) setModules({ r3f, plugins });
       } catch (error) {
         if (cancelled) return;
         console.warn(
@@ -107,20 +103,21 @@ export function PlateauTileset({ enabled, onStatus }: PlateauTilesetProps) {
     };
   }, [enabled, configured, onStatus]);
 
-  // タイムアウト（タイルが一定時間読み込めなければ内蔵背景へ）
+  // タイムアウト（一定時間でタイルが読めなければ内蔵背景へ切り替える）
   useEffect(() => {
-    if (!modules || abandoned) return;
+    if (!enabled || !configured || abandoned) return;
+
     const timer = window.setTimeout(() => {
-      if (loadedRef.current) return;
+      if (readyRef.current) return;
       console.warn(
         `[viewer3d] PLATEAU 3D Tiles が ${TILESET_LOAD_TIMEOUT_MS} ms 以内に読み込めなかったため、内蔵背景へ切り替えます。`,
       );
       setAbandoned(true);
-      setModules(null);
       onStatus("timeout");
     }, TILESET_LOAD_TIMEOUT_MS);
+
     return () => window.clearTimeout(timer);
-  }, [modules, abandoned, onStatus]);
+  }, [enabled, configured, abandoned, onStatus]);
 
   if (!enabled || !configured || abandoned || !modules) return null;
 
@@ -134,24 +131,28 @@ export function PlateauTileset({ enabled, onStatus }: PlateauTilesetProps) {
         url={PLATEAU_TILESET.url}
         errorTarget={6}
         onLoadTileset={() => {
-          loadedRef.current = true;
+          readyRef.current = true;
           onStatus("rendering");
         }}
-        onLoadError={(event: unknown) => {
+        onLoadError={(event) => {
+          // 個別タイルの失敗は該当タイルのみスキップされる（致命的ではない）
           console.warn(
-            "[viewer3d] PLATEAU の一部タイルで読み込みエラーが発生しました（該当タイルのみスキップされます）。",
-            event,
+            "[viewer3d] PLATEAU の一部タイルで読み込みエラーが発生しました。",
+            event.error,
+            event.url,
           );
         }}
       >
         <TilesPlugin
           plugin={ReorientationPlugin}
-          args={{
-            lat: SCENE_ORIGIN.latitude * DEG2RAD,
-            lon: SCENE_ORIGIN.longitude * DEG2RAD,
-            height: PLATEAU_GROUND_HEIGHT_M,
-            recenter: true,
-          }}
+          args={[
+            {
+              lat: SCENE_ORIGIN.latitude * DEG2RAD,
+              lon: SCENE_ORIGIN.longitude * DEG2RAD,
+              height: PLATEAU_GROUND_HEIGHT_M,
+              recenter: true,
+            },
+          ]}
         />
         <TilesAttributionOverlay
           style={{

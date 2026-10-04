@@ -29,6 +29,7 @@ import {
   MAP_GEOJSON_SOURCES,
   MAP_INITIAL_VIEW,
   MAP_LAYERS,
+  MAP_SOURCE_IDS,
   NO_SELECTION_ID,
   STORE_LAYER_TO_MAP_LAYERS,
   buildMapStyle,
@@ -36,10 +37,14 @@ import {
 } from "@/lib/viewer/mapStyle";
 
 import styles from "./FallbackMap.module.css";
+import { createMaplibreWorkerUrl } from "./maplibreWorker";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 type MaplibreModule = typeof import("maplibre-gl");
 type MapStatus = "loading" | "ready" | "error";
+
+/** スタイル読込がこの時間内に完了しなければエラー表示へ切り替える（無限スピナー防止） */
+const MAP_LOAD_TIMEOUT_MS = 12_000;
 
 /** 選択案件だけを強調表示するフィルタ */
 function selectionFilter(projectId: string | null): MapLayerFilter {
@@ -51,6 +56,8 @@ export function FallbackMap(): ReactElement {
   const mapRef = useRef<MapLibreMap | null>(null);
   const maplibreRef = useRef<MaplibreModule | null>(null);
   const markerRef = useRef<{ remove: () => void } | null>(null);
+  /** 案件ごとの工区バウンディングボックス（選択時のカメラ移動に使う） */
+  const workzoneBoundsRef = useRef(new Map<string, [number, number, number, number]>());
 
   const [status, setStatus] = useState<MapStatus>("loading");
   const [errorMessage, setErrorMessage] = useState("");
@@ -68,6 +75,7 @@ export function FallbackMap(): ReactElement {
     if (!container) return;
 
     let cancelled = false;
+    let loadTimer: ReturnType<typeof setTimeout> | null = null;
 
     /** 同一オリジンの GeoJSON を読み込んでソースへ流し込む */
     const loadOverlays = async (map: MapLibreMap) => {
@@ -98,6 +106,18 @@ export function FallbackMap(): ReactElement {
 
           const box = collectionBounds(data);
           if (box) bounds.push(box);
+
+          // 工区は案件ごとの範囲を覚えておき、選択時のカメラ移動に使う
+          if (source.id === MAP_SOURCE_IDS.workzone) {
+            for (const feature of data.features) {
+              const featureBounds = collectionBounds({
+                type: "FeatureCollection",
+                features: [feature],
+              });
+              if (!featureBounds) continue;
+              workzoneBoundsRef.current.set(feature.properties.projectId, featureBounds);
+            }
+          }
         }),
       );
 
@@ -149,6 +169,15 @@ export function FallbackMap(): ReactElement {
         if (cancelled) return;
         maplibreRef.current = maplibregl;
 
+        // Turbopack は maplibre 内部の動的な `new URL(worker, import.meta.url)` を
+        // 解決できないため、自己完結した worker を用意して URL を明示的に渡す。
+        // （未指定だと "Worker failed to load" となり GeoJSON ソースが描画されない）
+        const workerUrl = await createMaplibreWorkerUrl();
+        if (cancelled) return;
+        if (workerUrl) {
+          maplibregl.setWorkerUrl(workerUrl);
+        }
+
         const map = new maplibregl.Map({
           container,
           style: buildMapStyle(),
@@ -178,9 +207,25 @@ export function FallbackMap(): ReactElement {
         });
 
         map.on("load", () => {
+          if (loadTimer) {
+            clearTimeout(loadTimer);
+            loadTimer = null;
+          }
           registerInteractions(map);
           void loadOverlays(map);
         });
+
+        // 読み込みが完了しないまま固まるのを避ける（無限スピナー対策）
+        loadTimer = setTimeout(() => {
+          if (cancelled || mapRef.current !== map) return;
+          setStatus((current) => {
+            if (current !== "loading") return current;
+            setErrorMessage(
+              "地図の読み込みが完了しませんでした。通信環境やブラウザの設定を確認して再試行してください。",
+            );
+            return "error";
+          });
+        }, MAP_LOAD_TIMEOUT_MS);
       } catch (error) {
         if (cancelled) return;
         console.error("[FallbackMap] 2D地図を初期化できませんでした:", error);
@@ -195,6 +240,10 @@ export function FallbackMap(): ReactElement {
 
     return () => {
       cancelled = true;
+      if (loadTimer) {
+        clearTimeout(loadTimer);
+        loadTimer = null;
+      }
       markerRef.current?.remove();
       markerRef.current = null;
       mapRef.current?.remove();
@@ -259,13 +308,28 @@ export function FallbackMap(): ReactElement {
       typeof window !== "undefined" &&
       typeof window.matchMedia === "function" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const duration = reduceMotion ? 0 : 900;
 
-    map.flyTo({
-      center: [longitude, latitude],
-      zoom: Math.max(map.getZoom(), 15.6),
-      duration: reduceMotion ? 0 : 900,
-      essential: true,
-    });
+    // 工区と工事位置の両方が視野に入るように合わせる。
+    // 工区データが無い場合は工事位置へ寄せる。
+    const zoneBounds = workzoneBoundsRef.current.get(selectedProjectId);
+    if (zoneBounds) {
+      const [west, south, east, north] = zoneBounds;
+      map.fitBounds(
+        [
+          [Math.min(west, longitude), Math.min(south, latitude)],
+          [Math.max(east, longitude), Math.max(north, latitude)],
+        ],
+        { padding: 64, maxZoom: 17, duration, essential: true },
+      );
+    } else {
+      map.flyTo({
+        center: [longitude, latitude],
+        zoom: Math.max(map.getZoom(), 15.6),
+        duration,
+        essential: true,
+      });
+    }
   }, [selectedProjectId, status]);
 
   const totalCount = publicProjects().length;

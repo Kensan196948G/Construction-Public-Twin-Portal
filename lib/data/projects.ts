@@ -26,20 +26,52 @@ import {
   type RawProject,
 } from "./source";
 import { impactIdsByProject } from "./impact-defs";
+import { lngLatToScene } from "@/lib/geo/transform";
 
 /* ------------------------------------------------------------------ *
  * 内部レコード（Project 本体 + ローカル座標ジオメトリ）
  * ------------------------------------------------------------------ */
 
 export interface ProjectGeometry {
-  /** 工区リング（ローカル座標 [x, z] メートル） */
+  /**
+   * 工区リング（**案件中心を原点とする**ローカル座標 [x, z] メートル）。
+   * シーン座標（基準点原点）へ変換するには `projectSceneOffset()` を加算すること。
+   */
   zone: [number, number][];
-  /** 規制線分 */
+  /** 規制線分（案件中心原点） */
   regulation: [number, number][] | null;
-  /** 迂回ループ */
+  /** 迂回ループ（案件中心原点） */
   detour: [number, number][] | null;
-  /** 歩道切替線分 */
+  /** 歩道切替線分（案件中心原点） */
   pedestrian: [number, number][] | null;
+}
+
+/**
+ * 案件中心のシーン座標（基準点原点）オフセット。
+ *
+ * `ProjectGeometry` の各座標は案件中心を原点とするため、
+ * 基準点を原点とするシーンへ配置する際は必ずこの値を加算する。
+ */
+export function projectSceneOffset(project: Project): { x: number; z: number } {
+  const p = lngLatToScene(
+    project.location.center.longitude,
+    project.location.center.latitude,
+  );
+  return { x: p.x, z: p.z };
+}
+
+/**
+ * 案件中心オフセットを適用したシーン座標のジオメトリを返す。
+ * 3D ビューア・GeoJSON 生成の双方でこれを使い、座標の二重実装を避ける。
+ */
+export function sceneGeometryOf(
+  kind: "zone" | "regulation" | "detour" | "pedestrian",
+  record: ProjectRecord,
+): [number, number][] | null {
+  const raw = record.geometry[kind];
+  if (!raw) return null;
+  const { x: ox, z: oz } = projectSceneOffset(record.project);
+  return raw.map(([x, z]) => [x + ox, z + oz] as [number, number]);
 }
 
 export interface ProjectRecord {

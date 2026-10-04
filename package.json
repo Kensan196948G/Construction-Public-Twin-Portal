@@ -4,14 +4,16 @@
   "private": true,
   "description": "工事みえるマップ 3D Beta / Construction Public Twin Portal - MVP",
   "scripts": {
-    "dev": "next dev -p 3000",
+    "dev": "next dev",
     "build": "next build",
-    "start": "next start -p 3000",
+    "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "export:data": "tsx scripts/export-data.ts"
+    "export:data": "tsx scripts/export-data.ts",
+    "vendor:maplibre": "node scripts/vendor-maplibre.mjs",
+    "verify:browser": "node scripts/verify-browser.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",

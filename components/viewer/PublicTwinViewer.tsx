@@ -56,7 +56,7 @@ import styles from "./viewer.module.css";
  * WebGL 判定
  * ------------------------------------------------------------------ */
 
-type WebglState = "checking" | "ok" | "unavailable";
+type WebglState = "ok" | "unavailable";
 
 function detectWebgl(): boolean {
   try {
@@ -180,22 +180,34 @@ export function PublicTwinViewer(): React.ReactElement {
     setCommand((current) => ({ preset, nonce: current.nonce + 1 }));
   }, []);
 
-  const [plateauStatus, setPlateauStatus] = useState<PlateauStatus>("disabled");
+  const [plateauAttempt, setPlateauAttempt] = useState<PlateauStatus>("loading");
+  const [plateauRetry, setPlateauRetry] = useState(0);
   const handlePlateauStatus = useCallback((status: PlateauStatus) => {
-    setPlateauStatus(status);
+    setPlateauAttempt(status);
+  }, []);
+  const retryPlateau = useCallback(() => {
+    setPlateauAttempt("loading");
+    setPlateauRetry((count) => count + 1);
   }, []);
 
-  const [webgl, setWebgl] = useState<WebglState>("checking");
+  // WebGL の可否は初回レンダリング時に一度だけ判定する。
+  // このコンポーネントは app/page.tsx で dynamic(..., { ssr: false }) として読み込まれるため、
+  // ここは必ずブラウザで実行される（document を参照しても安全）。
+  const [webgl] = useState<WebglState>(() => (detectWebgl() ? "ok" : "unavailable"));
   const [failure, setFailure] = useState<string | null>(null);
   const contextCleanup = useRef<(() => void) | null>(null);
 
-  useEffect(() => {
-    setWebgl(detectWebgl() ? "ok" : "unavailable");
-  }, []);
-
   useEffect(() => () => contextCleanup.current?.(), []);
 
-  const handlePointerMissed = useCallback(() => {
+  const pointerDownAt = useRef<{ x: number; y: number } | null>(null);
+
+  /**
+   * 背景クリックで選択解除する。
+   * ドラッグ（カメラ操作）で解除されないよう、押下位置から一定以上動いた場合は無視する。
+   */
+  const handlePointerMissed = useCallback((event: MouseEvent) => {
+    const start = pointerDownAt.current;
+    if (start && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 6) return;
     selectProject(null);
   }, [selectProject]);
 
@@ -216,51 +228,28 @@ export function PublicTwinViewer(): React.ReactElement {
   const switchTo2d = useCallback(() => setViewMode("2d"), [setViewMode]);
 
   const usingPlateau = base3dSource === "plateau";
+  // disabled / unconfigured はこのコンポーネント側で導出する（PlateauTileset は試行結果のみ報告）
+  const plateauStatus: PlateauStatus =
+    base3dSource !== "plateau"
+      ? "disabled"
+      : !PLATEAU_TILESET.configured
+        ? "unconfigured"
+        : plateauAttempt;
   const plateauRendererActive = usingPlateau && plateauStatus === "rendering";
   const badge = baseStatusView(base3dSource, plateauStatus);
+  const canRetryPlateau = plateauStatus === "unavailable" || plateauStatus === "timeout";
 
-  const notice = useMemo(() => {
-    if (webgl === "unavailable") {
-      return {
-        title: "3Dを表示できません",
-        detail:
-          "この環境では WebGL（3D描画）を利用できないため、3Dビューアを起動できませんでした。",
-        hint: "2D表示に切り替えると、工事位置・交通規制・迂回路を平面図で確認できます。",
-        technical: null as string | null,
-      };
-    }
-    if (failure) {
-      return {
-        title: "3Dを表示できません",
-        detail: failure,
-        hint: "2D表示に切り替えると、工事位置・交通規制・迂回路を平面図で確認できます。",
-        technical: failure,
-      };
-    }
-    return null;
-  }, [webgl, failure]);
-
-  if (webgl === "checking") {
-    return (
-      <div className={styles.root}>
-        <div className="spinner">
-          <span className="ring" aria-hidden="true" />
-          <span className="num" style={{ fontSize: 12, color: "var(--muted)" }}>
-            3Dビューアを準備しています…
-          </span>
-        </div>
-      </div>
-    );
-  }
-
-  if (notice) {
+  if (webgl === "unavailable" || failure) {
     return (
       <div className={styles.root}>
         <ViewerNotice
-          title={notice.title}
-          detail={notice.detail}
-          hint={notice.hint}
-          technical={notice.technical}
+          title="3Dを表示できません"
+          detail={
+            failure ??
+            "この環境では WebGL（3D描画）を利用できないため、3Dビューアを起動できませんでした。"
+          }
+          hint="2D表示に切り替えると、工事位置・交通規制・迂回路を平面図で確認できます。"
+          technical={failure}
           onSwitchTo2d={switchTo2d}
         />
       </div>
@@ -283,7 +272,12 @@ export function PublicTwinViewer(): React.ReactElement {
         onError={(message) => setFailure(`3Dシーンの初期化に失敗しました（${message}）。`)}
         fallback={fallbackNotice}
       >
-        <div className={styles.canvasWrap}>
+        <div
+          className={styles.canvasWrap}
+          onPointerDown={(event) => {
+            pointerDownAt.current = { x: event.clientX, y: event.clientY };
+          }}
+        >
           <Canvas
             dpr={[1, 2]}
             camera={{
@@ -314,7 +308,11 @@ export function PublicTwinViewer(): React.ReactElement {
             {/* 背景（地形は常に、内蔵都市は PLATEAU 表示中以外） */}
             <TerrainLayer visible={visibleLayers.terrain} />
             <LocalCityModel layout={layout} visible={!plateauRendererActive && visibleLayers.city} />
-            <PlateauTileset enabled={usingPlateau} onStatus={handlePlateauStatus} />
+            <PlateauTileset
+              key={`plateau-${plateauRetry}`}
+              enabled={usingPlateau}
+              onStatus={handlePlateauStatus}
+            />
 
             {/* 工事 */}
             <WorkZoneLayer
@@ -402,6 +400,11 @@ export function PublicTwinViewer(): React.ReactElement {
       <div className={`float ${styles.badge}`} role="status" aria-live="polite">
         <span className={styles.badgeDot} data-state={badge.state} aria-hidden="true" />
         <span className={styles.badgeText}>{badge.text}</span>
+        {canRetryPlateau ? (
+          <button type="button" className="chip-btn" onClick={retryPlateau}>
+            再試行
+          </button>
+        ) : null}
       </div>
 
       {/* 内蔵背景の出典（PLATEAU 表示中は TilesAttributionOverlay が出典を出す） */}

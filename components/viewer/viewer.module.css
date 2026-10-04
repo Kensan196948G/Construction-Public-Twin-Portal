@@ -27,7 +27,7 @@
 /* ビューア左下: カメラプリセットと完成予想の切替 */
 .viewerBar {
   left: 16px;
-  bottom: 16px;
+  bottom: 46px;
   padding: 8px 10px;
   display: flex;
   flex-direction: column;
@@ -55,10 +55,11 @@
   flex-wrap: wrap;
 }
 
-/* PLATEAU / 内蔵背景の状態バッジ（正直な状態表示） */
+/* PLATEAU / 内蔵背景の状態バッジ（正直な状態表示）。MapNote の下に置く。 */
 .badge {
-  left: 16px;
-  bottom: 132px;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 58px;
   padding: 6px 10px;
   display: flex;
   align-items: center;
@@ -66,7 +67,24 @@
   font-size: 11px;
   color: var(--muted);
   border-radius: 999px;
-  max-width: min(420px, calc(100% - 32px));
+  max-width: min(520px, calc(100% - 32px));
+}
+
+.badge .chip-btn {
+  flex: 0 0 auto;
+}
+
+/* 内蔵背景の出典表示（PLATEAU 表示中は TilesAttributionOverlay が担当） */
+.attribution {
+  position: absolute;
+  left: 16px;
+  bottom: 14px;
+  max-width: min(460px, calc(100% - 32px));
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--faint);
+  pointer-events: none;
 }
 
 .badgeDot {

@@ -10,7 +10,13 @@
  */
 import { sceneToLngLat } from "@/lib/geo/transform";
 import type { FeatureCollection, GeoJsonFeature, GeoJsonGeometry } from "@/lib/geo/geojson";
-import { publicProjectRecords, type ProjectGeometry } from "./projects";
+import {
+  publicProjectRecords,
+  sceneGeometryOf,
+  type ProjectGeometry,
+  type ProjectRecord,
+} from "./projects";
+
 function toLngLat([x, z]: [number, number]): [number, number] {
   const { longitude, latitude } = sceneToLngLat(x, z);
   return [longitude, latitude];
@@ -36,6 +42,12 @@ function line(pts: [number, number][]): [number, number][] {
 
 export type GeometryKind = "workzone" | "regulation" | "detour" | "pedestrian";
 
+/**
+ * 案件中心を原点とする生のジオメトリを返す。
+ *
+ * 注意: そのままシーン／WGS84 へ変換してはならない。
+ * 案件中心オフセットを加算する `sceneGeometryOf()` を使うこと。
+ */
 export function geometryOf(kind: GeometryKind, geom: ProjectGeometry): [number, number][] | null {
   switch (kind) {
     case "workzone":
@@ -64,7 +76,7 @@ export function geometryKindLabel(kind: GeometryKind): string {
 
 function buildFeature(
   kind: GeometryKind,
-  geom: ProjectGeometry,
+  record: ProjectRecord,
   meta: {
     projectId: string;
     projectName: string;
@@ -74,7 +86,8 @@ function buildFeature(
     validTo?: string;
   },
 ): GeoJsonFeature | null {
-  const pts = geometryOf(kind, geom);
+  // 案件中心オフセットを適用したシーン座標を得る（基準点原点）。
+  const pts = sceneGeometryOf(kind === "workzone" ? "zone" : kind, record);
   if (!pts || pts.length < 2) return null;
 
   let geometry: GeoJsonGeometry;
@@ -111,11 +124,11 @@ function buildFeature(
 export function buildProjectCollection(slug: string, kinds: GeometryKind[]): FeatureCollection {
   const record = publicProjectRecords().find((r) => r.project.slug === slug);
   if (!record) return { type: "FeatureCollection", features: [] };
-  const { project, geometry } = record;
+  const { project } = record;
 
   const features = kinds
     .map((kind) =>
-      buildFeature(kind, geometry, {
+      buildFeature(kind, record, {
         projectId: project.id,
         projectName: project.publicTitle,
         source: project.source.provider,
@@ -134,7 +147,7 @@ export function buildAllCollection(kinds: GeometryKind[]): FeatureCollection {
   const features: GeoJsonFeature[] = [];
   for (const record of publicProjectRecords()) {
     for (const kind of kinds) {
-      const f = buildFeature(kind, record.geometry, {
+      const f = buildFeature(kind, record, {
         projectId: record.project.id,
         projectName: record.project.publicTitle,
         source: record.project.source.provider,

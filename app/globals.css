@@ -7,7 +7,7 @@
  * default framework theme colors or typography.
  *
  * Component-specific layout lives in per-component CSS Modules
- * (components/**/*.module.css) so that files stay single-writer.
+ * (one module stylesheet per component) so that files stay single-writer.
  * ==========================================================================*/
 
 :root {

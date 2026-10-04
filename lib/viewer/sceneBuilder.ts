@@ -17,8 +17,8 @@
  *   lib/store/useAppStore.ts の LAYERS.swatch の値をここに集約する。
  *   UI（CSS）側ではこれらの色を直接使わないこと。
  */
-import { lngLatToScene } from "@/lib/geo/transform";
 import type { CompletionType, Project, ProjectStatus } from "@/lib/schemas/project";
+import { projectSceneOffset } from "@/lib/data/projects";
 
 /* ------------------------------------------------------------------ *
  * パレット（デザインハンドオフの C / LAYERS.swatch と同値）
@@ -586,10 +586,14 @@ export function buildCompletionParts(
  * 座標・工区
  * ------------------------------------------------------------------ */
 
-/** 工事の基準点をシーン座標へ */
+/**
+ * 工事の基準点をシーン座標へ。
+ *
+ * 実装は `lib/data/projects.ts` の `projectSceneOffset()` に委譲する
+ * （2D 地図・GeoJSON と 3D ビューアで座標変換を二重実装しないため）。
+ */
 export function projectSceneCenter(project: Project): Vec2 {
-  const p = lngLatToScene(project.location.center.longitude, project.location.center.latitude);
-  return { x: p.x, z: p.z };
+  return projectSceneOffset(project);
 }
 
 /** 工区リング（ローカル [x, z]）をシーン座標のリングへ */
