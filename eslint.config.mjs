@@ -4,7 +4,7 @@ import next from "eslint-config-next";
  * Flat ESLint config.
  * `WebUI/` holds the exported design reference and is not part of the build.
  */
-export default [
+const config = [
   {
     ignores: [
       ".next/**",
@@ -17,3 +17,5 @@ export default [
   },
   ...next,
 ];
+
+export default config;

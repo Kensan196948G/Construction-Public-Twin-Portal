@@ -1,0 +1,365 @@
+/* ============================================================================
+ * 3D ビューア（components/viewer/**）のレイアウト。
+ * 出典: WebUI/koji-mieru-map-3d.html の .timeline / .view-controls /
+ *       .s3d-badge / .s3d-fallback 相当。
+ * 色・角丸・影は app/globals.css のトークンを使用する（独自 hex は書かない）。
+ * ==========================================================================*/
+
+.root {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: oklch(93% 0.008 250);
+}
+
+.canvasWrap {
+  position: absolute;
+  inset: 0;
+}
+
+.canvasWrap canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+/* ビューア左下: カメラプリセットと完成予想の切替 */
+.viewerBar {
+  left: 16px;
+  bottom: 16px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: min(360px, calc(100% - 32px));
+}
+
+.viewerBarLabel {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+  font-family: var(--font-mono);
+}
+
+.viewerBarRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.viewerBarGroup {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* PLATEAU / 内蔵背景の状態バッジ（正直な状態表示） */
+.badge {
+  left: 16px;
+  bottom: 132px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  color: var(--muted);
+  border-radius: 999px;
+  max-width: min(420px, calc(100% - 32px));
+}
+
+.badgeDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: var(--st-done);
+}
+
+.badgeDot[data-state="loading"] {
+  background: var(--st-active);
+}
+
+.badgeDot[data-state="warn"] {
+  background: var(--st-reg);
+}
+
+.badgeDot[data-state="off"] {
+  background: var(--faint);
+}
+
+.badge strong {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.badgeText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* WebGL 不可・初期化失敗時のフォールバック */
+.fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: linear-gradient(180deg, oklch(98% 0.004 250), oklch(92% 0.012 250));
+}
+
+.fallbackCard {
+  max-width: 420px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  display: grid;
+  gap: 12px;
+  text-align: left;
+}
+
+.fallbackCard h2 {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.fallbackCard p {
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.fallbackActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.fallbackDetail {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--faint);
+  word-break: break-word;
+}
+
+/* --------------------------------------------------------------------------
+ * 時間軸（Lead の layout.module.css から移設・自己完結）
+ * ------------------------------------------------------------------------*/
+
+.timeline {
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 16px;
+  width: min(520px, calc(100% - 600px));
+  padding: 10px 14px 8px;
+}
+
+.tlHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.tlPlay {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  display: grid;
+  place-items: center;
+  color: var(--fg);
+  flex: 0 0 auto;
+}
+
+.tlPlay:hover {
+  border-color: var(--muted);
+}
+
+.tlDate {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.tlJumps {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+}
+
+.tlSlider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, oklch(78% 0.02 250), oklch(88% 0.01 250));
+  outline: none;
+  margin: 6px 0 4px;
+}
+
+.tlSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--fg);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+
+.tlSlider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--fg);
+  border: 2px solid #fff;
+  cursor: pointer;
+}
+
+.tlAxis {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--faint);
+  letter-spacing: 0.04em;
+}
+
+/* --------------------------------------------------------------------------
+ * レイヤー ON/OFF（サイドバーのタブ内）
+ * ------------------------------------------------------------------------*/
+
+.layerPanel {
+  display: grid;
+  gap: 2px;
+}
+
+.layerActions {
+  display: flex;
+  gap: 6px;
+  margin: 2px 0 4px;
+}
+
+.layerGroup {
+  display: grid;
+  gap: 2px;
+}
+
+.layerRow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 6px 4px;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.layerRow:hover {
+  background: var(--surface-2);
+}
+
+.layerMark {
+  width: 14px;
+  height: 8px;
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+
+.layerMarkLine {
+  width: 16px;
+  height: 0;
+  border-top: 2px solid;
+  flex: 0 0 auto;
+}
+
+.layerMarkLineDashed {
+  width: 16px;
+  height: 0;
+  border-top: 2px dashed;
+  flex: 0 0 auto;
+}
+
+.layerMarkPoint {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.layerName {
+  font-size: 12.5px;
+  color: var(--fg);
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.layerCount {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--faint);
+}
+
+.layerNote {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 2px 4px 4px;
+  line-height: 1.6;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 1280px) {
+  .timeline {
+    width: min(460px, calc(100% - 400px));
+  }
+}
+
+@media (max-width: 1080px) {
+  .timeline {
+    width: min(460px, calc(100% - 32px));
+    bottom: 12px;
+  }
+
+  .viewerBar {
+    max-width: min(300px, calc(100% - 32px));
+  }
+
+  .badge {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .viewerBar {
+    left: 12px;
+    bottom: 12px;
+  }
+
+  .timeline {
+    width: calc(100% - 24px);
+  }
+}

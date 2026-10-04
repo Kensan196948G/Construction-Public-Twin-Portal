@@ -111,14 +111,17 @@ export function searchSuggestions(
   const q = normalize(keyword);
   if (!q) return [];
 
-  const out: SearchSuggestion[] = [];
-  const seen = new Set<string>();
+  const byKind: Record<SearchSuggestion["kind"], SearchSuggestion[]> = {
+    name: [],
+    municipality: [],
+    category: [],
+    address: [],
+  };
 
   const push = (s: SearchSuggestion) => {
-    const key = `${s.kind}:${s.title}:${s.projectId}`;
-    if (seen.has(key)) return;
-    seen.add(key);
-    out.push(s);
+    const bucket = byKind[s.kind];
+    if (bucket.some((e) => e.title === s.title)) return;
+    bucket.push(s);
   };
 
   // 1. 工事件名・公開名称
@@ -134,7 +137,23 @@ export function searchSuggestions(
     }
   }
 
-  // 2. 住所
+  // 2. 自治体
+  const municipalities = [...new Set(projects.map((p) => p.location.municipality))];
+  for (const m of municipalities) {
+    if (normalize(m).includes(q)) {
+      push({ projectId: "", slug: "", title: m, subtitle: "自治体で絞り込む", kind: "municipality" });
+    }
+  }
+
+  // 3. 工種
+  const categories = [...new Set(projects.map((p) => p.category))];
+  for (const c of categories) {
+    if (normalize(c).includes(q)) {
+      push({ projectId: "", slug: "", title: c, subtitle: "工種で絞り込む", kind: "category" });
+    }
+  }
+
+  // 4. 住所
   for (const p of projects) {
     if (normalize(p.location.address).includes(q)) {
       push({
@@ -147,27 +166,23 @@ export function searchSuggestions(
     }
   }
 
-  // 3. 自治体
-  const municipalities = [...new Set(projects.map((p) => p.location.municipality))];
-  for (const m of municipalities) {
-    if (normalize(m).includes(q)) {
-      push({
-        projectId: "",
-        slug: "",
-        title: m,
-        subtitle: "自治体で絞り込む",
-        kind: "municipality",
-      });
+  // 種別ごとにラウンドロビンで配分する。
+  // 住所一致が枠を埋めて自治体・工種の候補が消えるのを防ぐため。
+  const order: SearchSuggestion["kind"][] = ["name", "municipality", "category", "address"];
+  const out: SearchSuggestion[] = [];
+  let progressed = true;
+
+  while (out.length < limit && progressed) {
+    progressed = false;
+    for (const kind of order) {
+      if (out.length >= limit) break;
+      const next = byKind[kind].shift();
+      if (next) {
+        out.push(next);
+        progressed = true;
+      }
     }
   }
 
-  // 4. 工種
-  const categories = [...new Set(projects.map((p) => p.category))];
-  for (const c of categories) {
-    if (normalize(c).includes(q)) {
-      push({ projectId: "", slug: "", title: c, subtitle: "工種で絞り込む", kind: "category" });
-    }
-  }
-
-  return out.slice(0, limit);
+  return out;
 }

@@ -1,0 +1,1316 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>detail-1020</title>
+<style>
+/* ============================================================================
+ * 工事みえるマップ 3D Beta / Construction Public Twin Portal
+ * Design tokens + shared primitives.
+ *
+ * SOURCE OF TRUTH: WebUI/koji-mieru-map-3d.html (lines 14-321).
+ * These tokens are a faithful port of the exported design. Do not substitute
+ * default framework theme colors or typography.
+ *
+ * Component-specific layout lives in per-component CSS Modules
+ * (components/**/*.module.css) so that files stay single-writer.
+ * ==========================================================================*/
+
+:root {
+  /* --- surface / text --- */
+  --bg: oklch(97.5% 0.005 250);
+  --surface: oklch(100% 0 0);
+  --surface-2: oklch(96.5% 0.006 250);
+  --fg: oklch(22% 0.02 240);
+  --muted: oklch(50% 0.018 240);
+  --faint: oklch(64% 0.014 240);
+  --border: oklch(90% 0.008 240);
+  --border-strong: oklch(83% 0.01 240);
+
+  /* --- accent --- */
+  --accent: oklch(58% 0.16 145);
+  --accent-ink: oklch(30% 0.09 150);
+  --accent-soft: color-mix(in oklch, oklch(58% 0.16 145) 12%, white);
+
+  /* --- status --- */
+  --st-planned: oklch(58% 0.14 250);
+  --st-active: oklch(70% 0.16 60);
+  --st-reg: oklch(58% 0.2 27);
+  --st-done: oklch(58% 0.13 155);
+  --st-hold: oklch(60% 0.012 250);
+  --st-night: oklch(54% 0.15 300);
+  --st-detour: oklch(66% 0.11 220);
+
+  /* --- type --- */
+  --font-body: "Zen Kaku Gothic New", "Noto Sans JP", "Hiragino Kaku Gothic ProN",
+    "Yu Gothic", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+
+  /* --- misc --- */
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 10px 28px -14px rgba(16, 24, 40, 0.28);
+  --radius: 12px;
+
+  /* --- layout (design contract) --- */
+  --topbar-h: 60px;
+  --statusbar-h: 38px;
+  --detail-w: 396px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: 0;
+  background: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* --------------------------------------------------------------------------
+ * Shared primitives (global class names — used across many components)
+ * ------------------------------------------------------------------------*/
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* floating glass panel */
+.float {
+  position: absolute;
+  background: color-mix(in oklch, white 92%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  z-index: 20;
+}
+
+/* --- status pills --- */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.pill.planned {
+  color: oklch(44% 0.14 250);
+  background: color-mix(in oklch, var(--st-planned) 14%, white);
+  border: 1px solid color-mix(in oklch, var(--st-planned) 34%, white);
+}
+.pill.active {
+  color: oklch(42% 0.12 60);
+  background: color-mix(in oklch, var(--st-active) 16%, white);
+  border: 1px solid color-mix(in oklch, var(--st-active) 40%, white);
+}
+.pill.reg {
+  color: oklch(42% 0.18 27);
+  background: color-mix(in oklch, var(--st-reg) 13%, white);
+  border: 1px solid color-mix(in oklch, var(--st-reg) 34%, white);
+}
+.pill.done {
+  color: oklch(38% 0.1 155);
+  background: color-mix(in oklch, var(--st-done) 13%, white);
+  border: 1px solid color-mix(in oklch, var(--st-done) 34%, white);
+}
+.pill.cat {
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.pill.solid {
+  color: #fff;
+  background: var(--status, var(--muted));
+  border: 1px solid var(--status, var(--muted));
+}
+
+/* --- severity pills (impact events) --- */
+.sev-pill {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.sev-pill.info {
+  color: oklch(40% 0.1 220);
+  background: color-mix(in oklch, var(--st-detour) 16%, white);
+}
+.sev-pill.notice {
+  color: oklch(42% 0.12 60);
+  background: color-mix(in oklch, var(--st-active) 18%, white);
+}
+.sev-pill.warning {
+  color: oklch(42% 0.18 27);
+  background: color-mix(in oklch, var(--st-reg) 15%, white);
+}
+
+/* --- filter chips --- */
+.fchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--surface);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.fchip .fa {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--faint);
+}
+.fchip:hover {
+  color: var(--fg);
+  border-color: var(--muted);
+}
+.fchip.active {
+  background: oklch(35% 0.02 240);
+  border-color: oklch(35% 0.02 240);
+  color: #fff;
+}
+.fchip.active .fa {
+  background: #fff;
+}
+.fchip .fc-n {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--faint);
+  margin-left: 1px;
+}
+.fchip.active .fc-n {
+  color: rgba(255, 255, 255, 0.78);
+}
+.fchip[data-f="active"] .fa {
+  background: var(--st-active);
+}
+.fchip[data-f="planned"] .fa {
+  background: var(--st-planned);
+}
+.fchip[data-f="reg"] .fa {
+  background: var(--st-reg);
+}
+.fchip[data-f="done"] .fa {
+  background: var(--st-done);
+}
+
+/* --- small toggle chip --- */
+.tchip {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  color: var(--muted);
+  background: var(--surface);
+}
+.tchip:hover {
+  color: var(--fg);
+  border-color: var(--muted);
+}
+.tchip.active {
+  background: oklch(35% 0.02 240);
+  border-color: oklch(35% 0.02 240);
+  color: #fff;
+}
+
+/* --- button --- */
+.chip-btn {
+  height: 28px;
+  padding: 0 11px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.chip-btn:hover {
+  color: var(--fg);
+  border-color: var(--muted);
+}
+.chip-btn.on {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.top-btn {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 9px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--fg);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.top-btn:hover {
+  border-color: var(--muted);
+}
+.top-btn.on {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.top-btn .tcount {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  border: 1px solid var(--border-strong);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--surface);
+}
+.icon-btn:hover {
+  color: var(--fg);
+  border-color: var(--muted);
+}
+
+/* --- segmented control --- */
+.seg {
+  display: flex;
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: 9px;
+  padding: 2px;
+}
+.seg button {
+  flex: 1;
+  height: 28px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  padding: 0 12px;
+  white-space: nowrap;
+}
+.seg button.active {
+  background: var(--surface);
+  color: var(--fg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+/* --- switch --- */
+.switch {
+  width: 34px;
+  height: 20px;
+  border-radius: 999px;
+  background: oklch(84% 0.01 250);
+  position: relative;
+  flex: 0 0 auto;
+  transition: background 0.15s;
+}
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  transition: transform 0.15s;
+}
+.on > .switch,
+.switch.on {
+  background: var(--accent);
+}
+.on > .switch::after,
+.switch.on::after {
+  transform: translateX(14px);
+}
+
+/* --- section heading (mono uppercase) --- */
+.lg-head {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  font-family: var(--font-mono);
+  padding: 11px 9px 4px;
+}
+.lg-head:first-child {
+  padding-top: 2px;
+}
+
+.grp-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 10px 4px 5px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 7px;
+}
+.grp-head .gd {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+.grp-head .gn {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.empty-note {
+  font-size: 12px;
+  color: var(--muted);
+  padding: 8px;
+}
+
+/* --- toast --- */
+.toast {
+  position: fixed;
+  bottom: 56px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: oklch(24% 0.02 240);
+  color: #fff;
+  font-size: 12.5px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  z-index: 120;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+  max-width: min(560px, calc(100vw - 32px));
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* --- modal --- */
+.modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 24, 40, 0.42);
+  backdrop-filter: blur(3px);
+  z-index: 110;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.modal {
+  background: var(--surface);
+  border-radius: 16px;
+  max-width: 520px;
+  width: 100%;
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  box-shadow: 0 30px 80px -20px rgba(16, 24, 40, 0.6);
+}
+.modal header {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.modal header h2 {
+  font-size: 16px;
+  font-weight: 800;
+}
+.modal .body {
+  padding: 18px 20px;
+  display: grid;
+  gap: 14px;
+}
+
+/* --- spinner --- */
+.spinner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: oklch(93% 0.008 250);
+  z-index: 10;
+  gap: 10px;
+}
+.spinner .ring {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 3px solid var(--border-strong);
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ============================================================================
+ * 工事詳細 UI（components/project/** 専用）
+ * 単一ライター: projectui
+ *
+ * 出典: WebUI/koji-mieru-map-3d.html の
+ *   .detail / .d-hero / .d-tags / .d-title / .d-formal / .d-meta /
+ *   .d-sec / .benefits / .cta-row / .btn / .imp / .src / .disclaimer /
+ *   .photo-card / .siteviewer / .sv-*
+ * 色・角丸・余白は app/globals.css のトークンを使う（独自 hex は増やさない）。
+ * ==========================================================================*/
+
+/* --------------------------------------------------------------------------
+ * カード全体
+ * ------------------------------------------------------------------------*/
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: var(--surface);
+}
+
+/* --------------------------------------------------------------------------
+ * ヒーロー（状態・名称・メタ情報）
+ * ------------------------------------------------------------------------*/
+
+.dHero {
+  position: relative;
+  overflow: hidden;
+  padding: 18px 18px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.dHero::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--muted);
+}
+.heroPlanned::before {
+  background: var(--st-planned);
+}
+.heroActive::before {
+  background: var(--st-active);
+}
+.heroDone::before {
+  background: var(--st-done);
+}
+.heroHold::before {
+  background: var(--st-hold);
+}
+
+.dTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.dTitle {
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+
+.dFormal {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.dMeta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+}
+.dMetaFull {
+  grid-column: 1 / -1;
+}
+.k {
+  font-size: 10.5px;
+  color: var(--faint);
+  letter-spacing: 0.04em;
+}
+.v {
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.v small {
+  display: block;
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 11px;
+}
+.vInline {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+}
+.vInline svg {
+  flex: 0 0 auto;
+  margin-top: 4px;
+  color: var(--faint);
+}
+
+/* --------------------------------------------------------------------------
+ * セクション
+ * ------------------------------------------------------------------------*/
+
+.dSec {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.dSec:last-child {
+  border-bottom: 0;
+}
+.dSec h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+  font-family: var(--font-mono);
+  margin-bottom: 10px;
+}
+.dSec h3.h3Spaced {
+  margin-top: 14px;
+}
+.secCount {
+  margin-left: auto;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--muted);
+}
+.lead {
+  font-size: 13.5px;
+  line-height: 1.75;
+}
+.note {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-top: 8px;
+}
+
+/* --------------------------------------------------------------------------
+ * 整備効果
+ * ------------------------------------------------------------------------*/
+
+.benefits {
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  margin-top: 4px;
+}
+.benefits li {
+  display: flex;
+  gap: 9px;
+  font-size: 13px;
+  align-items: flex-start;
+}
+.benefits li svg {
+  flex: 0 0 auto;
+  margin-top: 3px;
+  color: var(--accent);
+}
+
+/* --------------------------------------------------------------------------
+ * ボタン（デザインの .btn / .btn.ghost）
+ * ------------------------------------------------------------------------*/
+
+.btn {
+  height: 42px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid transparent;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+.btnGhost {
+  background: var(--surface);
+  border-color: var(--border-strong);
+  color: var(--fg);
+}
+.btnGhost:hover {
+  background: var(--surface-2);
+  border-color: var(--muted);
+}
+.photoOpen {
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* --------------------------------------------------------------------------
+ * 工区情報
+ * ------------------------------------------------------------------------*/
+
+.zoneList {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px 14px;
+}
+.zoneList dt {
+  font-size: 10.5px;
+  color: var(--faint);
+  letter-spacing: 0.04em;
+}
+.zoneList dd {
+  font-size: 12.5px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* --------------------------------------------------------------------------
+ * 写真（クレジット必須）
+ * ------------------------------------------------------------------------*/
+
+.photoCard {
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.photoCard img {
+  display: block;
+  width: 100%;
+  /* width/height 属性より CSS のアスペクト比を優先させる */
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  background: oklch(90% 0.008 250);
+}
+.photoCard figcaption {
+  padding: 8px 11px;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.photoCard figcaption b {
+  color: var(--fg);
+  font-weight: 600;
+}
+.photoCard a {
+  color: var(--accent-ink);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px solid color-mix(in oklch, var(--accent) 40%, white);
+}
+.photoCard a:hover {
+  border-bottom-color: var(--accent);
+}
+
+/* --------------------------------------------------------------------------
+ * 交通規制・影響イベント
+ * ------------------------------------------------------------------------*/
+
+.imp {
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+.impItem {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 12px;
+  border-left: 4px solid var(--muted);
+  background: var(--surface);
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.impItem:hover {
+  background: var(--surface-2);
+}
+.impWarning {
+  border-left-color: var(--st-reg);
+}
+.impNotice {
+  border-left-color: var(--st-active);
+}
+.impInfo {
+  border-left-color: var(--st-detour);
+}
+.inactive {
+  opacity: 0.55;
+}
+.impSelected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.impTop {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.impTitle {
+  font-size: 13px;
+  font-weight: 700;
+}
+.impPills {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  flex: 0 0 auto;
+}
+.impDesc {
+  display: block;
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.impPeriod {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 6px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.impPeriod b {
+  color: var(--fg);
+  font-weight: 600;
+}
+.impState {
+  font-weight: 700;
+}
+.impStateActive {
+  font-weight: 700;
+  color: var(--accent-ink);
+}
+
+/* --------------------------------------------------------------------------
+ * 工期タイムライン
+ * ------------------------------------------------------------------------*/
+
+.tl {
+  display: grid;
+  gap: 6px;
+}
+.tlHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.tlHeadLabel {
+  font-weight: 700;
+  color: var(--fg);
+}
+.tlNowLabel b {
+  color: var(--fg);
+}
+.tlTrack {
+  position: relative;
+  min-height: 22px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+.tlWork {
+  position: absolute;
+  top: 3px;
+  height: 11px;
+  border-radius: 6px;
+  background: var(--accent);
+}
+.tlBand {
+  position: absolute;
+  height: 5px;
+  border-radius: 3px;
+  opacity: 0.92;
+}
+.tlBandWarning {
+  background: var(--st-reg);
+}
+.tlBandNotice {
+  background: var(--st-active);
+}
+.tlBandInfo {
+  background: var(--st-detour);
+}
+.tlNow {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--fg);
+}
+.tlAxis {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--faint);
+  letter-spacing: 0.04em;
+}
+.tlLegend {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 10.5px;
+  color: var(--muted);
+}
+.tlLegend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.tlSwWork,
+.tlSwWarning,
+.tlSwNotice,
+.tlSwInfo {
+  width: 10px;
+  height: 4px;
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+.tlSwWork {
+  background: var(--accent);
+}
+.tlSwWarning {
+  background: var(--st-reg);
+}
+.tlSwNotice {
+  background: var(--st-active);
+}
+.tlSwInfo {
+  background: var(--st-detour);
+}
+
+/* --------------------------------------------------------------------------
+ * 出典
+ * ------------------------------------------------------------------------*/
+
+.srcBlock {
+  display: grid;
+  gap: 8px;
+}
+.srcRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+.srcRow b {
+  font-weight: 600;
+}
+.srcRow a {
+  color: var(--accent-ink);
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-bottom: 1px solid color-mix(in oklch, var(--accent) 40%, white);
+}
+.srcRow a:hover {
+  border-bottom-color: var(--accent);
+}
+.srcSub {
+  color: var(--muted);
+}
+
+/* --------------------------------------------------------------------------
+ * ご注意（免責）
+ * ------------------------------------------------------------------------*/
+
+.disclaimer {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.65;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  gap: 9px;
+}
+.disclaimer svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--faint);
+}
+.disclaimer p + p {
+  margin-top: 6px;
+}
+.disclaimer strong {
+  color: var(--fg);
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+ * 現場ビューア（全画面）
+ * ------------------------------------------------------------------------*/
+
+.siteviewer {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.svHead {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.svHead h2 {
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+.svHead p {
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.svNav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+.svNav button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.svCount {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  min-width: 60px;
+  text-align: center;
+}
+.svBody {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: 290px minmax(0, 1fr);
+  min-height: 0;
+}
+.svList {
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 8px;
+  background: var(--surface);
+}
+.svItem {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  text-align: left;
+  padding: 9px 10px;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  margin-bottom: 4px;
+  background: transparent;
+}
+.svItem:hover {
+  background: var(--surface-2);
+}
+.svItemActive {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+.svDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: var(--muted);
+}
+.svDot[data-status="planned"] {
+  background: var(--st-planned);
+}
+.svDot[data-status="under_construction"] {
+  background: var(--st-active);
+}
+.svDot[data-status="completed"] {
+  background: var(--st-done);
+}
+.svDot[data-status="suspended"] {
+  background: var(--st-hold);
+}
+.svIt {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.svIname {
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.svIloc {
+  font-size: 10.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.svItype {
+  font-size: 9.5px;
+  font-family: var(--font-mono);
+  color: var(--faint);
+  flex: 0 0 auto;
+}
+.svStage {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.svPhoto {
+  margin: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--surface-2);
+}
+.svPhotoImg {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 200px;
+}
+.svPhotoImg img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.svCredit {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  font-size: 11px;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.svCredit b {
+  color: var(--fg);
+  font-weight: 600;
+}
+.svCredit a {
+  color: var(--accent-ink);
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-bottom: 1px solid color-mix(in oklch, var(--accent) 40%, white);
+}
+.svCredit a:hover {
+  border-bottom-color: var(--accent);
+}
+.svMeta {
+  flex: 0 0 auto;
+  max-height: 46%;
+  overflow-y: auto;
+  border-top: 1px solid var(--border);
+  padding: 13px 18px;
+  background: var(--surface);
+}
+.svMtags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.svMeta h3 {
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+.svMlead {
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.svMdl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px 16px;
+  margin-top: 10px;
+}
+.svMdl dt {
+  font-size: 10px;
+  color: var(--faint);
+  letter-spacing: 0.04em;
+}
+.svMdl dd {
+  font-size: 12px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* --------------------------------------------------------------------------
+ * レスポンシブ（デザインの @media を踏襲）
+ * ------------------------------------------------------------------------*/
+
+@media (max-width: 1080px) {
+  .svBody {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .svList {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 8px;
+  }
+  .svItem {
+    width: auto;
+    flex: 0 0 auto;
+    min-width: 186px;
+    margin-bottom: 0;
+  }
+  .svMeta {
+    max-height: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .dMeta,
+  .zoneList,
+  .svMdl {
+    grid-template-columns: 1fr;
+  }
+  .svHead {
+    flex-wrap: wrap;
+  }
+  .svPhotoImg {
+    min-height: 160px;
+  }
+}
+
+</style></head>
+<body style="overflow:auto;height:auto"><div style="width:396px;height:100vh;overflow:auto;border-right:1px solid #d5d8de;margin:0 auto"><article class="detail" aria-label="駅前広場を歩行者中心に整える工事 の工事詳細"><header class="dHero heroActive"><div class="dTags"><span class="pill active">施工中</span><span class="pill cat">広場</span><span class="pill cat">都市部土木</span><span class="pill reg"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>規制中</span></div><h1 class="dTitle">駅前広場を歩行者中心に整える工事</h1><div class="dFormal">田園調布駅前広場整備工事</div><div class="dMeta"><div class="dMetaFull"><div class="k">所在地</div><div class="v vInline"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="2.6"></circle></svg><span>〒145-0071 東京都 大田区 田園調布本町 1-1-1</span></div></div><div><div class="k">工期</div><div class="v num">2026年4月1日<small>〜 2027年3月31日</small></div></div><div><div class="k">現在の状態</div><div class="v">施工中</div></div><div><div class="k">現在の工程</div><div class="v">広場舗装・植栽工事</div></div><div><div class="k">発注者</div><div class="v">大田区 建設部 まちづくり課</div></div><div><div class="k">施工者</div><div class="v">田園調布建設株式会社</div></div><div class="dMetaFull"><div class="k">最終更新（この情報の更新日時）</div><div class="v num">2026年10月4日 07:00</div></div></div></header><section class="dSec"><h3>目的 / PURPOSE</h3><p class="lead">駅前の歩行空間を広げ、段差を解消してバリアフリー動線を確保します。通勤・通学時の安全性と回遊性を高めるための整備です。</p><h3 class="h3Spaced">整備内容 / SCOPE</h3><ul class="benefits"><li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"></path></svg><span>広場の拡幅と段差の解消</span></li><li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"></path></svg><span>バス・タクシー乗降場の再配置</span></li><li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"></path></svg><span>緑陰・ベンチ・案内サインの整備</span></li></ul></section><section class="dSec"><h3>完成予想 / COMPLETION</h3><div class="seg" role="group" aria-label="完成予想の表示切替"><button type="button" class="active" aria-pressed="true">現在</button><button type="button" class="" aria-pressed="false">完成予想</button><button type="button" class="" aria-pressed="false">比較</button></div><p class="note">完成予想モデル: <b>駅前広場</b>（3D 表示に反映されます）</p></section><section class="dSec"><h3>工区 / WORK ZONE</h3><dl class="zoneList"><div><dt>自治体</dt><dd>大田区</dd></div><div><dt>郵便番号</dt><dd class="num">〒145-0071</dd></div><div><dt>都道府県・市区町村</dt><dd>東京都 大田区</dd></div><div><dt>町名</dt><dd>田園調布本町 1-1-1</dd></div><div><dt>中心座標</dt><dd class="num">35.59300, 139.66800</dd></div><div><dt>工区データ</dt><dd class="mono">/data/geo/denenchofu-station-plaza/workzone.geojson</dd></div></dl></section><section class="dSec" id="impact-section"><h3>交通規制・影響 / IMPACTS<span class="secCount">有効 3 / 全 3 件</span></h3><ul class="imp"><li><button type="button" class="impItem impNotice" aria-pressed="false"><span class="impTop"><span class="impTitle">駅前歩道の切替</span><span class="impPills"><span class="sev-pill notice">注意</span><span class="pill cat">歩道切替</span></span></span><span class="impDesc">駅前の歩道を仮設歩道へ切り替えます。幅員は確保していますが、朝夕は混雑します。</span><span class="impPeriod"><span class="impStateActive">期間中</span><b>2026年6月1日 〜 2027年2月28日</b><span>終日</span></span></button></li><li><button type="button" class="impItem impWarning" aria-pressed="false"><span class="impTop"><span class="impTitle">夜間の片側交互通行</span><span class="impPills"><span class="sev-pill warning">重要</span><span class="pill cat">車線規制</span></span></span><span class="impDesc">舗装工事のため、夜間に片側交互通行を実施します。誘導員が配置されます。</span><span class="impPeriod"><span class="impStateActive">期間中</span><b>2026年10月10日 〜 2026年10月31日</b><span>平日 21:00〜翌5:00</span></span></button></li><li><button type="button" class="impItem impInfo" aria-pressed="false"><span class="impTop"><span class="impTitle">駅前の迂回路</span><span class="impPills"><span class="sev-pill info">参考</span><span class="pill cat">迂回路</span></span></span><span class="impDesc">広場前の通りを通行止めにし、北側の市道へ迂回していただきます。</span><span class="impPeriod"><span class="impStateActive">期間中</span><b>2026年10月10日 〜 2027年3月31日</b><span>終日</span></span></button></li></ul></section><section class="dSec"><h3>工期と規制の見通し / TIMELINE</h3><div class="tl"><div class="tlHead"><span class="tlHeadLabel">工事期間</span><span class="tlNowLabel">基準日 <b class="num">2026年10月20日</b></span></div><div class="tlTrack" style="height:43px" role="img" aria-label="工期 2026年4月1日 から 2027年3月31日。規制等 3 件。基準日 2026年10月20日"><span class="tlWork" style="left:0%;width:100%"></span><span class="tlBand tlBandNotice" style="left:16.758241758241756%;width:74.72527472527473%;top:18px" title="歩道切替: 2026年6月1日 〜 2027年2月28日"></span><span class="tlBand tlBandWarning" style="left:52.74725274725275%;width:5.7692307692307665%;top:25px" title="車線規制: 2026年10月10日 〜 2026年10月31日"></span><span class="tlBand tlBandInfo" style="left:52.74725274725275%;width:47.25274725274725%;top:32px" title="迂回路: 2026年10月10日 〜 2027年3月31日"></span><span class="tlNow" style="left:55.63186813186813%"></span></div><div class="tlAxis"><span>2026/04</span><span>2026/07</span><span>2026/09</span><span>2026/12</span><span>2027/03</span></div><ul class="tlLegend"><li><span class="tlSwWork"></span>工事期間</li><li><span class="tlSwWarning"></span>重要</li><li><span class="tlSwNotice"></span>注意</li><li><span class="tlSwInfo"></span>参考</li></ul></div></section><section class="dSec"><h3>サンプル写真 / PHOTO</h3><figure class="photoCard"><img src="file:///home/kensan/Projects/Mirai-Admin-Platform/Construction-Public-Twin-Portal/public/images/sample-cu1.jpg" alt="田園調布駅前広場整備工事の工事イメージ写真（サンプル）" width="800" height="500" loading="lazy"/><figcaption><b>田園調布駅前広場整備工事</b> の工事イメージ（サンプル写真）。 写真: <b>Sammya Nig Ltd</b> / CC BY-SA 4.0（<a href="https://commons.wikimedia.org/wiki/File:Asphalt_paver_working.jpg" target="_blank" rel="noopener noreferrer">原典: Wikimedia Commons<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></a>）</figcaption></figure><button type="button" class="btn btnGhost photoOpen">現場ビューアで拡大</button></section><section class="dSec"><h3>出典 / SOURCE</h3><div class="srcBlock"><div class="srcRow"><span>情報提供元 <b>大田区 建設部 まちづくり課</b></span><a href="https://www.city.ota.tokyo.jp/" target="_blank" rel="noopener noreferrer">公式情報を見る<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></a></div><div class="srcRow srcSub"><span>確認日時</span><span class="num">2026年10月4日 07:00</span></div><div class="srcRow srcSub"><span>データセット</span><span>開発用サンプルデータ</span></div><div class="srcRow srcSub"><span>ライセンス</span><span>サンプル（写真は Wikimedia Commons、各クレジット参照）</span></div></div></section><section class="dSec"><h3>ご注意 / NOTICE</h3><div class="disclaimer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg><div><p>規制内容・工期は変更される場合があります。現地の案内・標識を優先してください。 本ページのデータは<strong>デモ用サンプル</strong>であり、実際の工事情報ではありません。</p><p>この案件は「工事みえるマップ 3D Beta」MVP の開発用サンプルデータです。実在の工事・公告ではありません。位置・工期・規制内容は説明用に構成したもので、実際の交通規制や工事予定を示すものではありません。お出かけ前には必ず発注者・自治体の公式情報をご確認ください。</p></div></div></section></article></div></body></html>

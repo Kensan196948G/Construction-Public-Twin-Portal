@@ -155,7 +155,8 @@ export type SidebarTab = "projects" | "layers";
 export type CompletionMode = "current" | "planned" | "compare";
 
 export const useAppStore = create<AppState>((set) => ({
-  selectedProjectId: null,
+  // 初期表示はプロトタイプ（デザインの正）と同じ案件を選択状態にする
+  selectedProjectId: "tokyo-demo-002",
   searchKeyword: "",
   selectedCategory: null,
   selectedStatus: null,

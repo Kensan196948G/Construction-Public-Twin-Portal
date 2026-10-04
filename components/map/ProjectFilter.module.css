@@ -1,0 +1,17 @@
+/* ProjectFilter — 出典: WebUI/koji-mieru-map-3d.html の .filters（チップ本体は globals.css の .fchip） */
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .filters {
+    gap: 6px;
+    width: 100%;
+  }
+}

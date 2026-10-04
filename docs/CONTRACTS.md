@@ -12,6 +12,10 @@
 
 1. **担当ディレクトリ以外を書き換えない。** 担当範囲は §2 のとおり。
 2. **新しい npm 依存を追加しない。** 追加が必要なら Lead に相談する。
+   承認済みの追加依存: `3d-tiles-renderer@0.5.3`（PLATEAU 3D Tiles の実描画用。Lead が導入済み）。
+   サブパスは `3d-tiles-renderer/three` / `3d-tiles-renderer/r3f` を使うこと
+   （`/babylonjs` は Babylon の peer が必要なため使用禁止）。
+   **必ず動的 `import()` + try/catch で読み込み、失敗しても画面を落とさないこと。**
 3. ブラウザ API（`window`, `document`, `WebGL`, `fetch`, Zustand フック）を使うファイルは
    先頭に `"use client";` を置く。
 4. **外部ネットワークが無くても主要機能が動くこと。** 3D Tiles・地図タイル・Web フォントは
@@ -41,6 +45,16 @@
 | `lib/store/useAppStore.ts` | `useAppStore`, `LAYERS`, `LAYER_GROUPS`, `timelineIndexToDate()`, `TIMELINE_MIN/MAX` |
 | `lib/viewer/tileConfig.ts` | `PLATEAU_TILESET`, `LOCAL_CITY_TILESET`, `VIEWER_LIMITS`, `TILESET_LOAD_TIMEOUT_MS` |
 | `public/data/**` | 生成済み JSON / GeoJSON（`npm run export:data` で再生成可能） |
+
+### 所有権の補足（2026-10-04 追記）
+
+- **TimelineControl のスタイルは `components/viewer/viewer.module.css` に自己完結**させる。
+  `components/layout/layout.module.css` の `.timeline` 系は削除済み（二重定義回避）。
+- **3D のカメラプリセット（俯瞰 / 真上 / リセット等）は viewer3d 側の UI** として実装する。
+  `ViewportControls`（Lead 担当）は 2D/3D 切替・3D背景切替・現場ビューア起動のみを持つ。
+- PLATEAU 3D Tiles を実描画する場合、**attribution の表示が必須**（CC BY 4.0）。
+  `3d-tiles-renderer/r3f` の `TilesAttributionOverlay`、または `tileConfig` の `attribution` を使う。
+- 取得できていないタイルを「表示中」と表示してはならない。状態は正直に出す。
 
 ### Zustand ストアの形（`useAppStore`）
 

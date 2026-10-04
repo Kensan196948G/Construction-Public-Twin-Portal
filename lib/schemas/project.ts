@@ -15,11 +15,25 @@ export const httpUrlSchema = z
   .string()
   .refine((v) => /^https?:\/\//i.test(v), { message: "http(s) で始まる URL を指定してください" });
 
+/**
+ * YYYY-MM-DD 形式かつ実在する暦日であること。
+ * `2026-02-30` のような繰り上がり不正日を弾く（TST-001 不正日付の検出）。
+ */
+function isRealCalendarDate(value: string): boolean {
+  const [y, m, d] = value.split("-").map(Number);
+  if (!Number.isInteger(y) || !Number.isInteger(m) || !Number.isInteger(d)) return false;
+  if (m < 1 || m > 12 || d < 1) return false;
+  const utc = new Date(Date.UTC(y, m - 1, d));
+  return (
+    utc.getUTCFullYear() === y && utc.getUTCMonth() === m - 1 && utc.getUTCDate() === d
+  );
+}
+
 /** YYYY-MM-DD */
 export const isoDateSchema = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, "YYYY-MM-DD 形式で指定してください")
-  .refine((v) => !Number.isNaN(Date.parse(v)), "実在する日付を指定してください");
+  .refine(isRealCalendarDate, "実在する日付を指定してください");
 
 /** ISO 8601 日時 (タイムゾーン付きを推奨) */
 export const isoDateTimeSchema = z

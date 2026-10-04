@@ -1,0 +1,791 @@
+/* ============================================================================
+ * 工事詳細 UI（components/project/** 専用）
+ * 単一ライター: projectui
+ *
+ * 出典: WebUI/koji-mieru-map-3d.html の
+ *   .detail / .d-hero / .d-tags / .d-title / .d-formal / .d-meta /
+ *   .d-sec / .benefits / .cta-row / .btn / .imp / .src / .disclaimer /
+ *   .photo-card / .siteviewer / .sv-*
+ * 色・角丸・余白は app/globals.css のトークンを使う（独自 hex は増やさない）。
+ * ==========================================================================*/
+
+/* --------------------------------------------------------------------------
+ * カード全体
+ * ------------------------------------------------------------------------*/
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: var(--surface);
+}
+
+/* --------------------------------------------------------------------------
+ * ヒーロー（状態・名称・メタ情報）
+ * ------------------------------------------------------------------------*/
+
+.dHero {
+  position: relative;
+  overflow: hidden;
+  padding: 18px 18px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.dHero::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--muted);
+}
+.heroPlanned::before {
+  background: var(--st-planned);
+}
+.heroActive::before {
+  background: var(--st-active);
+}
+.heroDone::before {
+  background: var(--st-done);
+}
+.heroHold::before {
+  background: var(--st-hold);
+}
+
+.dTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.dTitle {
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+
+.dFormal {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.dMeta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+}
+.dMetaFull {
+  grid-column: 1 / -1;
+}
+.k {
+  font-size: 10.5px;
+  color: var(--faint);
+  letter-spacing: 0.04em;
+}
+.v {
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.v small {
+  display: block;
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 11px;
+}
+.vInline {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+}
+.vInline svg {
+  flex: 0 0 auto;
+  margin-top: 4px;
+  color: var(--faint);
+}
+
+/* --------------------------------------------------------------------------
+ * セクション
+ * ------------------------------------------------------------------------*/
+
+.dSec {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.dSec:last-child {
+  border-bottom: 0;
+}
+.dSec h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+  font-family: var(--font-mono);
+  margin-bottom: 10px;
+}
+.dSec h3.h3Spaced {
+  margin-top: 14px;
+}
+.secCount {
+  margin-left: auto;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--muted);
+}
+.lead {
+  font-size: 13.5px;
+  line-height: 1.75;
+}
+.note {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-top: 8px;
+}
+
+/* --------------------------------------------------------------------------
+ * 整備効果
+ * ------------------------------------------------------------------------*/
+
+.benefits {
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  margin-top: 4px;
+}
+.benefits li {
+  display: flex;
+  gap: 9px;
+  font-size: 13px;
+  align-items: flex-start;
+}
+.benefits li svg {
+  flex: 0 0 auto;
+  margin-top: 3px;
+  color: var(--accent);
+}
+
+/* --------------------------------------------------------------------------
+ * ボタン（デザインの .btn / .btn.ghost）
+ * ------------------------------------------------------------------------*/
+
+.btn {
+  height: 42px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid transparent;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+.btnGhost {
+  background: var(--surface);
+  border-color: var(--border-strong);
+  color: var(--fg);
+}
+.btnGhost:hover {
+  background: var(--surface-2);
+  border-color: var(--muted);
+}
+.photoOpen {
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* --------------------------------------------------------------------------
+ * 工区情報
+ * ------------------------------------------------------------------------*/
+
+.zoneList {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px 14px;
+}
+.zoneList dt {
+  font-size: 10.5px;
+  color: var(--faint);
+  letter-spacing: 0.04em;
+}
+.zoneList dd {
+  font-size: 12.5px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* --------------------------------------------------------------------------
+ * 写真（クレジット必須）
+ * ------------------------------------------------------------------------*/
+
+.photoCard {
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.photoCard img {
+  display: block;
+  width: 100%;
+  /* width/height 属性より CSS のアスペクト比を優先させる */
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  background: oklch(90% 0.008 250);
+}
+.photoCard figcaption {
+  padding: 8px 11px;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.photoCard figcaption b {
+  color: var(--fg);
+  font-weight: 600;
+}
+.photoCard a {
+  color: var(--accent-ink);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px solid color-mix(in oklch, var(--accent) 40%, white);
+}
+.photoCard a:hover {
+  border-bottom-color: var(--accent);
+}
+
+/* --------------------------------------------------------------------------
+ * 交通規制・影響イベント
+ * ------------------------------------------------------------------------*/
+
+.imp {
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+.impItem {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 12px;
+  border-left: 4px solid var(--muted);
+  background: var(--surface);
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.impItem:hover {
+  background: var(--surface-2);
+}
+.impWarning {
+  border-left-color: var(--st-reg);
+}
+.impNotice {
+  border-left-color: var(--st-active);
+}
+.impInfo {
+  border-left-color: var(--st-detour);
+}
+.inactive {
+  opacity: 0.55;
+}
+.impSelected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.impTop {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.impTitle {
+  font-size: 13px;
+  font-weight: 700;
+}
+.impPills {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  flex: 0 0 auto;
+}
+.impDesc {
+  display: block;
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.impPeriod {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 6px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.impPeriod b {
+  color: var(--fg);
+  font-weight: 600;
+}
+.impState {
+  font-weight: 700;
+}
+.impStateActive {
+  font-weight: 700;
+  color: var(--accent-ink);
+}
+
+/* --------------------------------------------------------------------------
+ * 工期タイムライン
+ * ------------------------------------------------------------------------*/
+
+.tl {
+  display: grid;
+  gap: 6px;
+}
+.tlHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.tlHeadLabel {
+  font-weight: 700;
+  color: var(--fg);
+}
+.tlNowLabel b {
+  color: var(--fg);
+}
+.tlTrack {
+  position: relative;
+  min-height: 22px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+.tlWork {
+  position: absolute;
+  top: 3px;
+  height: 11px;
+  border-radius: 6px;
+  background: var(--accent);
+}
+.tlBand {
+  position: absolute;
+  height: 5px;
+  border-radius: 3px;
+  opacity: 0.92;
+}
+.tlBandWarning {
+  background: var(--st-reg);
+}
+.tlBandNotice {
+  background: var(--st-active);
+}
+.tlBandInfo {
+  background: var(--st-detour);
+}
+.tlNow {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--fg);
+}
+.tlAxis {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--faint);
+  letter-spacing: 0.04em;
+}
+.tlLegend {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 10.5px;
+  color: var(--muted);
+}
+.tlLegend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.tlSwWork,
+.tlSwWarning,
+.tlSwNotice,
+.tlSwInfo {
+  width: 10px;
+  height: 4px;
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+.tlSwWork {
+  background: var(--accent);
+}
+.tlSwWarning {
+  background: var(--st-reg);
+}
+.tlSwNotice {
+  background: var(--st-active);
+}
+.tlSwInfo {
+  background: var(--st-detour);
+}
+
+/* --------------------------------------------------------------------------
+ * 出典
+ * ------------------------------------------------------------------------*/
+
+.srcBlock {
+  display: grid;
+  gap: 8px;
+}
+.srcRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+.srcRow b {
+  font-weight: 600;
+}
+.srcRow a {
+  color: var(--accent-ink);
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-bottom: 1px solid color-mix(in oklch, var(--accent) 40%, white);
+}
+.srcRow a:hover {
+  border-bottom-color: var(--accent);
+}
+.srcSub {
+  color: var(--muted);
+}
+
+/* --------------------------------------------------------------------------
+ * ご注意（免責）
+ * ------------------------------------------------------------------------*/
+
+.disclaimer {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.65;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  gap: 9px;
+}
+.disclaimer svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--faint);
+}
+.disclaimer p + p {
+  margin-top: 6px;
+}
+.disclaimer strong {
+  color: var(--fg);
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+ * 現場ビューア（全画面）
+ * ------------------------------------------------------------------------*/
+
+.siteviewer {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.svHead {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.svHead h2 {
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+.svHead p {
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.svNav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+.svNav button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.svCount {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  min-width: 60px;
+  text-align: center;
+}
+.svBody {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: 290px minmax(0, 1fr);
+  min-height: 0;
+}
+.svList {
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 8px;
+  background: var(--surface);
+}
+.svItem {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  text-align: left;
+  padding: 9px 10px;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  margin-bottom: 4px;
+  background: transparent;
+}
+.svItem:hover {
+  background: var(--surface-2);
+}
+.svItemActive {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+.svDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: var(--muted);
+}
+.svDot[data-status="planned"] {
+  background: var(--st-planned);
+}
+.svDot[data-status="under_construction"] {
+  background: var(--st-active);
+}
+.svDot[data-status="completed"] {
+  background: var(--st-done);
+}
+.svDot[data-status="suspended"] {
+  background: var(--st-hold);
+}
+.svIt {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.svIname {
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.svIloc {
+  font-size: 10.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.svItype {
+  font-size: 9.5px;
+  font-family: var(--font-mono);
+  color: var(--faint);
+  flex: 0 0 auto;
+}
+.svStage {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.svPhoto {
+  margin: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--surface-2);
+}
+.svPhotoImg {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 200px;
+}
+.svPhotoImg img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.svCredit {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  font-size: 11px;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.svCredit b {
+  color: var(--fg);
+  font-weight: 600;
+}
+.svCredit a {
+  color: var(--accent-ink);
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-bottom: 1px solid color-mix(in oklch, var(--accent) 40%, white);
+}
+.svCredit a:hover {
+  border-bottom-color: var(--accent);
+}
+.svMeta {
+  flex: 0 0 auto;
+  max-height: 46%;
+  overflow-y: auto;
+  border-top: 1px solid var(--border);
+  padding: 13px 18px;
+  background: var(--surface);
+}
+.svMtags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.svMeta h3 {
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+.svMlead {
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.svMdl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px 16px;
+  margin-top: 10px;
+}
+.svMdl dt {
+  font-size: 10px;
+  color: var(--faint);
+  letter-spacing: 0.04em;
+}
+.svMdl dd {
+  font-size: 12px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* --------------------------------------------------------------------------
+ * レスポンシブ（デザインの @media を踏襲）
+ * ------------------------------------------------------------------------*/
+
+@media (max-width: 1080px) {
+  .svBody {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .svList {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 8px;
+  }
+  .svItem {
+    width: auto;
+    flex: 0 0 auto;
+    min-width: 186px;
+    margin-bottom: 0;
+  }
+  .svMeta {
+    max-height: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .dMeta,
+  .zoneList,
+  .svMdl {
+    grid-template-columns: 1fr;
+  }
+  .svHead {
+    flex-wrap: wrap;
+  }
+  .svPhotoImg {
+    min-height: 160px;
+  }
+}

@@ -26,9 +26,13 @@ export default function RootLayout({
           デザイン契約のタイポグラフィ。ビルド時にネットワークへ依存しないよう
           next/font ではなく <link> で読み込み、未取得時はシステムフォントへ
           フォールバックする（globals.css の --font-body / --font-mono）。
+          App Router では <link> は全ページで共有されるため、
+          no-page-custom-font の警告はここでは該当しない。
         */}
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
