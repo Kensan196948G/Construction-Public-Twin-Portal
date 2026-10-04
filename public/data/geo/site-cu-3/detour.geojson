@@ -1,0 +1,40 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "site-cu-3:detour",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.6672046158185,
+            35.59281907001991
+          ],
+          [
+            139.6672046158185,
+            35.592656233037815
+          ],
+          [
+            139.66879538418152,
+            35.592656233037815
+          ],
+          [
+            139.66879538418152,
+            35.59281907001991
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-cu-3:detour",
+        "projectId": "site-cu-3",
+        "type": "detour",
+        "name": "桜並木通りの電柱を地中化する工事 迂回路",
+        "validFrom": "2026-03-15",
+        "validTo": "2026-12-28",
+        "source": "大田区 建設部 土木課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    }
+  ]
+}

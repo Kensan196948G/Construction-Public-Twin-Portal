@@ -1,0 +1,730 @@
+{
+  "generatedAt": "2026-10-04T03:45:02.559Z",
+  "count": 36,
+  "impacts": [
+    {
+      "id": "imp-002-sidewalk",
+      "projectId": "tokyo-demo-002",
+      "type": "sidewalk_switch",
+      "severity": "notice",
+      "title": "駅前歩道の切替",
+      "description": "駅前の歩道を仮設歩道へ切り替えます。幅員は確保していますが、朝夕は混雑します。",
+      "activeFrom": "2026-06-01",
+      "activeTo": "2027-02-28",
+      "recurrence": "終日",
+      "geometryUrl": "/data/geo/denenchofu-station-plaza/pedestrian.geojson",
+      "geometryKind": "pedestrian",
+      "source": {
+        "provider": "大田区 建設部 まちづくり課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "imp-002-night-lane",
+      "projectId": "tokyo-demo-002",
+      "type": "lane_closure",
+      "severity": "warning",
+      "title": "夜間の片側交互通行",
+      "description": "舗装工事のため、夜間に片側交互通行を実施します。誘導員が配置されます。",
+      "activeFrom": "2026-10-10",
+      "activeTo": "2026-10-31",
+      "recurrence": "平日 21:00〜翌5:00",
+      "geometryUrl": "/data/geo/denenchofu-station-plaza/regulation.geojson",
+      "geometryKind": "regulation",
+      "source": {
+        "provider": "大田区 建設部 まちづくり課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "imp-002-detour",
+      "projectId": "tokyo-demo-002",
+      "type": "detour",
+      "severity": "info",
+      "title": "駅前の迂回路",
+      "description": "広場前の通りを通行止めにし、北側の市道へ迂回していただきます。",
+      "activeFrom": "2026-10-10",
+      "activeTo": "2027-03-31",
+      "recurrence": "終日",
+      "geometryUrl": "/data/geo/denenchofu-station-plaza/detour.geojson",
+      "geometryKind": "detour",
+      "detourUrl": "/data/geo/denenchofu-station-plaza/detour.geojson",
+      "source": {
+        "provider": "大田区 建設部 まちづくり課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "imp-001-day-lane",
+      "projectId": "tokyo-demo-001",
+      "type": "lane_closure",
+      "severity": "notice",
+      "title": "昼間の車線規制（片側1車線）",
+      "description": "歩道の拡幅工事に伴い、昼間は片側1車線の規制を行います。",
+      "activeFrom": "2026-08-01",
+      "activeTo": "2026-12-20",
+      "recurrence": "平日 9:00〜16:00",
+      "geometryUrl": "/data/geo/denenchofu-road-improvement/regulation.geojson",
+      "geometryKind": "regulation",
+      "source": {
+        "provider": "大田区 建設部 道路課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "imp-003-notice",
+      "projectId": "tokyo-demo-003",
+      "type": "advance_notice",
+      "severity": "info",
+      "title": "着工前の事前周知",
+      "description": "着工前に、周辺住民の皆さまへ工事説明と交通規制の予定を周知します。",
+      "activeFrom": "2026-11-01",
+      "activeTo": "2026-11-30",
+      "recurrence": "終日",
+      "geometryKind": null,
+      "source": {
+        "provider": "大田区 下水道部 管路課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "imp-004-done",
+      "projectId": "tokyo-demo-004",
+      "type": "completion",
+      "severity": "info",
+      "title": "工事完了・供用開始",
+      "description": "防災広場は完成し、現在は供用中です。",
+      "activeFrom": "2026-02-01",
+      "activeTo": "2026-03-31",
+      "recurrence": "終了",
+      "geometryKind": null,
+      "source": {
+        "provider": "大田区 都市整備部 公園課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-au-1-reg",
+      "projectId": "site-au-1",
+      "type": "access_restriction",
+      "severity": "notice",
+      "title": "車両搬入規制（高層マンションを建てる）",
+      "description": "田園調布二丁目 マンション新築工事に伴い、車両搬入規制を実施します。現地の誘導・標識に従ってください。",
+      "activeFrom": "2026-03-01",
+      "activeTo": "2027-02-28",
+      "recurrence": "平日 8:00〜18:00",
+      "geometryUrl": "/data/geo/site-au-1/pedestrian.geojson",
+      "geometryKind": "pedestrian",
+      "source": {
+        "provider": "大田区 建築部 市街地整備課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-au-1-night",
+      "projectId": "site-au-1",
+      "type": "night_work",
+      "severity": "warning",
+      "title": "夜間作業の実施（高層マンションを建てる）",
+      "description": "交通量の少ない夜間に、搬入・舗装などの作業を行います。",
+      "activeFrom": "2026-03-01",
+      "activeTo": "2027-02-28",
+      "recurrence": "原則 平日 22:00〜翌5:00",
+      "geometryKind": null,
+      "source": {
+        "provider": "大田区 建築部 市街地整備課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-au-2-reg",
+      "projectId": "site-au-2",
+      "type": "access_restriction",
+      "severity": "notice",
+      "title": "車両搬入規制（駅東口にオフィスビルを建てる）",
+      "description": "田園調布駅東口 オフィスビル新築工事に伴い、車両搬入規制を実施します。現地の誘導・標識に従ってください。",
+      "activeFrom": "2026-05-10",
+      "activeTo": "2027-03-31",
+      "recurrence": "平日 8:00〜18:00",
+      "geometryUrl": "/data/geo/site-au-2/pedestrian.geojson",
+      "geometryKind": "pedestrian",
+      "source": {
+        "provider": "大田区 建築部 市街地整備課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-au-2-night",
+      "projectId": "site-au-2",
+      "type": "night_work",
+      "severity": "warning",
+      "title": "夜間作業の実施（駅東口にオフィスビルを建てる）",
+      "description": "交通量の少ない夜間に、搬入・舗装などの作業を行います。",
+      "activeFrom": "2026-05-10",
+      "activeTo": "2027-03-31",
+      "recurrence": "原則 平日 22:00〜翌5:00",
+      "geometryKind": null,
+      "source": {
+        "provider": "大田区 建築部 市街地整備課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-au-3-reg",
+      "projectId": "site-au-3",
+      "type": "access_restriction",
+      "severity": "notice",
+      "title": "車両搬入規制（中央通りの商業施設を建て替える）",
+      "description": "中央通り 商業施設建替工事に伴い、車両搬入規制を実施します。現地の誘導・標識に従ってください。",
+      "activeFrom": "2026-04-15",
+      "activeTo": "2027-01-31",
+      "recurrence": "平日 8:00〜18:00",
+      "geometryUrl": "/data/geo/site-au-3/pedestrian.geojson",
+      "geometryKind": "pedestrian",
+      "source": {
+        "provider": "大田区 建築部 市街地整備課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-au-3-night",
+      "projectId": "site-au-3",
+      "type": "night_work",
+      "severity": "warning",
+      "title": "夜間作業の実施（中央通りの商業施設を建て替える）",
+      "description": "交通量の少ない夜間に、搬入・舗装などの作業を行います。",
+      "activeFrom": "2026-04-15",
+      "activeTo": "2027-01-31",
+      "recurrence": "原則 平日 22:00〜翌5:00",
+      "geometryKind": null,
+      "source": {
+        "provider": "大田区 建築部 市街地整備課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-au-4-reg",
+      "projectId": "site-au-4",
+      "type": "access_restriction",
+      "severity": "notice",
+      "title": "車両搬入規制（市役所前に複合ビルを建てる）",
+      "description": "市役所前 複合ビル新築工事に伴い、車両搬入規制を実施します。現地の誘導・標識に従ってください。",
+      "activeFrom": "2026-06-01",
+      "activeTo": "2027-03-15",
+      "recurrence": "平日 8:00〜18:00",
+      "geometryUrl": "/data/geo/site-au-4/pedestrian.geojson",
+      "geometryKind": "pedestrian",
+      "source": {
+        "provider": "大田区 建築部 市街地整備課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-au-4-night",
+      "projectId": "site-au-4",
+      "type": "night_work",
+      "severity": "warning",
+      "title": "夜間作業の実施（市役所前に複合ビルを建てる）",
+      "description": "交通量の少ない夜間に、搬入・舗装などの作業を行います。",
+      "activeFrom": "2026-06-01",
+      "activeTo": "2027-03-15",
+      "recurrence": "原則 平日 22:00〜翌5:00",
+      "geometryKind": null,
+      "source": {
+        "provider": "大田区 建築部 市街地整備課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-au-5-reg",
+      "projectId": "site-au-5",
+      "type": "access_restriction",
+      "severity": "notice",
+      "title": "車両搬入規制（公園通りに分譲住宅を建てる）",
+      "description": "公園通り 分譲住宅新築工事に伴い、車両搬入規制を実施します。現地の誘導・標識に従ってください。",
+      "activeFrom": "2026-02-20",
+      "activeTo": "2026-12-20",
+      "recurrence": "平日 8:00〜18:00",
+      "geometryUrl": "/data/geo/site-au-5/pedestrian.geojson",
+      "geometryKind": "pedestrian",
+      "source": {
+        "provider": "大田区 建築部 市街地整備課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-au-5-night",
+      "projectId": "site-au-5",
+      "type": "night_work",
+      "severity": "warning",
+      "title": "夜間作業の実施（公園通りに分譲住宅を建てる）",
+      "description": "交通量の少ない夜間に、搬入・舗装などの作業を行います。",
+      "activeFrom": "2026-02-20",
+      "activeTo": "2026-12-20",
+      "recurrence": "原則 平日 22:00〜翌5:00",
+      "geometryKind": null,
+      "source": {
+        "provider": "大田区 建築部 市街地整備課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-cu-1-reg",
+      "projectId": "site-cu-1",
+      "type": "lane_closure",
+      "severity": "warning",
+      "title": "車線規制（中央通りの下水道管を更新する）",
+      "description": "中央通り 下水道管更新工事に伴い、車線規制を実施します。現地の誘導・標識に従ってください。",
+      "activeFrom": "2026-04-01",
+      "activeTo": "2027-01-31",
+      "recurrence": "終日",
+      "geometryUrl": "/data/geo/site-cu-1/regulation.geojson",
+      "geometryKind": "regulation",
+      "detourUrl": "/data/geo/site-cu-1/detour.geojson",
+      "source": {
+        "provider": "大田区 建設部 土木課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-cu-1-night",
+      "projectId": "site-cu-1",
+      "type": "night_work",
+      "severity": "warning",
+      "title": "夜間作業の実施（中央通りの下水道管を更新する）",
+      "description": "交通量の少ない夜間に、搬入・舗装などの作業を行います。",
+      "activeFrom": "2026-04-01",
+      "activeTo": "2027-01-31",
+      "recurrence": "原則 平日 22:00〜翌5:00",
+      "geometryKind": null,
+      "detourUrl": "/data/geo/site-cu-1/detour.geojson",
+      "source": {
+        "provider": "大田区 建設部 土木課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-cu-2-reg",
+      "projectId": "site-cu-2",
+      "type": "lane_closure",
+      "severity": "warning",
+      "title": "車線規制（駅南の道路を拡幅する）",
+      "description": "駅南 道路拡幅工事に伴い、車線規制を実施します。現地の誘導・標識に従ってください。",
+      "activeFrom": "2026-05-01",
+      "activeTo": "2027-02-28",
+      "recurrence": "終日",
+      "geometryUrl": "/data/geo/site-cu-2/regulation.geojson",
+      "geometryKind": "regulation",
+      "detourUrl": "/data/geo/site-cu-2/detour.geojson",
+      "source": {
+        "provider": "大田区 建設部 土木課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-cu-2-night",
+      "projectId": "site-cu-2",
+      "type": "night_work",
+      "severity": "warning",
+      "title": "夜間作業の実施（駅南の道路を拡幅する）",
+      "description": "交通量の少ない夜間に、搬入・舗装などの作業を行います。",
+      "activeFrom": "2026-05-01",
+      "activeTo": "2027-02-28",
+      "recurrence": "原則 平日 22:00〜翌5:00",
+      "geometryKind": null,
+      "detourUrl": "/data/geo/site-cu-2/detour.geojson",
+      "source": {
+        "provider": "大田区 建設部 土木課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-cu-3-reg",
+      "projectId": "site-cu-3",
+      "type": "lane_closure",
+      "severity": "warning",
+      "title": "車線規制（桜並木通りの電柱を地中化する）",
+      "description": "桜並木通り 無電柱化・歩道整備工事に伴い、車線規制を実施します。現地の誘導・標識に従ってください。",
+      "activeFrom": "2026-03-15",
+      "activeTo": "2026-12-28",
+      "recurrence": "終日",
+      "geometryUrl": "/data/geo/site-cu-3/regulation.geojson",
+      "geometryKind": "regulation",
+      "detourUrl": "/data/geo/site-cu-3/detour.geojson",
+      "source": {
+        "provider": "大田区 建設部 土木課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-cu-3-night",
+      "projectId": "site-cu-3",
+      "type": "night_work",
+      "severity": "warning",
+      "title": "夜間作業の実施（桜並木通りの電柱を地中化する）",
+      "description": "交通量の少ない夜間に、搬入・舗装などの作業を行います。",
+      "activeFrom": "2026-03-15",
+      "activeTo": "2026-12-28",
+      "recurrence": "原則 平日 22:00〜翌5:00",
+      "geometryKind": null,
+      "detourUrl": "/data/geo/site-cu-3/detour.geojson",
+      "source": {
+        "provider": "大田区 建設部 土木課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-cu-4-reg",
+      "projectId": "site-cu-4",
+      "type": "lane_closure",
+      "severity": "warning",
+      "title": "車線規制（浸水対策の雨水貯留施設をつくる）",
+      "description": "市街地 雨水貯留施設整備工事に伴い、車線規制を実施します。現地の誘導・標識に従ってください。",
+      "activeFrom": "2026-06-15",
+      "activeTo": "2027-03-31",
+      "recurrence": "終日",
+      "geometryUrl": "/data/geo/site-cu-4/regulation.geojson",
+      "geometryKind": "regulation",
+      "detourUrl": "/data/geo/site-cu-4/detour.geojson",
+      "source": {
+        "provider": "大田区 建設部 土木課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-cu-4-night",
+      "projectId": "site-cu-4",
+      "type": "night_work",
+      "severity": "warning",
+      "title": "夜間作業の実施（浸水対策の雨水貯留施設をつくる）",
+      "description": "交通量の少ない夜間に、搬入・舗装などの作業を行います。",
+      "activeFrom": "2026-06-15",
+      "activeTo": "2027-03-31",
+      "recurrence": "原則 平日 22:00〜翌5:00",
+      "geometryKind": null,
+      "detourUrl": "/data/geo/site-cu-4/detour.geojson",
+      "source": {
+        "provider": "大田区 建設部 土木課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-cu-5-reg",
+      "projectId": "site-cu-5",
+      "type": "lane_closure",
+      "severity": "warning",
+      "title": "車線規制（文化会館前の広場を再整備する）",
+      "description": "文化会館前 広場再整備工事に伴い、車線規制を実施します。現地の誘導・標識に従ってください。",
+      "activeFrom": "2026-07-01",
+      "activeTo": "2027-02-28",
+      "recurrence": "終日",
+      "geometryUrl": "/data/geo/site-cu-5/regulation.geojson",
+      "geometryKind": "regulation",
+      "detourUrl": "/data/geo/site-cu-5/detour.geojson",
+      "source": {
+        "provider": "大田区 建設部 土木課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-cu-5-night",
+      "projectId": "site-cu-5",
+      "type": "night_work",
+      "severity": "warning",
+      "title": "夜間作業の実施（文化会館前の広場を再整備する）",
+      "description": "交通量の少ない夜間に、搬入・舗装などの作業を行います。",
+      "activeFrom": "2026-07-01",
+      "activeTo": "2027-02-28",
+      "recurrence": "原則 平日 22:00〜翌5:00",
+      "geometryKind": null,
+      "detourUrl": "/data/geo/site-cu-5/detour.geojson",
+      "source": {
+        "provider": "大田区 建設部 土木課",
+        "officialUrl": "https://www.city.ota.tokyo.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-ar-1-reg",
+      "projectId": "site-ar-1",
+      "type": "access_restriction",
+      "severity": "notice",
+      "title": "車両搬入規制（地域の福祉施設を新築する）",
+      "description": "みなみ野 地域福祉施設新築工事に伴い、車両搬入規制を実施します。現地の誘導・標識に従ってください。",
+      "activeFrom": "2026-09-01",
+      "activeTo": "2027-03-31",
+      "recurrence": "平日 8:00〜18:00",
+      "geometryUrl": "/data/geo/site-ar-1/pedestrian.geojson",
+      "geometryKind": "pedestrian",
+      "source": {
+        "provider": "サンプル町 建設課",
+        "officialUrl": "https://www.mlit.go.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-ar-2-reg",
+      "projectId": "site-ar-2",
+      "type": "access_restriction",
+      "severity": "notice",
+      "title": "車両搬入規制（農産物直売所を新築する）",
+      "description": "川辺町 農産物直売所新築工事に伴い、車両搬入規制を実施します。現地の誘導・標識に従ってください。",
+      "activeFrom": "2026-11-15",
+      "activeTo": "2027-03-31",
+      "recurrence": "平日 8:00〜18:00",
+      "geometryUrl": "/data/geo/site-ar-2/pedestrian.geojson",
+      "geometryKind": "pedestrian",
+      "source": {
+        "provider": "サンプル町 建設課",
+        "officialUrl": "https://www.mlit.go.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-ar-3-reg",
+      "projectId": "site-ar-3",
+      "type": "access_restriction",
+      "severity": "notice",
+      "title": "車両搬入規制（集落の診療所を建て替える）",
+      "description": "山手集落 診療所建替工事に伴い、車両搬入規制を実施します。現地の誘導・標識に従ってください。",
+      "activeFrom": "2026-12-01",
+      "activeTo": "2027-03-31",
+      "recurrence": "平日 8:00〜18:00",
+      "geometryUrl": "/data/geo/site-ar-3/pedestrian.geojson",
+      "geometryKind": "pedestrian",
+      "source": {
+        "provider": "サンプル町 建設課",
+        "officialUrl": "https://www.mlit.go.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-ar-4-reg",
+      "projectId": "site-ar-4",
+      "type": "access_restriction",
+      "severity": "notice",
+      "title": "車両搬入規制（湖畔に保育所を新築する）",
+      "description": "湖畔 保育所新築工事に伴い、車両搬入規制を実施します。現地の誘導・標識に従ってください。",
+      "activeFrom": "2026-08-01",
+      "activeTo": "2027-03-31",
+      "recurrence": "平日 8:00〜18:00",
+      "geometryUrl": "/data/geo/site-ar-4/pedestrian.geojson",
+      "geometryKind": "pedestrian",
+      "source": {
+        "provider": "サンプル町 建設課",
+        "officialUrl": "https://www.mlit.go.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-ar-5-reg",
+      "projectId": "site-ar-5",
+      "type": "access_restriction",
+      "severity": "notice",
+      "title": "車両搬入規制（老朽化した公民館を改築する）",
+      "description": "東野 公民館改築工事に伴い、車両搬入規制を実施します。現地の誘導・標識に従ってください。",
+      "activeFrom": "2025-09-01",
+      "activeTo": "2026-05-31",
+      "recurrence": "平日 8:00〜18:00",
+      "geometryUrl": "/data/geo/site-ar-5/pedestrian.geojson",
+      "geometryKind": "pedestrian",
+      "source": {
+        "provider": "サンプル町 建設課",
+        "officialUrl": "https://www.mlit.go.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-cr-1-reg",
+      "projectId": "site-cr-1",
+      "type": "lane_closure",
+      "severity": "notice",
+      "title": "片側交互通行（県道の法面を補強する）",
+      "description": "県道 山間部 法面補強工事に伴い、片側交互通行を実施します。現地の誘導・標識に従ってください。",
+      "activeFrom": "2026-10-20",
+      "activeTo": "2027-03-31",
+      "recurrence": "終日",
+      "geometryUrl": "/data/geo/site-cr-1/regulation.geojson",
+      "geometryKind": "regulation",
+      "detourUrl": "/data/geo/site-cr-1/detour.geojson",
+      "source": {
+        "provider": "サンプル県 地域整備部",
+        "officialUrl": "https://www.mlit.go.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-cr-2-reg",
+      "projectId": "site-cr-2",
+      "type": "lane_closure",
+      "severity": "notice",
+      "title": "片側交互通行（河川の護岸を改修する）",
+      "description": "一級河川 護岸改修工事に伴い、片側交互通行を実施します。現地の誘導・標識に従ってください。",
+      "activeFrom": "2026-04-01",
+      "activeTo": "2026-11-30",
+      "recurrence": "終日",
+      "geometryUrl": "/data/geo/site-cr-2/regulation.geojson",
+      "geometryKind": "regulation",
+      "detourUrl": "/data/geo/site-cr-2/detour.geojson",
+      "source": {
+        "provider": "サンプル県 地域整備部",
+        "officialUrl": "https://www.mlit.go.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-cr-3-reg",
+      "projectId": "site-cr-3",
+      "type": "lane_closure",
+      "severity": "notice",
+      "title": "片側交互通行（農道を舗装改良する）",
+      "description": "西部農道 舗装改良工事に伴い、片側交互通行を実施します。現地の誘導・標識に従ってください。",
+      "activeFrom": "2026-09-15",
+      "activeTo": "2027-03-31",
+      "recurrence": "終日",
+      "geometryUrl": "/data/geo/site-cr-3/regulation.geojson",
+      "geometryKind": "regulation",
+      "detourUrl": "/data/geo/site-cr-3/detour.geojson",
+      "source": {
+        "provider": "サンプル県 地域整備部",
+        "officialUrl": "https://www.mlit.go.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-cr-4-reg",
+      "projectId": "site-cr-4",
+      "type": "lane_closure",
+      "severity": "notice",
+      "title": "片側交互通行（峠の急カーブを改良する）",
+      "description": "峠区間 線形改良工事に伴い、片側交互通行を実施します。現地の誘導・標識に従ってください。",
+      "activeFrom": "2027-01-10",
+      "activeTo": "2027-03-31",
+      "recurrence": "終日",
+      "geometryUrl": "/data/geo/site-cr-4/regulation.geojson",
+      "geometryKind": "regulation",
+      "detourUrl": "/data/geo/site-cr-4/detour.geojson",
+      "source": {
+        "provider": "サンプル県 地域整備部",
+        "officialUrl": "https://www.mlit.go.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    },
+    {
+      "id": "site-cr-5-reg",
+      "projectId": "site-cr-5",
+      "type": "lane_closure",
+      "severity": "notice",
+      "title": "片側交互通行（古い橋を耐震補強する）",
+      "description": "橋梁 耐震補強工事に伴い、片側交互通行を実施します。現地の誘導・標識に従ってください。",
+      "activeFrom": "2025-08-01",
+      "activeTo": "2026-03-31",
+      "recurrence": "終日",
+      "geometryUrl": "/data/geo/site-cr-5/regulation.geojson",
+      "geometryKind": "regulation",
+      "detourUrl": "/data/geo/site-cr-5/detour.geojson",
+      "source": {
+        "provider": "サンプル県 地域整備部",
+        "officialUrl": "https://www.mlit.go.jp/",
+        "verifiedAt": "2026-10-04T07:00:00+09:00",
+        "dataset": "開発用サンプルデータ",
+        "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+      }
+    }
+  ]
+}

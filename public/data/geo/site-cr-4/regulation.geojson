@@ -1,0 +1,32 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "site-cr-4:regulation",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66717147481094,
+            35.593
+          ],
+          [
+            139.66882852518907,
+            35.593
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-cr-4:regulation",
+        "projectId": "site-cr-4",
+        "type": "regulation",
+        "name": "峠の急カーブを改良する工事 交通規制区間",
+        "validFrom": "2027-01-10",
+        "validTo": "2027-03-31",
+        "source": "サンプル県 地域整備部",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    }
+  ]
+}

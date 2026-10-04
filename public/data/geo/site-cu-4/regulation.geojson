@@ -1,0 +1,32 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "site-cu-4:regulation",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66733717984874,
+            35.593
+          ],
+          [
+            139.66866282015127,
+            35.593
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-cu-4:regulation",
+        "projectId": "site-cu-4",
+        "type": "regulation",
+        "name": "浸水対策の雨水貯留施設をつくる工事 交通規制区間",
+        "validFrom": "2026-06-15",
+        "validTo": "2027-03-31",
+        "source": "大田区 建設部 土木課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    }
+  ]
+}

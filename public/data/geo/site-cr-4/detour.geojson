@@ -1,0 +1,40 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "site-cr-4:detour",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.6670389107807,
+            35.59279193052289
+          ],
+          [
+            139.6670389107807,
+            35.5926290935408
+          ],
+          [
+            139.66896108921932,
+            35.5926290935408
+          ],
+          [
+            139.66896108921932,
+            35.59279193052289
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-cr-4:detour",
+        "projectId": "site-cr-4",
+        "type": "detour",
+        "name": "峠の急カーブを改良する工事 迂回路",
+        "validFrom": "2027-01-10",
+        "validTo": "2027-03-31",
+        "source": "サンプル県 地域整備部",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    }
+  ]
+}

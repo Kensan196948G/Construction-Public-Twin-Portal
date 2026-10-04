@@ -1,0 +1,69 @@
+{
+  "id": "site-cr-2",
+  "slug": "site-cr-2",
+  "status": "under_construction",
+  "category": "土木・地方",
+  "siteType": "civil-rural",
+  "name": "一級河川 護岸改修工事",
+  "publicTitle": "河川の護岸を改修する工事",
+  "purpose": "地域の幹線道路・農道・河川護岸を改良し、安全性と災害時の通行確保を図ります。",
+  "benefits": [
+    "狭隘区間・急勾配の改良",
+    "法面・護岸の補強",
+    "災害時の輸送路の確保"
+  ],
+  "owner": {
+    "name": "サンプル県 地域整備部"
+  },
+  "contractor": {
+    "name": "サンプル建設株式会社"
+  },
+  "schedule": {
+    "startDate": "2026-04-01",
+    "plannedEndDate": "2026-11-30",
+    "phase": "盛土・法面工事",
+    "lastUpdatedAt": "2026-10-04T07:00:00+09:00"
+  },
+  "location": {
+    "postalCode": "330-0021",
+    "prefecture": "埼玉県",
+    "city": "入間川市",
+    "ward": "",
+    "town": "河岸 2-14-6",
+    "address": "埼玉県 入間川市 河岸 2-14-6",
+    "municipality": "入間川市",
+    "center": {
+      "longitude": 139.65960427808412,
+      "latitude": 35.59173349013932
+    },
+    "workZoneGeoJsonUrl": "/data/geo/site-cr-2/workzone.geojson"
+  },
+  "visual": {
+    "thumbnailUrl": "/images/sample-cr1.jpg",
+    "thumbnailCredit": {
+      "author": "Anastasiya Lvova",
+      "license": "CC BY-SA 3.0",
+      "url": "https://commons.wikimedia.org/wiki/File:Tura_River_embankment_022.JPG"
+    },
+    "completionType": "levee",
+    "siteWidthM": 150,
+    "siteDepthM": 30,
+    "floors": 0
+  },
+  "impacts": [
+    "site-cr-2-reg"
+  ],
+  "visibility": {
+    "classification": "public",
+    "publicationState": "published",
+    "reviewDueAt": "2027-04-30"
+  },
+  "source": {
+    "provider": "サンプル県 地域整備部",
+    "officialUrl": "https://www.mlit.go.jp/",
+    "verifiedAt": "2026-10-04T07:00:00+09:00",
+    "dataset": "開発用サンプルデータ",
+    "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+  },
+  "disclaimer": "この案件は「工事みえるマップ 3D Beta」MVP の開発用サンプルデータです。実在の工事・公告ではありません。位置・工期・規制内容は説明用に構成したもので、実際の交通規制や工事予定を示すものではありません。お出かけ前には必ず発注者・自治体の公式情報をご確認ください。"
+}

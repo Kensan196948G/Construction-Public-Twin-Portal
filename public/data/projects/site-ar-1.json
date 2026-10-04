@@ -1,0 +1,69 @@
+{
+  "id": "site-ar-1",
+  "slug": "site-ar-1",
+  "status": "under_construction",
+  "category": "建築・地方",
+  "siteType": "arch-rural",
+  "name": "みなみ野 地域福祉施設新築工事",
+  "publicTitle": "地域の福祉施設を新築する工事",
+  "purpose": "地域の生活利便施設を更新するため、木造・鉄骨造の低層施設を新築します。地域産材と地元施工を前提としています。",
+  "benefits": [
+    "生活・福祉施設の更新",
+    "地域産材・地元施工の活用",
+    "敷地内の駐車・緑地の確保"
+  ],
+  "owner": {
+    "name": "サンプル町 建設課"
+  },
+  "contractor": {
+    "name": "サンプル建設工業"
+  },
+  "schedule": {
+    "startDate": "2026-09-01",
+    "plannedEndDate": "2027-03-31",
+    "phase": "基礎・躯体工事",
+    "lastUpdatedAt": "2026-10-04T07:00:00+09:00"
+  },
+  "location": {
+    "postalCode": "330-0001",
+    "prefecture": "埼玉県",
+    "city": "みなみ野市",
+    "ward": "",
+    "town": "みなみ野 12-4",
+    "address": "埼玉県 みなみ野市 みなみ野 12-4",
+    "municipality": "みなみ野市",
+    "center": {
+      "longitude": 139.6741863214117,
+      "latitude": 35.58811489053736
+    },
+    "workZoneGeoJsonUrl": "/data/geo/site-ar-1/workzone.geojson"
+  },
+  "visual": {
+    "thumbnailUrl": "/images/sample-ar1.jpg",
+    "thumbnailCredit": {
+      "author": "Jaggery",
+      "license": "CC BY-SA 2.0",
+      "url": "https://commons.wikimedia.org/wiki/File:House_construction_site,_Greenmeadow,_Cwmbran_-_geograph.org.uk_-_5343692.jpg"
+    },
+    "completionType": "rural",
+    "siteWidthM": 54,
+    "siteDepthM": 42,
+    "floors": 3
+  },
+  "impacts": [
+    "site-ar-1-reg"
+  ],
+  "visibility": {
+    "classification": "public",
+    "publicationState": "published",
+    "reviewDueAt": "2027-04-30"
+  },
+  "source": {
+    "provider": "サンプル町 建設課",
+    "officialUrl": "https://www.mlit.go.jp/",
+    "verifiedAt": "2026-10-04T07:00:00+09:00",
+    "dataset": "開発用サンプルデータ",
+    "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+  },
+  "disclaimer": "この案件は「工事みえるマップ 3D Beta」MVP の開発用サンプルデータです。実在の工事・公告ではありません。位置・工期・規制内容は説明用に構成したもので、実際の交通規制や工事予定を示すものではありません。お出かけ前には必ず発注者・自治体の公式情報をご確認ください。"
+}

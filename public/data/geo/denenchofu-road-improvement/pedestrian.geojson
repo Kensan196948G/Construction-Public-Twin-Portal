@@ -1,0 +1,32 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "tokyo-demo-001:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66716042780843,
+            35.592873349013935
+          ],
+          [
+            139.66844188010083,
+            35.592873349013935
+          ]
+        ]
+      },
+      "properties": {
+        "id": "tokyo-demo-001:pedestrian",
+        "projectId": "tokyo-demo-001",
+        "type": "pedestrian",
+        "name": "駅周辺の歩道を広げる工事 歩道切替",
+        "validFrom": "2026-05-15",
+        "validTo": "2027-01-31",
+        "source": "大田区 建設部 道路課",
+        "updatedAt": "2026-10-03T18:30:00+09:00"
+      }
+    }
+  ]
+}

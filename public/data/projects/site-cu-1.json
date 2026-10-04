@@ -1,0 +1,70 @@
+{
+  "id": "site-cu-1",
+  "slug": "site-cu-1",
+  "status": "under_construction",
+  "category": "土木・都市部",
+  "siteType": "civil-urban",
+  "name": "中央通り 下水道管更新工事",
+  "publicTitle": "中央通りの下水道管を更新する工事",
+  "purpose": "都市部の道路・上下水道・広場を更新し、安全で使いやすい歩行者・自転車空間と防災機能を確保します。",
+  "benefits": [
+    "老朽インフラの更新",
+    "歩行者・自転車空間の再整備",
+    "浸水・震災対策の強化"
+  ],
+  "owner": {
+    "name": "大田区 建設部 土木課"
+  },
+  "contractor": {
+    "name": "サンプル土木株式会社"
+  },
+  "schedule": {
+    "startDate": "2026-04-01",
+    "plannedEndDate": "2027-01-31",
+    "phase": "開削・構造物工事",
+    "lastUpdatedAt": "2026-10-04T07:00:00+09:00"
+  },
+  "location": {
+    "postalCode": "145-0071",
+    "prefecture": "東京都",
+    "city": "",
+    "ward": "大田区",
+    "town": "中央通り 3-4-11",
+    "address": "東京都 大田区 中央通り 3-4-11",
+    "municipality": "大田区",
+    "center": {
+      "longitude": 139.67241880100838,
+      "latitude": 35.59263814003981
+    },
+    "workZoneGeoJsonUrl": "/data/geo/site-cu-1/workzone.geojson"
+  },
+  "visual": {
+    "thumbnailUrl": "/images/sample-cu1.jpg",
+    "thumbnailCredit": {
+      "author": "Sammya Nig Ltd",
+      "license": "CC BY-SA 4.0",
+      "url": "https://commons.wikimedia.org/wiki/File:Asphalt_paver_working.jpg"
+    },
+    "completionType": "road",
+    "siteWidthM": 120,
+    "siteDepthM": 24,
+    "floors": 0
+  },
+  "impacts": [
+    "site-cu-1-reg",
+    "site-cu-1-night"
+  ],
+  "visibility": {
+    "classification": "public",
+    "publicationState": "published",
+    "reviewDueAt": "2027-04-30"
+  },
+  "source": {
+    "provider": "大田区 建設部 土木課",
+    "officialUrl": "https://www.city.ota.tokyo.jp/",
+    "verifiedAt": "2026-10-04T07:00:00+09:00",
+    "dataset": "開発用サンプルデータ",
+    "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+  },
+  "disclaimer": "この案件は「工事みえるマップ 3D Beta」MVP の開発用サンプルデータです。実在の工事・公告ではありません。位置・工期・規制内容は説明用に構成したもので、実際の交通規制や工事予定を示すものではありません。お出かけ前には必ず発注者・自治体の公式情報をご確認ください。"
+}

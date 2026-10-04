@@ -1,0 +1,626 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "site-cr-4:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66717147481094,
+            35.592810023520904
+          ],
+          [
+            139.66882852518907,
+            35.592810023520904
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-cr-4:pedestrian",
+        "projectId": "site-cr-4",
+        "type": "pedestrian",
+        "name": "峠の急カーブを改良する工事 歩道切替",
+        "validFrom": "2027-01-10",
+        "validTo": "2027-03-31",
+        "source": "サンプル県 地域整備部",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-ar-3:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66770173093195,
+            35.59284620951692
+          ],
+          [
+            139.66829826906806,
+            35.59284620951692
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-ar-3:pedestrian",
+        "projectId": "site-ar-3",
+        "type": "pedestrian",
+        "name": "集落の診療所を建て替える工事 歩道切替",
+        "validFrom": "2026-12-01",
+        "validTo": "2027-03-31",
+        "source": "サンプル町 建設課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-ar-2:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66770173093195,
+            35.59284620951692
+          ],
+          [
+            139.66829826906806,
+            35.59284620951692
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-ar-2:pedestrian",
+        "projectId": "site-ar-2",
+        "type": "pedestrian",
+        "name": "農産物直売所を新築する工事 歩道切替",
+        "validFrom": "2026-11-15",
+        "validTo": "2027-03-31",
+        "source": "サンプル町 建設課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-cr-1:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66717147481094,
+            35.592810023520904
+          ],
+          [
+            139.66882852518907,
+            35.592810023520904
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-cr-1:pedestrian",
+        "projectId": "site-cr-1",
+        "type": "pedestrian",
+        "name": "県道の法面を補強する工事 歩道切替",
+        "validFrom": "2026-10-20",
+        "validTo": "2027-03-31",
+        "source": "サンプル県 地域整備部",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-cr-3:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66717147481094,
+            35.592810023520904
+          ],
+          [
+            139.66882852518907,
+            35.592810023520904
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-cr-3:pedestrian",
+        "projectId": "site-cr-3",
+        "type": "pedestrian",
+        "name": "農道を舗装改良する工事 歩道切替",
+        "validFrom": "2026-09-15",
+        "validTo": "2027-03-31",
+        "source": "サンプル県 地域整備部",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-ar-1:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66770173093195,
+            35.59284620951692
+          ],
+          [
+            139.66829826906806,
+            35.59284620951692
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-ar-1:pedestrian",
+        "projectId": "site-ar-1",
+        "type": "pedestrian",
+        "name": "地域の福祉施設を新築する工事 歩道切替",
+        "validFrom": "2026-09-01",
+        "validTo": "2027-03-31",
+        "source": "サンプル町 建設課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-ar-4:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66770173093195,
+            35.59284620951692
+          ],
+          [
+            139.66829826906806,
+            35.59284620951692
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-ar-4:pedestrian",
+        "projectId": "site-ar-4",
+        "type": "pedestrian",
+        "name": "湖畔に保育所を新築する工事 歩道切替",
+        "validFrom": "2026-08-01",
+        "validTo": "2027-03-31",
+        "source": "サンプル町 建設課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-cu-5:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66733717984874,
+            35.59283716301792
+          ],
+          [
+            139.66866282015127,
+            35.59283716301792
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-cu-5:pedestrian",
+        "projectId": "site-cu-5",
+        "type": "pedestrian",
+        "name": "文化会館前の広場を再整備する工事 歩道切替",
+        "validFrom": "2026-07-01",
+        "validTo": "2027-02-28",
+        "source": "大田区 建設部 土木課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-cu-4:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66733717984874,
+            35.59283716301792
+          ],
+          [
+            139.66866282015127,
+            35.59283716301792
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-cu-4:pedestrian",
+        "projectId": "site-cu-4",
+        "type": "pedestrian",
+        "name": "浸水対策の雨水貯留施設をつくる工事 歩道切替",
+        "validFrom": "2026-06-15",
+        "validTo": "2027-03-31",
+        "source": "大田区 建設部 土木課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-au-4:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66764649591934,
+            35.59282811651891
+          ],
+          [
+            139.66835350408067,
+            35.59282811651891
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-au-4:pedestrian",
+        "projectId": "site-au-4",
+        "type": "pedestrian",
+        "name": "市役所前に複合ビルを建てる工事 歩道切替",
+        "validFrom": "2026-06-01",
+        "validTo": "2027-03-15",
+        "source": "大田区 建築部 市街地整備課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "tokyo-demo-001:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66716042780843,
+            35.592873349013935
+          ],
+          [
+            139.66844188010083,
+            35.592873349013935
+          ]
+        ]
+      },
+      "properties": {
+        "id": "tokyo-demo-001:pedestrian",
+        "projectId": "tokyo-demo-001",
+        "type": "pedestrian",
+        "name": "駅周辺の歩道を広げる工事 歩道切替",
+        "validFrom": "2026-05-15",
+        "validTo": "2027-01-31",
+        "source": "大田区 建設部 道路課",
+        "updatedAt": "2026-10-03T18:30:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-au-2:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66764649591934,
+            35.59282811651891
+          ],
+          [
+            139.66835350408067,
+            35.59282811651891
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-au-2:pedestrian",
+        "projectId": "site-au-2",
+        "type": "pedestrian",
+        "name": "駅東口にオフィスビルを建てる工事 歩道切替",
+        "validFrom": "2026-05-10",
+        "validTo": "2027-03-31",
+        "source": "大田区 建築部 市街地整備課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-cu-2:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66733717984874,
+            35.59283716301792
+          ],
+          [
+            139.66866282015127,
+            35.59283716301792
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-cu-2:pedestrian",
+        "projectId": "site-cu-2",
+        "type": "pedestrian",
+        "name": "駅南の道路を拡幅する工事 歩道切替",
+        "validFrom": "2026-05-01",
+        "validTo": "2027-02-28",
+        "source": "大田区 建設部 土木課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-au-3:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66764649591934,
+            35.59282811651891
+          ],
+          [
+            139.66835350408067,
+            35.59282811651891
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-au-3:pedestrian",
+        "projectId": "site-au-3",
+        "type": "pedestrian",
+        "name": "中央通りの商業施設を建て替える工事 歩道切替",
+        "validFrom": "2026-04-15",
+        "validTo": "2027-01-31",
+        "source": "大田区 建築部 市街地整備課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "tokyo-demo-002:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66707205178824,
+            35.59281907001991
+          ],
+          [
+            139.66848606811092,
+            35.59281907001991
+          ]
+        ]
+      },
+      "properties": {
+        "id": "tokyo-demo-002:pedestrian",
+        "projectId": "tokyo-demo-002",
+        "type": "pedestrian",
+        "name": "駅前広場を歩行者中心に整える工事 歩道切替",
+        "validFrom": "2026-04-01",
+        "validTo": "2027-03-31",
+        "source": "大田区 建設部 まちづくり課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-cu-1:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66733717984874,
+            35.59283716301792
+          ],
+          [
+            139.66866282015127,
+            35.59283716301792
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-cu-1:pedestrian",
+        "projectId": "site-cu-1",
+        "type": "pedestrian",
+        "name": "中央通りの下水道管を更新する工事 歩道切替",
+        "validFrom": "2026-04-01",
+        "validTo": "2027-01-31",
+        "source": "大田区 建設部 土木課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-cr-2:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66717147481094,
+            35.592810023520904
+          ],
+          [
+            139.66882852518907,
+            35.592810023520904
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-cr-2:pedestrian",
+        "projectId": "site-cr-2",
+        "type": "pedestrian",
+        "name": "河川の護岸を改修する工事 歩道切替",
+        "validFrom": "2026-04-01",
+        "validTo": "2026-11-30",
+        "source": "サンプル県 地域整備部",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-cu-3:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66733717984874,
+            35.59283716301792
+          ],
+          [
+            139.66866282015127,
+            35.59283716301792
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-cu-3:pedestrian",
+        "projectId": "site-cu-3",
+        "type": "pedestrian",
+        "name": "桜並木通りの電柱を地中化する工事 歩道切替",
+        "validFrom": "2026-03-15",
+        "validTo": "2026-12-28",
+        "source": "大田区 建設部 土木課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-au-1:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66764649591934,
+            35.59282811651891
+          ],
+          [
+            139.66835350408067,
+            35.59282811651891
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-au-1:pedestrian",
+        "projectId": "site-au-1",
+        "type": "pedestrian",
+        "name": "高層マンションを建てる工事 歩道切替",
+        "validFrom": "2026-03-01",
+        "validTo": "2027-02-28",
+        "source": "大田区 建築部 市街地整備課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-au-5:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66764649591934,
+            35.59282811651891
+          ],
+          [
+            139.66835350408067,
+            35.59282811651891
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-au-5:pedestrian",
+        "projectId": "site-au-5",
+        "type": "pedestrian",
+        "name": "公園通りに分譲住宅を建てる工事 歩道切替",
+        "validFrom": "2026-02-20",
+        "validTo": "2026-12-20",
+        "source": "大田区 建築部 市街地整備課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-ar-5:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66770173093195,
+            35.59284620951692
+          ],
+          [
+            139.66829826906806,
+            35.59284620951692
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-ar-5:pedestrian",
+        "projectId": "site-ar-5",
+        "type": "pedestrian",
+        "name": "老朽化した公民館を改築する工事 歩道切替",
+        "validFrom": "2025-09-01",
+        "validTo": "2026-05-31",
+        "source": "サンプル町 建設課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-cr-5:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66717147481094,
+            35.592810023520904
+          ],
+          [
+            139.66882852518907,
+            35.592810023520904
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-cr-5:pedestrian",
+        "projectId": "site-cr-5",
+        "type": "pedestrian",
+        "name": "古い橋を耐震補強する工事 歩道切替",
+        "validFrom": "2025-08-01",
+        "validTo": "2026-03-31",
+        "source": "サンプル県 地域整備部",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "tokyo-demo-004:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66722670982355,
+            35.592728605029855
+          ],
+          [
+            139.66877329017646,
+            35.592728605029855
+          ]
+        ]
+      },
+      "properties": {
+        "id": "tokyo-demo-004:pedestrian",
+        "projectId": "tokyo-demo-004",
+        "type": "pedestrian",
+        "name": "公園に防災広場をつくる工事 歩道切替",
+        "validFrom": "2025-06-01",
+        "validTo": "2026-02-28",
+        "source": "大田区 都市整備部 公園課",
+        "updatedAt": "2026-03-05T10:00:00+09:00"
+      }
+    }
+  ]
+}

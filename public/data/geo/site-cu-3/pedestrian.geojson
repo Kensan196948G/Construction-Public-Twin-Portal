@@ -1,0 +1,32 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "site-cu-3:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66733717984874,
+            35.59283716301792
+          ],
+          [
+            139.66866282015127,
+            35.59283716301792
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-cu-3:pedestrian",
+        "projectId": "site-cu-3",
+        "type": "pedestrian",
+        "name": "桜並木通りの電柱を地中化する工事 歩道切替",
+        "validFrom": "2026-03-15",
+        "validTo": "2026-12-28",
+        "source": "大田区 建設部 土木課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    }
+  ]
+}

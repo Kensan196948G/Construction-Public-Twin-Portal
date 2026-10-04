@@ -1,0 +1,69 @@
+{
+  "id": "tokyo-demo-004",
+  "slug": "tamagawa-park-plaza",
+  "status": "completed",
+  "category": "公園",
+  "siteType": "civil-urban",
+  "name": "多摩川台公園 防災広場整備工事",
+  "publicTitle": "公園に防災広場をつくる工事",
+  "purpose": "災害時に一時避難できる広場と、かまどベンチ・防災倉庫を整備しました。",
+  "benefits": [
+    "一時避難広場の確保",
+    "かまどベンチ・防災倉庫",
+    "園路のバリアフリー化"
+  ],
+  "owner": {
+    "name": "大田区 都市整備部 公園課"
+  },
+  "contractor": {
+    "name": "緑地建設株式会社"
+  },
+  "schedule": {
+    "startDate": "2025-06-01",
+    "plannedEndDate": "2026-02-28",
+    "phase": "工事完了・供用中",
+    "lastUpdatedAt": "2026-03-05T10:00:00+09:00"
+  },
+  "location": {
+    "postalCode": "145-0073",
+    "prefecture": "東京都",
+    "city": "",
+    "ward": "大田区",
+    "town": "多摩川台 2-1-1",
+    "address": "東京都 大田区 多摩川台 2-1-1",
+    "municipality": "大田区",
+    "center": {
+      "longitude": 139.6695,
+      "latitude": 35.5952
+    },
+    "workZoneGeoJsonUrl": "/data/geo/tamagawa-park-plaza/workzone.geojson"
+  },
+  "visual": {
+    "thumbnailUrl": "/images/sample-cu1.jpg",
+    "thumbnailCredit": {
+      "author": "Sammya Nig Ltd",
+      "license": "CC BY-SA 4.0",
+      "url": "https://commons.wikimedia.org/wiki/File:Asphalt_paver_working.jpg"
+    },
+    "completionType": "park",
+    "siteWidthM": 124,
+    "siteDepthM": 92,
+    "floors": 0
+  },
+  "impacts": [
+    "imp-004-done"
+  ],
+  "visibility": {
+    "classification": "public",
+    "publicationState": "published",
+    "reviewDueAt": "2027-04-30"
+  },
+  "source": {
+    "provider": "大田区 都市整備部 公園課",
+    "officialUrl": "https://www.city.ota.tokyo.jp/",
+    "verifiedAt": "2026-10-04T07:00:00+09:00",
+    "dataset": "開発用サンプルデータ",
+    "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+  },
+  "disclaimer": "この案件は「工事みえるマップ 3D Beta」MVP の開発用サンプルデータです。実在の工事・公告ではありません。位置・工期・規制内容は説明用に構成したもので、実際の交通規制や工事予定を示すものではありません。お出かけ前には必ず発注者・自治体の公式情報をご確認ください。"
+}

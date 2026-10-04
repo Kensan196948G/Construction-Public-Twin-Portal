@@ -3,12 +3,11 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   // MVP: sample photographs are served from /public/images. Keep the repo self-contained.
-  eslint: {
-    // `npm run lint` is executed explicitly in the verification loop.
-    ignoreDuringBuilds: true,
-  },
+  //
+  // NOTE: Next.js 16 removed the `eslint` config key (`next lint` is gone).
+  // Lint and typecheck are run explicitly by the verification loop via
+  // `npm run lint` / `npm run typecheck`.
   typescript: {
-    // `npm run typecheck` is executed explicitly in the verification loop.
     ignoreBuildErrors: false,
   },
 };

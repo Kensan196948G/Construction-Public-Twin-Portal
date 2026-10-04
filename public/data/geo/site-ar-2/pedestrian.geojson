@@ -1,0 +1,32 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "site-ar-2:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66770173093195,
+            35.59284620951692
+          ],
+          [
+            139.66829826906806,
+            35.59284620951692
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-ar-2:pedestrian",
+        "projectId": "site-ar-2",
+        "type": "pedestrian",
+        "name": "農産物直売所を新築する工事 歩道切替",
+        "validFrom": "2026-11-15",
+        "validTo": "2027-03-31",
+        "source": "サンプル町 建設課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    }
+  ]
+}

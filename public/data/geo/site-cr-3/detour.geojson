@@ -1,0 +1,40 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "site-cr-3:detour",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.6670389107807,
+            35.59279193052289
+          ],
+          [
+            139.6670389107807,
+            35.5926290935408
+          ],
+          [
+            139.66896108921932,
+            35.5926290935408
+          ],
+          [
+            139.66896108921932,
+            35.59279193052289
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-cr-3:detour",
+        "projectId": "site-cr-3",
+        "type": "detour",
+        "name": "農道を舗装改良する工事 迂回路",
+        "validFrom": "2026-09-15",
+        "validTo": "2027-03-31",
+        "source": "サンプル県 地域整備部",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    }
+  ]
+}

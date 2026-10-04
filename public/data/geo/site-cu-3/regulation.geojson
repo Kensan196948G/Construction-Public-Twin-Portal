@@ -1,0 +1,32 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "site-cu-3:regulation",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66733717984874,
+            35.593
+          ],
+          [
+            139.66866282015127,
+            35.593
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-cu-3:regulation",
+        "projectId": "site-cu-3",
+        "type": "regulation",
+        "name": "桜並木通りの電柱を地中化する工事 交通規制区間",
+        "validFrom": "2026-03-15",
+        "validTo": "2026-12-28",
+        "source": "大田区 建設部 土木課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    }
+  ]
+}

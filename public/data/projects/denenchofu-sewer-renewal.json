@@ -1,0 +1,69 @@
+{
+  "id": "tokyo-demo-003",
+  "slug": "denenchofu-sewer-renewal",
+  "status": "planned",
+  "category": "下水道",
+  "siteType": "civil-urban",
+  "name": "田園調布駅周辺 下水道管更新工事",
+  "publicTitle": "古い下水道管を入れ替える工事",
+  "purpose": "老朽化した下水道管を耐震管に入れ替え、地震時の排水機能と道路の安全性を確保します。",
+  "benefits": [
+    "耐震管への更新",
+    "浸水リスクの低減",
+    "マンホールの段差解消"
+  ],
+  "owner": {
+    "name": "大田区 下水道部 管路課"
+  },
+  "contractor": {
+    "name": "調整中"
+  },
+  "schedule": {
+    "startDate": "2026-12-01",
+    "plannedEndDate": "2027-03-31",
+    "phase": "開削工事（準備期間を含む）",
+    "lastUpdatedAt": "2026-10-01T09:00:00+09:00"
+  },
+  "location": {
+    "postalCode": "145-0071",
+    "prefecture": "東京都",
+    "city": "",
+    "ward": "大田区",
+    "town": "田園調布三丁目 3-2-4",
+    "address": "東京都 大田区 田園調布三丁目 3-2-4",
+    "municipality": "大田区",
+    "center": {
+      "longitude": 139.6666,
+      "latitude": 35.5941
+    },
+    "workZoneGeoJsonUrl": "/data/geo/denenchofu-sewer-renewal/workzone.geojson"
+  },
+  "visual": {
+    "thumbnailUrl": "/images/sample-cu1.jpg",
+    "thumbnailCredit": {
+      "author": "Sammya Nig Ltd",
+      "license": "CC BY-SA 4.0",
+      "url": "https://commons.wikimedia.org/wiki/File:Asphalt_paver_working.jpg"
+    },
+    "completionType": "utility",
+    "siteWidthM": 52,
+    "siteDepthM": 44,
+    "floors": 0
+  },
+  "impacts": [
+    "imp-003-notice"
+  ],
+  "visibility": {
+    "classification": "public",
+    "publicationState": "published",
+    "reviewDueAt": "2027-04-30"
+  },
+  "source": {
+    "provider": "大田区 下水道部 管路課",
+    "officialUrl": "https://www.city.ota.tokyo.jp/",
+    "verifiedAt": "2026-10-04T07:00:00+09:00",
+    "dataset": "開発用サンプルデータ",
+    "license": "サンプル（写真は Wikimedia Commons、各クレジット参照）"
+  },
+  "disclaimer": "この案件は「工事みえるマップ 3D Beta」MVP の開発用サンプルデータです。実在の工事・公告ではありません。位置・工期・規制内容は説明用に構成したもので、実際の交通規制や工事予定を示すものではありません。お出かけ前には必ず発注者・自治体の公式情報をご確認ください。"
+}

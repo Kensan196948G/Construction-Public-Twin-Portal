@@ -1,0 +1,549 @@
+{
+  "generatedAt": "2026-10-04T03:45:02.530Z",
+  "count": 24,
+  "facets": {
+    "categories": [
+      {
+        "category": "建築・地方",
+        "count": 5
+      },
+      {
+        "category": "建築・都市部",
+        "count": 5
+      },
+      {
+        "category": "土木・地方",
+        "count": 5
+      },
+      {
+        "category": "土木・都市部",
+        "count": 5
+      },
+      {
+        "category": "下水道",
+        "count": 1
+      },
+      {
+        "category": "公園",
+        "count": 1
+      },
+      {
+        "category": "広場",
+        "count": 1
+      },
+      {
+        "category": "道路",
+        "count": 1
+      }
+    ],
+    "statuses": [
+      {
+        "status": "under_construction",
+        "count": 22
+      },
+      {
+        "status": "planned",
+        "count": 1
+      },
+      {
+        "status": "completed",
+        "count": 1
+      }
+    ],
+    "municipalities": [
+      "みなみ野市",
+      "桂川町",
+      "湖畔町",
+      "山手村",
+      "川辺町",
+      "大井川市",
+      "大田区",
+      "東野市",
+      "南信濃町",
+      "入間川市",
+      "利根町"
+    ]
+  },
+  "projects": [
+    {
+      "id": "site-cr-4",
+      "slug": "site-cr-4",
+      "name": "峠区間 線形改良工事",
+      "publicTitle": "峠の急カーブを改良する工事",
+      "status": "under_construction",
+      "category": "土木・地方",
+      "siteType": "civil-rural",
+      "municipality": "桂川町",
+      "address": "山梨県 桂川町 峠 9-2",
+      "center": {
+        "longitude": 139.6728606811092,
+        "latitude": 35.599332549303426
+      },
+      "startDate": "2027-01-10",
+      "plannedEndDate": "2027-03-31",
+      "lastUpdatedAt": "2026-10-04T07:00:00+09:00",
+      "thumbnailUrl": "/images/sample-cr1.jpg",
+      "impactCount": 1
+    },
+    {
+      "id": "site-ar-3",
+      "slug": "site-ar-3",
+      "name": "山手集落 診療所建替工事",
+      "publicTitle": "集落の診療所を建て替える工事",
+      "status": "under_construction",
+      "category": "建築・地方",
+      "siteType": "arch-rural",
+      "municipality": "山手村",
+      "address": "長野県 山手村 山手 890-1",
+      "center": {
+        "longitude": 139.66092991838664,
+        "latitude": 35.596980459562154
+      },
+      "startDate": "2026-12-01",
+      "plannedEndDate": "2027-03-31",
+      "lastUpdatedAt": "2026-10-04T07:00:00+09:00",
+      "thumbnailUrl": "/images/sample-ar1.jpg",
+      "impactCount": 1
+    },
+    {
+      "id": "site-ar-2",
+      "slug": "site-ar-2",
+      "name": "川辺町 農産物直売所新築工事",
+      "publicTitle": "農産物直売所を新築する工事",
+      "status": "under_construction",
+      "category": "建築・地方",
+      "siteType": "arch-rural",
+      "municipality": "川辺町",
+      "address": "埼玉県 川辺町 川辺 45-2",
+      "center": {
+        "longitude": 139.66137179848747,
+        "latitude": 35.58847675049756
+      },
+      "startDate": "2026-11-15",
+      "plannedEndDate": "2027-03-31",
+      "lastUpdatedAt": "2026-10-04T07:00:00+09:00",
+      "thumbnailUrl": "/images/sample-ar1.jpg",
+      "impactCount": 1
+    },
+    {
+      "id": "site-cr-1",
+      "slug": "site-cr-1",
+      "name": "県道 山間部 法面補強工事",
+      "publicTitle": "県道の法面を補強する工事",
+      "status": "under_construction",
+      "category": "土木・地方",
+      "siteType": "civil-rural",
+      "municipality": "南信濃町",
+      "address": "長野県 南信濃町 山間 10-3",
+      "center": {
+        "longitude": 139.67595384181504,
+        "latitude": 35.591371630179125
+      },
+      "startDate": "2026-10-20",
+      "plannedEndDate": "2027-03-31",
+      "lastUpdatedAt": "2026-10-04T07:00:00+09:00",
+      "thumbnailUrl": "/images/sample-cr1.jpg",
+      "impactCount": 1
+    },
+    {
+      "id": "site-cr-3",
+      "slug": "site-cr-3",
+      "name": "西部農道 舗装改良工事",
+      "publicTitle": "農道を舗装改良する工事",
+      "status": "under_construction",
+      "category": "土木・地方",
+      "siteType": "civil-rural",
+      "municipality": "利根町",
+      "address": "群馬県 利根町 西部 55-8",
+      "center": {
+        "longitude": 139.6655696594454,
+        "latitude": 35.58666745069658
+      },
+      "startDate": "2026-09-15",
+      "plannedEndDate": "2027-03-31",
+      "lastUpdatedAt": "2026-10-04T07:00:00+09:00",
+      "thumbnailUrl": "/images/sample-cr1.jpg",
+      "impactCount": 1
+    },
+    {
+      "id": "site-ar-1",
+      "slug": "site-ar-1",
+      "name": "みなみ野 地域福祉施設新築工事",
+      "publicTitle": "地域の福祉施設を新築する工事",
+      "status": "under_construction",
+      "category": "建築・地方",
+      "siteType": "arch-rural",
+      "municipality": "みなみ野市",
+      "address": "埼玉県 みなみ野市 みなみ野 12-4",
+      "center": {
+        "longitude": 139.6741863214117,
+        "latitude": 35.58811489053736
+      },
+      "startDate": "2026-09-01",
+      "plannedEndDate": "2027-03-31",
+      "lastUpdatedAt": "2026-10-04T07:00:00+09:00",
+      "thumbnailUrl": "/images/sample-ar1.jpg",
+      "impactCount": 1
+    },
+    {
+      "id": "site-ar-4",
+      "slug": "site-ar-4",
+      "name": "湖畔 保育所新築工事",
+      "publicTitle": "湖畔に保育所を新築する工事",
+      "status": "under_construction",
+      "category": "建築・地方",
+      "siteType": "arch-rural",
+      "municipality": "湖畔町",
+      "address": "山梨県 湖畔町 湖畔 3-7-1",
+      "center": {
+        "longitude": 139.67462820151255,
+        "latitude": 35.597885109462645
+      },
+      "startDate": "2026-08-01",
+      "plannedEndDate": "2027-03-31",
+      "lastUpdatedAt": "2026-10-04T07:00:00+09:00",
+      "thumbnailUrl": "/images/sample-ar1.jpg",
+      "impactCount": 1
+    },
+    {
+      "id": "site-cu-5",
+      "slug": "site-cu-5",
+      "name": "文化会館前 広場再整備工事",
+      "publicTitle": "文化会館前の広場を再整備する工事",
+      "status": "under_construction",
+      "category": "土木・都市部",
+      "siteType": "civil-urban",
+      "municipality": "大田区",
+      "address": "東京都 大田区 文化会館前 2-3-1",
+      "center": {
+        "longitude": 139.66380213904208,
+        "latitude": 35.59010512031844
+      },
+      "startDate": "2026-07-01",
+      "plannedEndDate": "2027-02-28",
+      "lastUpdatedAt": "2026-10-04T07:00:00+09:00",
+      "thumbnailUrl": "/images/sample-cu1.jpg",
+      "impactCount": 2
+    },
+    {
+      "id": "site-cu-4",
+      "slug": "site-cu-4",
+      "name": "市街地 雨水貯留施設整備工事",
+      "publicTitle": "浸水対策の雨水貯留施設をつくる工事",
+      "status": "under_construction",
+      "category": "土木・都市部",
+      "siteType": "civil-urban",
+      "municipality": "大田区",
+      "address": "東京都 大田区 市街地中央 1-9-6",
+      "center": {
+        "longitude": 139.67109316070585,
+        "latitude": 35.58938140039805
+      },
+      "startDate": "2026-06-15",
+      "plannedEndDate": "2027-03-31",
+      "lastUpdatedAt": "2026-10-04T07:00:00+09:00",
+      "thumbnailUrl": "/images/sample-cu1.jpg",
+      "impactCount": 2
+    },
+    {
+      "id": "site-au-4",
+      "slug": "site-au-4",
+      "name": "市役所前 複合ビル新築工事",
+      "publicTitle": "市役所前に複合ビルを建てる工事",
+      "status": "under_construction",
+      "category": "建築・都市部",
+      "siteType": "arch-urban",
+      "municipality": "大田区",
+      "address": "東京都 大田区 市役所前 1-1-1",
+      "center": {
+        "longitude": 139.67131410075626,
+        "latitude": 35.595894879681566
+      },
+      "startDate": "2026-06-01",
+      "plannedEndDate": "2027-03-15",
+      "lastUpdatedAt": "2026-10-04T07:00:00+09:00",
+      "thumbnailUrl": "/images/sample-au1.jpg",
+      "impactCount": 2
+    },
+    {
+      "id": "tokyo-demo-001",
+      "slug": "denenchofu-road-improvement",
+      "name": "田園調布地区 歩道整備工事",
+      "publicTitle": "駅周辺の歩道を広げる工事",
+      "status": "under_construction",
+      "category": "道路",
+      "siteType": "civil-urban",
+      "municipality": "大田区",
+      "address": "東京都 大田区 田園調布一丁目 1-8-5",
+      "center": {
+        "longitude": 139.67,
+        "latitude": 35.5924
+      },
+      "startDate": "2026-05-15",
+      "plannedEndDate": "2027-01-31",
+      "lastUpdatedAt": "2026-10-03T18:30:00+09:00",
+      "thumbnailUrl": "/images/sample-cu1.jpg",
+      "impactCount": 1
+    },
+    {
+      "id": "site-au-2",
+      "slug": "site-au-2",
+      "name": "田園調布駅東口 オフィスビル新築工事",
+      "publicTitle": "駅東口にオフィスビルを建てる工事",
+      "status": "under_construction",
+      "category": "建築・都市部",
+      "siteType": "arch-urban",
+      "municipality": "大田区",
+      "address": "東京都 大田区 田園調布駅東口 1-3-8",
+      "center": {
+        "longitude": 139.6654591894202,
+        "latitude": 35.591643025149274
+      },
+      "startDate": "2026-05-10",
+      "plannedEndDate": "2027-03-31",
+      "lastUpdatedAt": "2026-10-04T07:00:00+09:00",
+      "thumbnailUrl": "/images/sample-au1.jpg",
+      "impactCount": 2
+    },
+    {
+      "id": "site-cu-2",
+      "slug": "site-cu-2",
+      "name": "駅南 道路拡幅工事",
+      "publicTitle": "駅南の道路を拡幅する工事",
+      "status": "under_construction",
+      "category": "土木・都市部",
+      "siteType": "civil-urban",
+      "municipality": "大田区",
+      "address": "東京都 大田区 駅南口 2-7-3",
+      "center": {
+        "longitude": 139.66358119899164,
+        "latitude": 35.593542789940294
+      },
+      "startDate": "2026-05-01",
+      "plannedEndDate": "2027-02-28",
+      "lastUpdatedAt": "2026-10-04T07:00:00+09:00",
+      "thumbnailUrl": "/images/sample-cu1.jpg",
+      "impactCount": 2
+    },
+    {
+      "id": "site-au-3",
+      "slug": "site-au-3",
+      "name": "中央通り 商業施設建替工事",
+      "publicTitle": "中央通りの商業施設を建て替える工事",
+      "status": "under_construction",
+      "category": "建築・都市部",
+      "siteType": "arch-urban",
+      "municipality": "大田区",
+      "address": "東京都 大田区 中央通り 4-6-2",
+      "center": {
+        "longitude": 139.66501730931935,
+        "latitude": 35.59462836982088
+      },
+      "startDate": "2026-04-15",
+      "plannedEndDate": "2027-01-31",
+      "lastUpdatedAt": "2026-10-04T07:00:00+09:00",
+      "thumbnailUrl": "/images/sample-au1.jpg",
+      "impactCount": 2
+    },
+    {
+      "id": "tokyo-demo-002",
+      "slug": "denenchofu-station-plaza",
+      "name": "田園調布駅前広場整備工事",
+      "publicTitle": "駅前広場を歩行者中心に整える工事",
+      "status": "under_construction",
+      "category": "広場",
+      "siteType": "civil-urban",
+      "municipality": "大田区",
+      "address": "東京都 大田区 田園調布本町 1-1-1",
+      "center": {
+        "longitude": 139.668,
+        "latitude": 35.593
+      },
+      "startDate": "2026-04-01",
+      "plannedEndDate": "2027-03-31",
+      "lastUpdatedAt": "2026-10-04T07:00:00+09:00",
+      "thumbnailUrl": "/images/sample-cu1.jpg",
+      "impactCount": 3
+    },
+    {
+      "id": "site-cu-1",
+      "slug": "site-cu-1",
+      "name": "中央通り 下水道管更新工事",
+      "publicTitle": "中央通りの下水道管を更新する工事",
+      "status": "under_construction",
+      "category": "土木・都市部",
+      "siteType": "civil-urban",
+      "municipality": "大田区",
+      "address": "東京都 大田区 中央通り 3-4-11",
+      "center": {
+        "longitude": 139.67241880100838,
+        "latitude": 35.59263814003981
+      },
+      "startDate": "2026-04-01",
+      "plannedEndDate": "2027-01-31",
+      "lastUpdatedAt": "2026-10-04T07:00:00+09:00",
+      "thumbnailUrl": "/images/sample-cu1.jpg",
+      "impactCount": 2
+    },
+    {
+      "id": "site-cr-2",
+      "slug": "site-cr-2",
+      "name": "一級河川 護岸改修工事",
+      "publicTitle": "河川の護岸を改修する工事",
+      "status": "under_construction",
+      "category": "土木・地方",
+      "siteType": "civil-rural",
+      "municipality": "入間川市",
+      "address": "埼玉県 入間川市 河岸 2-14-6",
+      "center": {
+        "longitude": 139.65960427808412,
+        "latitude": 35.59173349013932
+      },
+      "startDate": "2026-04-01",
+      "plannedEndDate": "2026-11-30",
+      "lastUpdatedAt": "2026-10-04T07:00:00+09:00",
+      "thumbnailUrl": "/images/sample-cr1.jpg",
+      "impactCount": 1
+    },
+    {
+      "id": "site-cu-3",
+      "slug": "site-cu-3",
+      "name": "桜並木通り 無電柱化・歩道整備工事",
+      "publicTitle": "桜並木通りの電柱を地中化する工事",
+      "status": "under_construction",
+      "category": "土木・都市部",
+      "siteType": "civil-urban",
+      "municipality": "大田区",
+      "address": "東京都 大田区 桜並木通り 6-1-4",
+      "center": {
+        "longitude": 139.6666743596975,
+        "latitude": 35.58974326035825
+      },
+      "startDate": "2026-03-15",
+      "plannedEndDate": "2026-12-28",
+      "lastUpdatedAt": "2026-10-04T07:00:00+09:00",
+      "thumbnailUrl": "/images/sample-cu1.jpg",
+      "impactCount": 2
+    },
+    {
+      "id": "site-au-1",
+      "slug": "site-au-1",
+      "name": "田園調布二丁目 マンション新築工事",
+      "publicTitle": "高層マンションを建てる工事",
+      "status": "under_construction",
+      "category": "建築・都市部",
+      "siteType": "arch-urban",
+      "municipality": "大田区",
+      "address": "東京都 大田区 田園調布二丁目 2-5-12",
+      "center": {
+        "longitude": 139.66965705037813,
+        "latitude": 35.59128116518907
+      },
+      "startDate": "2026-03-01",
+      "plannedEndDate": "2027-02-28",
+      "lastUpdatedAt": "2026-10-04T07:00:00+09:00",
+      "thumbnailUrl": "/images/sample-au1.jpg",
+      "impactCount": 2
+    },
+    {
+      "id": "site-au-5",
+      "slug": "site-au-5",
+      "name": "公園通り 分譲住宅新築工事",
+      "publicTitle": "公園通りに分譲住宅を建てる工事",
+      "status": "under_construction",
+      "category": "建築・都市部",
+      "siteType": "arch-urban",
+      "municipality": "大田区",
+      "address": "東京都 大田区 公園通り 5-2-9",
+      "center": {
+        "longitude": 139.66755811989918,
+        "latitude": 35.59625673964176
+      },
+      "startDate": "2026-02-20",
+      "plannedEndDate": "2026-12-20",
+      "lastUpdatedAt": "2026-10-04T07:00:00+09:00",
+      "thumbnailUrl": "/images/sample-au1.jpg",
+      "impactCount": 2
+    },
+    {
+      "id": "site-ar-5",
+      "slug": "site-ar-5",
+      "name": "東野 公民館改築工事",
+      "publicTitle": "老朽化した公民館を改築する工事",
+      "status": "under_construction",
+      "category": "建築・地方",
+      "siteType": "arch-rural",
+      "municipality": "東野市",
+      "address": "茨城県 東野市 東野 77-5",
+      "center": {
+        "longitude": 139.66822094005042,
+        "latitude": 35.59951347928352
+      },
+      "startDate": "2025-09-01",
+      "plannedEndDate": "2026-05-31",
+      "lastUpdatedAt": "2026-10-04T07:00:00+09:00",
+      "thumbnailUrl": "/images/sample-ar1.jpg",
+      "impactCount": 1
+    },
+    {
+      "id": "site-cr-5",
+      "slug": "site-cr-5",
+      "name": "橋梁 耐震補強工事",
+      "publicTitle": "古い橋を耐震補強する工事",
+      "status": "under_construction",
+      "category": "土木・地方",
+      "siteType": "civil-rural",
+      "municipality": "大井川市",
+      "address": "静岡県 大井川市 橋梁 1-22-4",
+      "center": {
+        "longitude": 139.6763957219159,
+        "latitude": 35.59625673964176
+      },
+      "startDate": "2025-08-01",
+      "plannedEndDate": "2026-03-31",
+      "lastUpdatedAt": "2026-10-04T07:00:00+09:00",
+      "thumbnailUrl": "/images/sample-cr1.jpg",
+      "impactCount": 1
+    },
+    {
+      "id": "tokyo-demo-003",
+      "slug": "denenchofu-sewer-renewal",
+      "name": "田園調布駅周辺 下水道管更新工事",
+      "publicTitle": "古い下水道管を入れ替える工事",
+      "status": "planned",
+      "category": "下水道",
+      "siteType": "civil-urban",
+      "municipality": "大田区",
+      "address": "東京都 大田区 田園調布三丁目 3-2-4",
+      "center": {
+        "longitude": 139.6666,
+        "latitude": 35.5941
+      },
+      "startDate": "2026-12-01",
+      "plannedEndDate": "2027-03-31",
+      "lastUpdatedAt": "2026-10-01T09:00:00+09:00",
+      "thumbnailUrl": "/images/sample-cu1.jpg",
+      "impactCount": 1
+    },
+    {
+      "id": "tokyo-demo-004",
+      "slug": "tamagawa-park-plaza",
+      "name": "多摩川台公園 防災広場整備工事",
+      "publicTitle": "公園に防災広場をつくる工事",
+      "status": "completed",
+      "category": "公園",
+      "siteType": "civil-urban",
+      "municipality": "大田区",
+      "address": "東京都 大田区 多摩川台 2-1-1",
+      "center": {
+        "longitude": 139.6695,
+        "latitude": 35.5952
+      },
+      "startDate": "2025-06-01",
+      "plannedEndDate": "2026-02-28",
+      "lastUpdatedAt": "2026-03-05T10:00:00+09:00",
+      "thumbnailUrl": "/images/sample-cu1.jpg",
+      "impactCount": 1
+    }
+  ]
+}

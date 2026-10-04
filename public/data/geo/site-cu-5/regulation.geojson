@@ -1,0 +1,32 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "site-cu-5:regulation",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66733717984874,
+            35.593
+          ],
+          [
+            139.66866282015127,
+            35.593
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-cu-5:regulation",
+        "projectId": "site-cu-5",
+        "type": "regulation",
+        "name": "文化会館前の広場を再整備する工事 交通規制区間",
+        "validFrom": "2026-07-01",
+        "validTo": "2027-02-28",
+        "source": "大田区 建設部 土木課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    }
+  ]
+}

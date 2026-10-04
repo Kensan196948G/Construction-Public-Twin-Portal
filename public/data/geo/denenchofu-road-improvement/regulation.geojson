@@ -1,0 +1,32 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "tokyo-demo-001:regulation",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.666939487758,
+            35.593
+          ],
+          [
+            139.66861863214118,
+            35.593
+          ]
+        ]
+      },
+      "properties": {
+        "id": "tokyo-demo-001:regulation",
+        "projectId": "tokyo-demo-001",
+        "type": "regulation",
+        "name": "駅周辺の歩道を広げる工事 交通規制区間",
+        "validFrom": "2026-05-15",
+        "validTo": "2027-01-31",
+        "source": "大田区 建設部 道路課",
+        "updatedAt": "2026-10-03T18:30:00+09:00"
+      }
+    }
+  ]
+}

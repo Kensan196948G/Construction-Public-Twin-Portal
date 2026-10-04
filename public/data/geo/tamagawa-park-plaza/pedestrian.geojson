@@ -1,0 +1,32 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "tokyo-demo-004:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66722670982355,
+            35.592728605029855
+          ],
+          [
+            139.66877329017646,
+            35.592728605029855
+          ]
+        ]
+      },
+      "properties": {
+        "id": "tokyo-demo-004:pedestrian",
+        "projectId": "tokyo-demo-004",
+        "type": "pedestrian",
+        "name": "公園に防災広場をつくる工事 歩道切替",
+        "validFrom": "2025-06-01",
+        "validTo": "2026-02-28",
+        "source": "大田区 都市整備部 公園課",
+        "updatedAt": "2026-03-05T10:00:00+09:00"
+      }
+    }
+  ]
+}

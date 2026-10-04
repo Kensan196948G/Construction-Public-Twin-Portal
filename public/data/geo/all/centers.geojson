@@ -1,0 +1,509 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "site-cr-4:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.6728606811092,
+          35.599332549303426
+        ]
+      },
+      "properties": {
+        "id": "site-cr-4:center",
+        "projectId": "site-cr-4",
+        "type": "project_center",
+        "name": "峠の急カーブを改良する工事",
+        "validFrom": "2027-01-10",
+        "validTo": "2027-03-31",
+        "source": "サンプル県 地域整備部",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-ar-3:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.66092991838664,
+          35.596980459562154
+        ]
+      },
+      "properties": {
+        "id": "site-ar-3:center",
+        "projectId": "site-ar-3",
+        "type": "project_center",
+        "name": "集落の診療所を建て替える工事",
+        "validFrom": "2026-12-01",
+        "validTo": "2027-03-31",
+        "source": "サンプル町 建設課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-ar-2:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.66137179848747,
+          35.58847675049756
+        ]
+      },
+      "properties": {
+        "id": "site-ar-2:center",
+        "projectId": "site-ar-2",
+        "type": "project_center",
+        "name": "農産物直売所を新築する工事",
+        "validFrom": "2026-11-15",
+        "validTo": "2027-03-31",
+        "source": "サンプル町 建設課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-cr-1:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.67595384181504,
+          35.591371630179125
+        ]
+      },
+      "properties": {
+        "id": "site-cr-1:center",
+        "projectId": "site-cr-1",
+        "type": "project_center",
+        "name": "県道の法面を補強する工事",
+        "validFrom": "2026-10-20",
+        "validTo": "2027-03-31",
+        "source": "サンプル県 地域整備部",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-cr-3:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.6655696594454,
+          35.58666745069658
+        ]
+      },
+      "properties": {
+        "id": "site-cr-3:center",
+        "projectId": "site-cr-3",
+        "type": "project_center",
+        "name": "農道を舗装改良する工事",
+        "validFrom": "2026-09-15",
+        "validTo": "2027-03-31",
+        "source": "サンプル県 地域整備部",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-ar-1:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.6741863214117,
+          35.58811489053736
+        ]
+      },
+      "properties": {
+        "id": "site-ar-1:center",
+        "projectId": "site-ar-1",
+        "type": "project_center",
+        "name": "地域の福祉施設を新築する工事",
+        "validFrom": "2026-09-01",
+        "validTo": "2027-03-31",
+        "source": "サンプル町 建設課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-ar-4:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.67462820151255,
+          35.597885109462645
+        ]
+      },
+      "properties": {
+        "id": "site-ar-4:center",
+        "projectId": "site-ar-4",
+        "type": "project_center",
+        "name": "湖畔に保育所を新築する工事",
+        "validFrom": "2026-08-01",
+        "validTo": "2027-03-31",
+        "source": "サンプル町 建設課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-cu-5:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.66380213904208,
+          35.59010512031844
+        ]
+      },
+      "properties": {
+        "id": "site-cu-5:center",
+        "projectId": "site-cu-5",
+        "type": "project_center",
+        "name": "文化会館前の広場を再整備する工事",
+        "validFrom": "2026-07-01",
+        "validTo": "2027-02-28",
+        "source": "大田区 建設部 土木課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-cu-4:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.67109316070585,
+          35.58938140039805
+        ]
+      },
+      "properties": {
+        "id": "site-cu-4:center",
+        "projectId": "site-cu-4",
+        "type": "project_center",
+        "name": "浸水対策の雨水貯留施設をつくる工事",
+        "validFrom": "2026-06-15",
+        "validTo": "2027-03-31",
+        "source": "大田区 建設部 土木課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-au-4:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.67131410075626,
+          35.595894879681566
+        ]
+      },
+      "properties": {
+        "id": "site-au-4:center",
+        "projectId": "site-au-4",
+        "type": "project_center",
+        "name": "市役所前に複合ビルを建てる工事",
+        "validFrom": "2026-06-01",
+        "validTo": "2027-03-15",
+        "source": "大田区 建築部 市街地整備課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "tokyo-demo-001:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.67,
+          35.5924
+        ]
+      },
+      "properties": {
+        "id": "tokyo-demo-001:center",
+        "projectId": "tokyo-demo-001",
+        "type": "project_center",
+        "name": "駅周辺の歩道を広げる工事",
+        "validFrom": "2026-05-15",
+        "validTo": "2027-01-31",
+        "source": "大田区 建設部 道路課",
+        "updatedAt": "2026-10-03T18:30:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-au-2:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.6654591894202,
+          35.591643025149274
+        ]
+      },
+      "properties": {
+        "id": "site-au-2:center",
+        "projectId": "site-au-2",
+        "type": "project_center",
+        "name": "駅東口にオフィスビルを建てる工事",
+        "validFrom": "2026-05-10",
+        "validTo": "2027-03-31",
+        "source": "大田区 建築部 市街地整備課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-cu-2:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.66358119899164,
+          35.593542789940294
+        ]
+      },
+      "properties": {
+        "id": "site-cu-2:center",
+        "projectId": "site-cu-2",
+        "type": "project_center",
+        "name": "駅南の道路を拡幅する工事",
+        "validFrom": "2026-05-01",
+        "validTo": "2027-02-28",
+        "source": "大田区 建設部 土木課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-au-3:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.66501730931935,
+          35.59462836982088
+        ]
+      },
+      "properties": {
+        "id": "site-au-3:center",
+        "projectId": "site-au-3",
+        "type": "project_center",
+        "name": "中央通りの商業施設を建て替える工事",
+        "validFrom": "2026-04-15",
+        "validTo": "2027-01-31",
+        "source": "大田区 建築部 市街地整備課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "tokyo-demo-002:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.668,
+          35.593
+        ]
+      },
+      "properties": {
+        "id": "tokyo-demo-002:center",
+        "projectId": "tokyo-demo-002",
+        "type": "project_center",
+        "name": "駅前広場を歩行者中心に整える工事",
+        "validFrom": "2026-04-01",
+        "validTo": "2027-03-31",
+        "source": "大田区 建設部 まちづくり課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-cu-1:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.67241880100838,
+          35.59263814003981
+        ]
+      },
+      "properties": {
+        "id": "site-cu-1:center",
+        "projectId": "site-cu-1",
+        "type": "project_center",
+        "name": "中央通りの下水道管を更新する工事",
+        "validFrom": "2026-04-01",
+        "validTo": "2027-01-31",
+        "source": "大田区 建設部 土木課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-cr-2:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.65960427808412,
+          35.59173349013932
+        ]
+      },
+      "properties": {
+        "id": "site-cr-2:center",
+        "projectId": "site-cr-2",
+        "type": "project_center",
+        "name": "河川の護岸を改修する工事",
+        "validFrom": "2026-04-01",
+        "validTo": "2026-11-30",
+        "source": "サンプル県 地域整備部",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-cu-3:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.6666743596975,
+          35.58974326035825
+        ]
+      },
+      "properties": {
+        "id": "site-cu-3:center",
+        "projectId": "site-cu-3",
+        "type": "project_center",
+        "name": "桜並木通りの電柱を地中化する工事",
+        "validFrom": "2026-03-15",
+        "validTo": "2026-12-28",
+        "source": "大田区 建設部 土木課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-au-1:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.66965705037813,
+          35.59128116518907
+        ]
+      },
+      "properties": {
+        "id": "site-au-1:center",
+        "projectId": "site-au-1",
+        "type": "project_center",
+        "name": "高層マンションを建てる工事",
+        "validFrom": "2026-03-01",
+        "validTo": "2027-02-28",
+        "source": "大田区 建築部 市街地整備課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-au-5:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.66755811989918,
+          35.59625673964176
+        ]
+      },
+      "properties": {
+        "id": "site-au-5:center",
+        "projectId": "site-au-5",
+        "type": "project_center",
+        "name": "公園通りに分譲住宅を建てる工事",
+        "validFrom": "2026-02-20",
+        "validTo": "2026-12-20",
+        "source": "大田区 建築部 市街地整備課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-ar-5:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.66822094005042,
+          35.59951347928352
+        ]
+      },
+      "properties": {
+        "id": "site-ar-5:center",
+        "projectId": "site-ar-5",
+        "type": "project_center",
+        "name": "老朽化した公民館を改築する工事",
+        "validFrom": "2025-09-01",
+        "validTo": "2026-05-31",
+        "source": "サンプル町 建設課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "site-cr-5:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.6763957219159,
+          35.59625673964176
+        ]
+      },
+      "properties": {
+        "id": "site-cr-5:center",
+        "projectId": "site-cr-5",
+        "type": "project_center",
+        "name": "古い橋を耐震補強する工事",
+        "validFrom": "2025-08-01",
+        "validTo": "2026-03-31",
+        "source": "サンプル県 地域整備部",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "tokyo-demo-003:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.6666,
+          35.5941
+        ]
+      },
+      "properties": {
+        "id": "tokyo-demo-003:center",
+        "projectId": "tokyo-demo-003",
+        "type": "project_center",
+        "name": "古い下水道管を入れ替える工事",
+        "validFrom": "2026-12-01",
+        "validTo": "2027-03-31",
+        "source": "大田区 下水道部 管路課",
+        "updatedAt": "2026-10-01T09:00:00+09:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "tokyo-demo-004:center",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.6695,
+          35.5952
+        ]
+      },
+      "properties": {
+        "id": "tokyo-demo-004:center",
+        "projectId": "tokyo-demo-004",
+        "type": "project_center",
+        "name": "公園に防災広場をつくる工事",
+        "validFrom": "2025-06-01",
+        "validTo": "2026-02-28",
+        "source": "大田区 都市整備部 公園課",
+        "updatedAt": "2026-03-05T10:00:00+09:00"
+      }
+    }
+  ]
+}

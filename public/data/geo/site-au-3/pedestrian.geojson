@@ -1,0 +1,32 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "site-au-3:pedestrian",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            139.66764649591934,
+            35.59282811651891
+          ],
+          [
+            139.66835350408067,
+            35.59282811651891
+          ]
+        ]
+      },
+      "properties": {
+        "id": "site-au-3:pedestrian",
+        "projectId": "site-au-3",
+        "type": "pedestrian",
+        "name": "中央通りの商業施設を建て替える工事 歩道切替",
+        "validFrom": "2026-04-15",
+        "validTo": "2027-01-31",
+        "source": "大田区 建築部 市街地整備課",
+        "updatedAt": "2026-10-04T07:00:00+09:00"
+      }
+    }
+  ]
+}
