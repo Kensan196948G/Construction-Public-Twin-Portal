@@ -93,6 +93,164 @@ export const DEFAULT_VISIBLE_LAYERS: Record<LayerId, boolean> = {
 };
 
 /* ------------------------------------------------------------------ *
+ * データレイヤー（現場ごとの3Dで扱う情報ソース）
+ *
+ * 建設デジタルツインで扱うデータ種別。GIS は既存の
+ * 工区・規制・迂回路・歩道切替レイヤーをまとめて制御する。
+ *
+ * 注意: 本 MVP には実データが無いため、各レイヤーの形状は
+ * `lib/site/sceneData.ts` がプロジェクトIDから決定的に生成する
+ * **サンプル（合成）データ**である。UI 上でその旨を明示すること。
+ * ------------------------------------------------------------------ */
+
+export const DATA_LAYER_IDS = [
+  "bim",
+  "cad",
+  "gis",
+  "pointcloud",
+  "gaussian",
+  "smartphone",
+  "photo",
+  "progress",
+  "inspection",
+  "trajectory",
+  "aiPin",
+] as const;
+
+export type DataLayerId = (typeof DATA_LAYER_IDS)[number];
+
+export interface DataLayerMeta {
+  id: DataLayerId;
+  /** 表示名（UI のラベルと一致させる） */
+  name: string;
+  /** 補足説明（1行） */
+  description: string;
+  /** 3D での描画プリミティブ（凡例のマーク形状） */
+  render: "mesh" | "line" | "line-dashed" | "points" | "splat" | "point" | "billboard" | "pin";
+  /** 凡例・スウォッチ色 */
+  swatch: string;
+  /** このレイヤーの元データが合成サンプルであるか */
+  sample: boolean;
+}
+
+export const DATA_LAYERS: DataLayerMeta[] = [
+  {
+    id: "bim",
+    name: "BIM",
+    description: "構造部材（柱・梁・床）の3Dモデル",
+    render: "mesh",
+    swatch: "#5b7cfa",
+    sample: true,
+  },
+  {
+    id: "cad",
+    name: "CAD",
+    description: "平面図・中心線・寸法のオーバーレイ",
+    render: "line",
+    swatch: "#e58212",
+    sample: true,
+  },
+  {
+    id: "gis",
+    name: "GIS",
+    description: "工区・交通規制・迂回路・歩道切替",
+    render: "mesh",
+    swatch: "#3b7dd8",
+    sample: false,
+  },
+  {
+    id: "pointcloud",
+    name: "点群",
+    description: "レーザースキャンによる点群",
+    render: "points",
+    swatch: "#3fb6a8",
+    sample: true,
+  },
+  {
+    id: "gaussian",
+    name: "3DGS",
+    description: "3Dガウシアンスプラッティング",
+    render: "splat",
+    swatch: "#b06ae0",
+    sample: true,
+  },
+  {
+    id: "smartphone",
+    name: "スマホ",
+    description: "スマートフォン撮影位置",
+    render: "point",
+    swatch: "#2f9d6b",
+    sample: true,
+  },
+  {
+    id: "photo",
+    name: "写真",
+    description: "撮影位置に貼る現場写真パネル",
+    render: "billboard",
+    swatch: "#d9a441",
+    sample: false,
+  },
+  {
+    id: "progress",
+    name: "施工進捗",
+    description: "工程ごとの進捗率を色で表現",
+    render: "mesh",
+    swatch: "#35a3c4",
+    sample: true,
+  },
+  {
+    id: "inspection",
+    name: "点検",
+    description: "点検記録と判定（良・要注意・要補修）",
+    render: "pin",
+    swatch: "#7a53c9",
+    sample: true,
+  },
+  {
+    id: "trajectory",
+    name: "撮影軌跡",
+    description: "撮影位置を結ぶ移動軌跡",
+    render: "line-dashed",
+    swatch: "#d23b2e",
+    sample: true,
+  },
+  {
+    id: "aiPin",
+    name: "AI・指摘ピン",
+    description: "AI検出・指摘事項の位置ピン",
+    render: "pin",
+    swatch: "#e0457b",
+    sample: true,
+  },
+];
+
+export const DEFAULT_DATA_LAYERS: Record<DataLayerId, boolean> = {
+  bim: false,
+  cad: false,
+  gis: true,
+  pointcloud: false,
+  gaussian: false,
+  smartphone: false,
+  photo: true,
+  progress: false,
+  inspection: false,
+  trajectory: false,
+  aiPin: false,
+};
+
+/* ------------------------------------------------------------------ *
+ * 表示スコープ
+ * ------------------------------------------------------------------ */
+
+/**
+ * 3D の表示スコープ。
+ *   site … 選択した1現場だけを描画する（既定。現場ごとの3D）
+ *   area … 地区全体の工区を俯瞰する（一覧性のため残す）
+ */
+export type ViewScope = "site" | "area";
+export const DEFAULT_VIEW_SCOPE: ViewScope = "site";
+
+/* ------------------------------------------------------------------ *
  * 表示モード
  * ------------------------------------------------------------------ */
 
@@ -117,6 +275,10 @@ export interface AppState {
 
   /* 補助状態 */
   regulatingOnly: boolean;
+  /** 3D の表示スコープ（現場ごと / 地区全体） */
+  viewScope: ViewScope;
+  /** データレイヤーの表示状態 */
+  dataLayers: Record<DataLayerId, boolean>;
   /** 一覧タブ: 工事 / レイヤー / 凡例 */
   sidebarTab: SidebarTab;
   /** 一覧から開く「現場ビューア」 */
@@ -140,6 +302,10 @@ export interface AppState {
   setAllLayers: (visible: boolean) => void;
   selectImpact: (id: string | null) => void;
   setRegulatingOnly: (value: boolean) => void;
+  setViewScope: (scope: ViewScope) => void;
+  toggleDataLayer: (id: DataLayerId) => void;
+  setDataLayerVisible: (id: DataLayerId, visible: boolean) => void;
+  setAllDataLayers: (visible: boolean) => void;
   setSidebarTab: (tab: SidebarTab) => void;
   openSiteViewer: (index?: number) => void;
   closeSiteViewer: () => void;
@@ -166,6 +332,8 @@ export const useAppStore = create<AppState>((set) => ({
   selectedImpactId: null,
 
   regulatingOnly: false,
+  viewScope: DEFAULT_VIEW_SCOPE,
+  dataLayers: { ...DEFAULT_DATA_LAYERS },
   sidebarTab: "projects",
   siteViewerOpen: false,
   siteViewerIndex: 0,
@@ -211,6 +379,21 @@ export const useAppStore = create<AppState>((set) => ({
 
   selectImpact: (selectedImpactId) => set({ selectedImpactId }),
   setRegulatingOnly: (regulatingOnly) => set({ regulatingOnly }),
+  setViewScope: (viewScope) => set({ viewScope }),
+
+  toggleDataLayer: (id) =>
+    set((s) => ({ dataLayers: { ...s.dataLayers, [id]: !s.dataLayers[id] } })),
+
+  setDataLayerVisible: (id, visible) =>
+    set((s) => ({ dataLayers: { ...s.dataLayers, [id]: visible } })),
+
+  setAllDataLayers: (visible) =>
+    set(() => ({
+      dataLayers: DATA_LAYER_IDS.reduce(
+        (acc, id) => ({ ...acc, [id]: visible }),
+        {} as Record<DataLayerId, boolean>,
+      ),
+    })),
   setSidebarTab: (sidebarTab) => set({ sidebarTab }),
   openSiteViewer: (index) =>
     set((s) => ({ siteViewerOpen: true, siteViewerIndex: index ?? s.siteViewerIndex })),

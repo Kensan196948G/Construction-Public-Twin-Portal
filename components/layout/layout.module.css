@@ -263,6 +263,12 @@
   flex: 0 0 auto;
 }
 
+.legendEmpty {
+  font-size: 11px;
+  color: var(--faint);
+  padding: 2px 0 4px;
+}
+
 .legendSub {
   font-size: 10px;
   letter-spacing: 0.1em;

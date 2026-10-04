@@ -12,6 +12,8 @@ export function ViewportControls() {
   const setViewMode = useAppStore((s) => s.setViewMode);
   const base3dSource = useAppStore((s) => s.base3dSource);
   const setBase3dSource = useAppStore((s) => s.setBase3dSource);
+  const viewScope = useAppStore((s) => s.viewScope);
+  const setViewScope = useAppStore((s) => s.setViewScope);
   const openSiteViewer = useAppStore((s) => s.openSiteViewer);
   const setMobileSheetOpen = useAppStore((s) => s.setMobileSheetOpen);
 
@@ -39,6 +41,28 @@ export function ViewportControls() {
 
       {viewMode === "3d" && (
         <>
+          <span className={styles.controlLabel}>3Dの範囲</span>
+          <div className="seg" role="group" aria-label="3D表示の範囲">
+            <button
+              type="button"
+              className={viewScope === "site" ? "active" : ""}
+              aria-pressed={viewScope === "site"}
+              onClick={() => setViewScope("site")}
+              title="選択した1現場だけを3D表示します"
+            >
+              現場
+            </button>
+            <button
+              type="button"
+              className={viewScope === "area" ? "active" : ""}
+              aria-pressed={viewScope === "area"}
+              onClick={() => setViewScope("area")}
+              title="地区全体の工区を俯瞰します"
+            >
+              地区
+            </button>
+          </div>
+
           <span className={styles.controlLabel}>3D背景</span>
           <div className="seg" role="group" aria-label="3D背景の切り替え">
             <button
@@ -69,9 +93,9 @@ export function ViewportControls() {
           type="button"
           className="chip-btn"
           onClick={() => openSiteViewer()}
-          title="写真とクレジットを並べて確認します"
+          title="24現場の3Dギャラリーと現場写真を開きます"
         >
-          現場ビューア
+          現場ギャラリー
         </button>
         <button
           type="button"
