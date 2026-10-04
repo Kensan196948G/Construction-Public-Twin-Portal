@@ -18,6 +18,7 @@ function formatDate(iso: string): string {
 export function MapNote() {
   const viewTime = useAppStore((s) => s.viewTime);
   const viewMode = useAppStore((s) => s.viewMode);
+  const viewScope = useAppStore((s) => s.viewScope);
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
   const searchKeyword = useAppStore((s) => s.searchKeyword);
   const selectedCategory = useAppStore((s) => s.selectedCategory);
@@ -51,7 +52,8 @@ export function MapNote() {
 
   return (
     <div className={`float ${styles.mapNote}`} role="status" aria-live="polite">
-      <b>{formatDate(viewTime)}</b> 時点 / {viewMode === "3d" ? "3D" : "2D"}表示 ・ 工事{" "}
+      <b>{formatDate(viewTime)}</b> 時点 /{" "}
+      {viewMode === "3d" ? (viewScope === "site" ? "現場3D" : "地区3D") : "2D"}表示 ・ 工事{" "}
       <b>{visibleCount}</b> 件 ・ 有効な規制 <b>{activeRegulations}</b> 件
       {selected ? (
         <>

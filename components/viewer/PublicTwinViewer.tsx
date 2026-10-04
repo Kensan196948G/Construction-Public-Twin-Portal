@@ -3,14 +3,15 @@
 /**
  * 3D ビューア本体（工事みえるマップ 3D Beta のメインビューポート）。
  *
- * 構成:
- *   - 内蔵の手続き生成都市（TerrainLayer / LocalCityModel）… 既定の背景。
- *     外部ネットワークが無くても必ず表示できる。
- *   - PLATEAU 3D Tiles（PlateauTileset）… 環境変数が設定されている時のみ試行。
- *     失敗・タイムアウト時は内蔵背景へ自動フォールバックし、バッジで正直に表示。
- *   - 工区 / 工事位置 / 完成予想 / 規制・迂回・歩道切替（各レイヤー）。
- *   - カメラ操作とプリセット（CameraController）。
+ * 表示スコープ（`useAppStore().viewScope`）で2つの見せ方を持つ:
  *
+ *   "site"（既定）… **選択した1現場だけ**を描画する（1現場 = 1つの3D）。
+ *                    座標は案件中心が原点。周辺の街並みは文脈として控えめに描く。
+ *                    PLATEAU（地区全体の3D Tiles）は試行しない。
+ *   "area"        … 従来どおり地区全体を俯瞰する。全案件の工区・完成予想・影響を
+ *                    描画し、選択中の現場のデータレイヤーだけを重ねる。
+ *
+ * 外部ネットワークが無くても必ず表示できる（手続き生成が基本）。
  * WebGL が使えない環境や初期化に失敗した場合は、例外を投げずに
  * 「3Dを表示できません」と 2D への切替ボタンを表示する。
  */
@@ -19,12 +20,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { publicImpacts } from "@/lib/data/impacts";
 import { publicProjectRecords } from "@/lib/data/projects";
+import { SITE_LAYER_NOTE, buildSiteModelData } from "@/lib/site/sceneData";
 import { useAppStore } from "@/lib/store/useAppStore";
 import {
   CAMERA_PRESETS,
   DEFAULT_CAMERA_TARGET,
   cameraPositionFor,
-  presetById,
+  sitePresets,
   type CameraPresetId,
 } from "@/lib/viewer/cameraPresets";
 import {
@@ -35,18 +37,21 @@ import {
 import {
   SCENE_COLORS,
   buildCityLayout,
-  projectRadius,
   projectSceneCenter,
   rectFromRing,
   type Rect,
 } from "@/lib/viewer/sceneBuilder";
+import { SITE_COLORS, siteRadius } from "@/lib/viewer/siteScene";
 
-import { CameraController, type CameraCommand } from "./CameraController";
+import { CameraController, type CameraCommand, type CameraIntent } from "./CameraController";
 import { DetourLayer } from "./DetourLayer";
 import { ImpactLayer } from "./ImpactLayer";
 import { LocalCityModel } from "./LocalCityModel";
+import { LocalSceneTransform } from "./LocalSceneTransform";
 import { PlateauTileset, type PlateauStatus } from "./PlateauTileset";
 import { ProjectOverlay } from "./ProjectOverlay";
+import { SiteDataLayers } from "./SiteDataLayers";
+import { SiteScene } from "./SiteScene";
 import { TerrainLayer } from "./TerrainLayer";
 import { ViewerErrorBoundary } from "./ViewerErrorBoundary";
 import { WorkZoneLayer } from "./WorkZoneLayer";
@@ -83,7 +88,11 @@ interface BaseStatusView {
 function baseStatusView(
   base3dSource: "local" | "plateau",
   plateauStatus: PlateauStatus,
+  siteTitle: string | null,
 ): BaseStatusView {
+  if (siteTitle) {
+    return { state: "ok", text: `現場3D：${siteTitle}` };
+  }
   if (base3dSource === "local") {
     return { state: "ok", text: `内蔵背景：${LOCAL_CITY_TILESET.name}` };
   }
@@ -149,8 +158,11 @@ export function PublicTwinViewer(): React.ReactElement {
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
   const selectedImpactId = useAppStore((s) => s.selectedImpactId);
   const visibleLayers = useAppStore((s) => s.visibleLayers);
+  const dataLayers = useAppStore((s) => s.dataLayers);
   const completionMode = useAppStore((s) => s.completionMode);
   const base3dSource = useAppStore((s) => s.base3dSource);
+  const viewScope = useAppStore((s) => s.viewScope);
+  const setViewScope = useAppStore((s) => s.setViewScope);
   const selectProject = useAppStore((s) => s.selectProject);
   const selectImpact = useAppStore((s) => s.selectImpact);
   const setViewMode = useAppStore((s) => s.setViewMode);
@@ -160,7 +172,21 @@ export function PublicTwinViewer(): React.ReactElement {
   const impacts = useMemo(() => publicImpacts(), []);
   const viewDate = useMemo(() => new Date(viewTime), [viewTime]);
 
-  // 工区と重なる場所には周辺建物を建てない
+  const siteRecord = useMemo(
+    () =>
+      selectedProjectId
+        ? (records.find((record) => record.project.id === selectedProjectId) ?? null)
+        : null,
+    [records, selectedProjectId],
+  );
+
+  /** 現場3Dのシーン寸法（カメラ距離とプリセットに使う） */
+  const siteData = useMemo(
+    () => (siteRecord ? buildSiteModelData(siteRecord.project) : null),
+    [siteRecord],
+  );
+
+  // 工区と重なる場所には周辺建物を建てない（地区全体表示のみ）
   const layout = useMemo(() => {
     const avoid = records
       .map((record) => rectFromRing(projectSceneCenter(record.project), record.geometry.zone))
@@ -168,17 +194,54 @@ export function PublicTwinViewer(): React.ReactElement {
     return buildCityLayout({ avoid });
   }, [records]);
 
-  const focus = useMemo(() => {
-    const record = records.find((r) => r.project.id === selectedProjectId);
-    if (!record) return null;
-    const center = projectSceneCenter(record.project);
-    return { x: center.x, z: center.z, radius: projectRadius(record.project) };
-  }, [records, selectedProjectId]);
+  const areaMode = viewScope === "area";
+  /** スコープに応じたカメラプリセット（現場3Dは現場寸法から距離を導出する） */
+  const presets = useMemo(
+    () => (areaMode || !siteData ? CAMERA_PRESETS : sitePresets(siteRadius(siteData))),
+    [areaMode, siteData],
+  );
 
   const [command, setCommand] = useState<CameraCommand>({ preset: "overview", nonce: 0 });
   const applyPreset = useCallback((preset: CameraPresetId) => {
     setCommand((current) => ({ preset, nonce: current.nonce + 1 }));
   }, []);
+
+  /**
+   * カメラの行き先（親が決めて CameraController へ渡す）。
+   *
+   * - 注視点: 地区全体 = 選択中の工区 / 現場3D = シーン原点（= 案件中心）
+   * - 距離・角度: スコープに合ったプリセット
+   * key が変わったときだけ CameraController が距離・角度を適用し直すため、
+   * スコープ切替（現場 ⇄ 地区全体）でもスケールが正しく追随する。
+   */
+  const cameraIntent = useMemo<CameraIntent>(() => {
+    const preset = presets.find((item) => item.id === command.preset) ?? presets[0];
+    const focus =
+      areaMode && siteRecord
+        ? projectSceneCenter(siteRecord.project)
+        : { x: DEFAULT_CAMERA_TARGET.x, z: DEFAULT_CAMERA_TARGET.z };
+    return {
+      key: `${areaMode ? "area" : "site"}:${selectedProjectId ?? "none"}:${command.preset}:${command.nonce}`,
+      target: { x: focus.x, y: DEFAULT_CAMERA_TARGET.y, z: focus.z },
+      distance: preset.distance,
+      theta: preset.theta,
+      phi: preset.phi,
+    };
+  }, [areaMode, command, presets, selectedProjectId, siteRecord]);
+
+
+  /**
+   * 表示スコープの切替。
+   * スコープで距離のスケールが2桁変わるため、切替時は必ず「標準」を適用して
+   * 新しいスコープに合った画角へ戻す（現場 対 地区全体）。
+   */
+  const setScope = useCallback(
+    (scope: "site" | "area") => {
+      setViewScope(scope);
+      applyPreset("overview");
+    },
+    [applyPreset, setViewScope],
+  );
 
   const [plateauAttempt, setPlateauAttempt] = useState<PlateauStatus>("loading");
   const [plateauRetry, setPlateauRetry] = useState(0);
@@ -202,14 +265,19 @@ export function PublicTwinViewer(): React.ReactElement {
   const pointerDownAt = useRef<{ x: number; y: number } | null>(null);
 
   /**
-   * 背景クリックで選択解除する。
+   * 背景クリックで選択解除する（地区全体表示のみ）。
    * ドラッグ（カメラ操作）で解除されないよう、押下位置から一定以上動いた場合は無視する。
+   * 現場3Dでは「その現場」しか描かないため、誤操作で消えないように解除しない。
    */
-  const handlePointerMissed = useCallback((event: MouseEvent) => {
-    const start = pointerDownAt.current;
-    if (start && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 6) return;
-    selectProject(null);
-  }, [selectProject]);
+  const handlePointerMissed = useCallback(
+    (event: MouseEvent) => {
+      if (!areaMode) return;
+      const start = pointerDownAt.current;
+      if (start && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 6) return;
+      selectProject(null);
+    },
+    [areaMode, selectProject],
+  );
 
   const handleSelectProject = useCallback(
     (projectId: string) => {
@@ -227,17 +295,25 @@ export function PublicTwinViewer(): React.ReactElement {
 
   const switchTo2d = useCallback(() => setViewMode("2d"), [setViewMode]);
 
-  const usingPlateau = base3dSource === "plateau";
+  const usingPlateau = areaMode && base3dSource === "plateau";
   // disabled / unconfigured はこのコンポーネント側で導出する（PlateauTileset は試行結果のみ報告）
   const plateauStatus: PlateauStatus =
-    base3dSource !== "plateau"
+    !areaMode || base3dSource !== "plateau"
       ? "disabled"
       : !PLATEAU_TILESET.configured
         ? "unconfigured"
         : plateauAttempt;
   const plateauRendererActive = usingPlateau && plateauStatus === "rendering";
-  const badge = baseStatusView(base3dSource, plateauStatus);
-  const canRetryPlateau = plateauStatus === "unavailable" || plateauStatus === "timeout";
+  const siteTitle = !areaMode && siteRecord ? siteRecord.project.publicTitle : null;
+  const badge = baseStatusView(base3dSource, plateauStatus, siteTitle);
+  const canRetryPlateau = areaMode && (plateauStatus === "unavailable" || plateauStatus === "timeout");
+
+  // Canvas の初期カメラ。以降は CameraController が毎フレーム駆動するため、
+  // マウント時の値だけを確定させておく（スコープ切替で作り直さない）。
+  const [initialCamera] = useState(() => ({
+    position: cameraPositionFor(cameraIntent.target, cameraIntent),
+    fov: 45,
+  }));
 
   if (webgl === "unavailable" || failure) {
     return (
@@ -281,10 +357,10 @@ export function PublicTwinViewer(): React.ReactElement {
           <Canvas
             dpr={[1, 2]}
             camera={{
-              fov: 45,
+              fov: initialCamera.fov,
               near: 1,
               far: 6000,
-              position: cameraPositionFor(DEFAULT_CAMERA_TARGET, presetById("overview")),
+              position: initialCamera.position,
             }}
             gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
             onCreated={({ gl }) => {
@@ -299,68 +375,132 @@ export function PublicTwinViewer(): React.ReactElement {
             }}
             onPointerMissed={handlePointerMissed}
           >
-            <color attach="background" args={[SCENE_COLORS.sky]} />
-            <fog attach="fog" args={[SCENE_COLORS.fog, 1000, 3200]} />
-            <hemisphereLight args={[0xf2f5f9, 0x9aa0a8, 0.95]} />
-            <directionalLight position={[-320, 520, 260]} intensity={0.7} />
-            <directionalLight position={[300, 260, -300]} intensity={0.25} />
+            {areaMode ? (
+              <>
+                <color attach="background" args={[SCENE_COLORS.sky]} />
+                <fog attach="fog" args={[SCENE_COLORS.fog, 1000, 3200]} />
+                <hemisphereLight args={[0xf2f5f9, 0x9aa0a8, 0.95]} />
+                <directionalLight position={[-320, 520, 260]} intensity={0.7} />
+                <directionalLight position={[300, 260, -300]} intensity={0.25} />
 
-            {/* 背景（地形は常に、内蔵都市は PLATEAU 表示中以外） */}
-            <TerrainLayer visible={visibleLayers.terrain} />
-            <LocalCityModel layout={layout} visible={!plateauRendererActive && visibleLayers.city} />
-            <PlateauTileset
-              key={`plateau-${plateauRetry}`}
-              enabled={usingPlateau}
-              onStatus={handlePlateauStatus}
-            />
+                {/* 背景（地形は常に、内蔵都市は PLATEAU 表示中以外） */}
+                <TerrainLayer visible={visibleLayers.terrain} />
+                <LocalCityModel
+                  layout={layout}
+                  visible={!plateauRendererActive && visibleLayers.city}
+                />
+                <PlateauTileset
+                  key={`plateau-${plateauRetry}`}
+                  enabled={usingPlateau}
+                  onStatus={handlePlateauStatus}
+                />
 
-            {/* 工事 */}
-            <WorkZoneLayer
-              records={records}
-              viewTime={viewDate}
-              selectedProjectId={selectedProjectId}
-              visible={visibleLayers.workzone}
-              onSelect={handleSelectProject}
-            />
-            <ProjectOverlay
-              records={records}
-              viewTime={viewDate}
-              markersVisible={visibleLayers.markers}
-              completionVisible={visibleLayers.completion}
-              completionMode={completionMode}
-              selectedProjectId={selectedProjectId}
-              onSelect={handleSelectProject}
-            />
+                {/* 工事（地区全体） */}
+                <WorkZoneLayer
+                  records={records}
+                  viewTime={viewDate}
+                  selectedProjectId={selectedProjectId}
+                  visible={visibleLayers.workzone}
+                  onSelect={handleSelectProject}
+                />
+                <ProjectOverlay
+                  records={records}
+                  viewTime={viewDate}
+                  markersVisible={visibleLayers.markers}
+                  completionVisible={visibleLayers.completion}
+                  completionMode={completionMode}
+                  selectedProjectId={selectedProjectId}
+                  onSelect={handleSelectProject}
+                />
 
-            {/* 影響（時間軸に連動） */}
-            <ImpactLayer
-              records={records}
-              impacts={impacts}
-              viewTime={viewDate}
-              selectedImpactId={selectedImpactId}
-              regulationVisible={visibleLayers.regulation}
-              pedestrianVisible={visibleLayers.pedestrian}
-              onSelectImpact={handleSelectImpact}
-            />
-            <DetourLayer
-              records={records}
-              impacts={impacts}
-              viewTime={viewDate}
-              selectedImpactId={selectedImpactId}
-              visible={visibleLayers.detour}
-              onSelectImpact={handleSelectImpact}
-            />
+                {/* 影響（時間軸に連動） */}
+                <ImpactLayer
+                  records={records}
+                  impacts={impacts}
+                  viewTime={viewDate}
+                  selectedImpactId={selectedImpactId}
+                  regulationVisible={visibleLayers.regulation}
+                  pedestrianVisible={visibleLayers.pedestrian}
+                  onSelectImpact={handleSelectImpact}
+                />
+                <DetourLayer
+                  records={records}
+                  impacts={impacts}
+                  viewTime={viewDate}
+                  selectedImpactId={selectedImpactId}
+                  visible={visibleLayers.detour}
+                  onSelectImpact={handleSelectImpact}
+                />
 
-            <CameraController focus={focus} command={command} />
+                {/* 選択中の現場のデータレイヤー（他案件には重ねない） */}
+                {siteRecord && siteData ? (
+                  <LocalSceneTransform center={projectSceneCenter(siteRecord.project)}>
+                    <SiteDataLayers data={siteData} variant="full" layers={dataLayers} />
+                  </LocalSceneTransform>
+                ) : null}
+
+                <CameraController intent={cameraIntent} />
+              </>
+            ) : (
+              <>
+                {siteRecord ? (
+                  <SiteScene projectId={siteRecord.project.id} variant="full" />
+                ) : (
+                  /* 未選択時: 中立的な地面と周辺の街並みだけを描き、ガイドを出す */
+                  <>
+                    <color attach="background" args={[SCENE_COLORS.sky]} />
+                    <fog attach="fog" args={[SCENE_COLORS.fog, 600, 2400]} />
+                    <hemisphereLight args={[0xf2f5f9, 0x9aa0a8, 0.95]} />
+                    <directionalLight position={[-320, 520, 260]} intensity={0.7} />
+                    <mesh rotation={[-Math.PI / 2, 0, 0]}>
+                      <planeGeometry args={[1400, 1400]} />
+                      <meshLambertMaterial color={SITE_COLORS.ground} />
+                    </mesh>
+                    <LocalCityModel layout={layout} visible />
+                  </>
+                )}
+                <CameraController intent={cameraIntent} />
+              </>
+            )}
           </Canvas>
         </div>
       </ViewerErrorBoundary>
 
+      {/* 現場を選んでください（3Dは描画したままガイドを重ねる） */}
+      {!areaMode && !siteRecord ? (
+        <div className={`float ${styles.guide}`} role="status">
+          <strong>現場を選んでください</strong>
+          <span>一覧または2D地図から工事を選ぶと、その現場だけの3Dを表示します。</span>
+        </div>
+      ) : null}
+
       {/* カメラプリセットと完成予想の切替（viewer3d 側の UI） */}
       <div className={`float ${styles.viewerBar}`} aria-label="3D表示の操作">
+        <span className={styles.viewerBarLabel}>表示</span>
+        <div className={styles.viewerBarGroup} role="group" aria-label="表示スコープ">
+          <button
+            type="button"
+            className={`chip-btn ${!areaMode ? "on" : ""}`}
+            aria-pressed={!areaMode}
+            title="選択した1現場だけを3D表示します"
+            onClick={() => setScope("site")}
+          >
+            現場
+          </button>
+          <button
+            type="button"
+            className={`chip-btn ${areaMode ? "on" : ""}`}
+            aria-pressed={areaMode}
+            title="地区全体を俯瞰します（一覧性のため）"
+            onClick={() => setScope("area")}
+          >
+            地区全体
+          </button>
+        </div>
+
         <span className={styles.viewerBarLabel}>カメラ</span>
         <div className={styles.viewerBarGroup} role="group" aria-label="カメラプリセット">
-          {CAMERA_PRESETS.map((preset) => (
+          {presets.map((preset) => (
             <button
               key={preset.id}
               type="button"
@@ -407,14 +547,18 @@ export function PublicTwinViewer(): React.ReactElement {
         ) : null}
       </div>
 
-      {/* 内蔵背景の出典（PLATEAU 表示中は TilesAttributionOverlay が出典を出す） */}
+      {/* 出典・サンプル注記（PLATEAU 表示中は TilesAttributionOverlay が出典を出す） */}
       {plateauRendererActive ? null : (
         <p className={styles.attribution}>
-          背景: {LOCAL_CITY_TILESET.name}（{LOCAL_CITY_TILESET.attribution}）／
-          完成予想・規制は開発用サンプルデータです。
-          {usingPlateau && PLATEAU_TILESET.url
-            ? ` PLATEAU: ${PLATEAU_TILESET.attribution}`
-            : ""}
+          {areaMode ? (
+            <>
+              背景: {LOCAL_CITY_TILESET.name}（{LOCAL_CITY_TILESET.attribution}）／
+              完成予想・規制は開発用サンプルデータです。
+            </>
+          ) : (
+            <>現場3Dは開発用サンプルデータです。{SITE_LAYER_NOTE}</>
+          )}
+          {usingPlateau && PLATEAU_TILESET.url ? ` PLATEAU: ${PLATEAU_TILESET.attribution}` : ""}
         </p>
       )}
     </div>

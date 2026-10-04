@@ -24,7 +24,10 @@ function argValue(name, fallback) {
   return i >= 0 && args[i + 1] ? args[i + 1] : fallback;
 }
 
-const BASE_URL = argValue("--url", process.env.BASE_URL ?? "http://127.0.0.1:3000");
+// NOTE: 既定を localhost にしているのは、Next 16 が 127.0.0.1 からの dev リソース
+// アクセスを cross-origin としてブロックし、dev サーバーでは hydration が止まるため。
+// （next.config.ts の allowedDevOrigins でも緩和しているが、既定はこちらに寄せる）
+const BASE_URL = argValue("--url", process.env.BASE_URL ?? "http://localhost:3000");
 const OUT_DIR = argValue("--outdir", "tmp-verify");
 const JSON_OUT = argValue("--json", `${OUT_DIR}/browser-report.json`);
 const CDP_PORT = Number(argValue("--port", "9333"));
@@ -70,7 +73,7 @@ class Cdp {
       const timer = setTimeout(() => {
         this.pending.delete(id);
         reject(new Error(`CDP timeout: ${method}`));
-      }, 60_000);
+      }, 120_000);
       this.pending.set(id, {
         resolve: (v) => {
           clearTimeout(timer);
@@ -298,14 +301,15 @@ try {
 
   /* ---------- 検索 ---------- */
 
-  const beforeSearch = await cdp.eval(`document.body.innerText.match(/表示中\\s*(\\d+)\\s*件/)?.[1] ?? ""`);
+  // 一覧の行数を直接数える（body 全文の正規表現は他要素を拾って誤検出する）
+  const beforeSearch = await count(LIST_ROW);
   const searchSelector = 'input[type="search"], input[aria-label*="検索"]';
   const typed = await setInputValue(searchSelector, "駅前広場");
   await sleep(1600);
-  const afterSearch = await cdp.eval(`document.body.innerText.match(/表示中\\s*(\\d+)\\s*件/)?.[1] ?? ""`);
+  const afterSearch = await count(LIST_ROW);
   record(
     "検索で一覧が絞り込まれる",
-    typed && Number(afterSearch) > 0 && Number(afterSearch) < Number(beforeSearch),
+    typed && afterSearch > 0 && afterSearch < beforeSearch,
     `${beforeSearch} → ${afterSearch} 件`,
   );
   await screenshot("02-search");
@@ -318,10 +322,10 @@ try {
 
   const chipClicked = await clickByText("button[class*='fchip'], button.fchip", "着工前");
   await sleep(1200);
-  const afterFilter = await cdp.eval(`document.body.innerText.match(/表示中\\s*(\\d+)\\s*件/)?.[1] ?? ""`);
+  const afterFilter = await count(LIST_ROW);
   record(
     "施工状態フィルタが機能する",
-    chipClicked && Number(afterFilter) > 0 && Number(afterFilter) < 24,
+    chipClicked && afterFilter > 0 && afterFilter < 24,
     `着工前 → ${afterFilter} 件`,
   );
 
@@ -377,7 +381,16 @@ try {
 
   /* ---------- 時間軸 ---------- */
 
-  const timelineBefore = await cdp.eval(`document.body.innerText.match(/(\\d{4})年(\\d{1,2})月(\\d{1,2})日/)?.[0] ?? ""`);
+  // スライダーの値そのものと、注記（MapNote）の日付で判定する
+  const NOTE = '[class*="mapNote"]';
+  const readTimeline = async () =>
+    cdp.eval(`(() => {
+      const slider = document.querySelector('input[type="range"]');
+      const note = document.querySelector(${JSON.stringify(NOTE)});
+      return { value: slider ? slider.value : "", note: note ? note.innerText : "" };
+    })()`);
+
+  const tlBefore = await readTimeline();
   const sliderChanged = await cdp.eval(`(() => {
     const el = document.querySelector('input[type="range"]');
     if (!el) return false;
@@ -387,12 +400,12 @@ try {
     el.dispatchEvent(new Event("change", { bubbles: true }));
     return true;
   })()`);
-  await sleep(1500);
-  const timelineAfter = await cdp.eval(`document.body.innerText.match(/(\\d{4})年(\\d{1,2})月(\\d{1,2})日/)?.[0] ?? ""`);
+  await sleep(1800);
+  const tlAfter = await readTimeline();
   record(
     "時間軸の操作で基準日が変わる",
-    sliderChanged && timelineBefore !== timelineAfter && timelineAfter.length > 0,
-    `${timelineBefore} → ${timelineAfter}`,
+    sliderChanged && tlBefore.value !== tlAfter.value && tlAfter.note !== tlBefore.note,
+    `スライダー ${tlBefore.value} → ${tlAfter.value}`,
   );
   await screenshot("04-timeline");
 
@@ -404,29 +417,41 @@ try {
     btn.click();
     return true;
   })()`);
-  await sleep(6000);
 
-  // MapLibre のコンテナが実際に高さを持っているか。
-  // （maplibre-gl.css の `.maplibregl-map{position:relative}` が
-  //   `position:absolute; inset:0` を上書きすると高さ 0 に潰れ、
-  //   工区は描画されるのに地図が見えなくなる。過去に実際に発生した。）
-  const mapBox = await cdp.eval(`(() => {
-    const el = document.querySelector('[class*="maplibregl-map"]');
-    if (!el) return null;
-    const r = el.getBoundingClientRect();
-    const c = el.querySelector("canvas");
-    return {
-      className: el.className,
-      w: Math.round(r.width),
-      h: Math.round(r.height),
-      canvasH: c ? c.clientHeight : 0,
-      canvasW: c ? c.clientWidth : 0,
-    };
-  })()`);
+  // MapLibre は動的 import のため初期化に時間がかかる。コンテナが出るまで待つ。
+  let mapBox = null;
+  for (let i = 0; i < 20; i++) {
+    await sleep(1500);
+    mapBox = await cdp.eval(`(() => {
+      const el = document.querySelector('[class*="maplibregl-map"]');
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      const c = el.querySelector("canvas");
+      return {
+        className: el.className,
+        w: Math.round(r.width),
+        h: Math.round(r.height),
+        canvasH: c ? c.clientHeight : 0,
+        canvasW: c ? c.clientWidth : 0,
+      };
+    })()`);
+    if (mapBox) break;
+  }
+
+  // 失敗時は原因究明のため、FallbackMap のエラー表示文言を拾う
+  const mapFallbackMessage = mapBox
+    ? ""
+    : await cdp.eval(
+        `(() => {
+          const alert = document.querySelector('[role="alert"]');
+          return alert ? alert.innerText.slice(0, 200) : "(エラー表示なし)";
+        })()`,
+      );
+
   record(
     "2D地図へ切り替えられる",
     to2d && mapBox !== null,
-    mapBox ? String(mapBox.className).slice(0, 60) : "MapLibre コンテナなし",
+    mapBox ? String(mapBox.className).slice(0, 60) : `MapLibre コンテナなし / ${mapFallbackMessage}`,
   );
   record(
     "2D地図のコンテナが実サイズを持つ",
@@ -435,7 +460,10 @@ try {
   );
 
   // ビューポートのピクセルを採取し、デバッグ色（マゼンタ）が露出していないことを確認する。
-  const { data: shot } = await cdp.send("Page.captureScreenshot", { format: "png" });
+  const { data: shot } = await cdp.send("Page.captureScreenshot", {
+    format: "png",
+    clip: { x: 300, y: 190, width: 320, height: 240, scale: 1 },
+  });
   const pixels = await cdp.eval(`(async () => {
     const img = new Image();
     img.src = "data:image/png;base64,${shot}";
@@ -448,7 +476,7 @@ try {
       const d = ctx.getImageData(Math.floor(img.width * fx), Math.floor(img.height * fy), 1, 1).data;
       return ((d[0] << 16) | (d[1] << 8) | d[2]).toString(16).padStart(6, "0");
     };
-    return [pick(0.45, 0.45), pick(0.35, 0.6), pick(0.55, 0.3), pick(0.4, 0.75)];
+    return [pick(0.25, 0.3), pick(0.5, 0.5), pick(0.75, 0.4), pick(0.4, 0.75)];
   })()`);
   const magentaCount = pixels.filter((p) => p.toLowerCase() === "ff00ff").length;
   record(
@@ -488,6 +516,212 @@ try {
   await cdp.send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
   await cdp.send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
   await sleep(1200);
+
+  /* ---------- 現場ごとの3D（表示スコープ） ---------- */
+
+  /**
+   * キャンバスの見た目を数値化して、レイヤー切替・スコープ切替の効果を測る。
+   *
+   * 画面全体のスクリーンショット（数百KB）をページ内でデコードすると
+   * Runtime.evaluate がタイムアウトするため、**ビューポート中央の小さな領域だけ**を
+   * クリップして取得し、32x24 へ縮小して全画素を比較する。
+   *
+   * NOTE: 以前は clip 内の6点だけを比較していたが、BIM のような細い柱・梁は
+   * 6点がたまたま背景に落ちると差分0になり、偽陰性が出た（site3d が再現・反証）。
+   * 全画素を縮小比較することでカメラ距離のわずかな差にも安定して反応する。
+   */
+  const sampleCanvasPixels = async () => {
+    const { data } = await cdp.send("Page.captureScreenshot", {
+      format: "png",
+      clip: { x: 300, y: 190, width: 320, height: 240, scale: 1 },
+    });
+    return cdp.eval(`(async () => {
+      const img = new Image();
+      img.src = "data:image/png;base64,${data}";
+      await img.decode();
+      const c = document.createElement("canvas");
+      c.width = 32;
+      c.height = 24;
+      const ctx = c.getContext("2d");
+      ctx.drawImage(img, 0, 0, 32, 24);
+      const d = ctx.getImageData(0, 0, 32, 24).data;
+      const out = [];
+      for (let i = 0; i < d.length; i += 4) out.push((d[i] << 16) | (d[i + 1] << 8) | d[i + 2]);
+      return out;
+    })()`);
+  };
+
+  /** チャンネル差 3 超の画素を「変化した」とみなす */
+  const diffCount = (a, b) =>
+    a.reduce((n, v, i) => {
+      const dr = Math.abs(((v >> 16) & 255) - ((b[i] >> 16) & 255));
+      const dg = Math.abs(((v >> 8) & 255) - ((b[i] >> 8) & 255));
+      const db = Math.abs((v & 255) - (b[i] & 255));
+      return n + (dr > 3 || dg > 3 || db > 3 ? 1 : 0);
+    }, 0);
+  const SAMPLE_TOTAL = 32 * 24;
+
+  // 表示スコープ（現場 / 地区全体）は 3D ビューア側のバーが持つ。
+  // ストア状態は注記（MapNote）の文言で確認する。
+  const noteText = await cdp.eval(`(document.querySelector('[class*="mapNote"]')?.innerText) ?? ""`);
+  record(
+    "既定が現場スコープ（1現場だけの3D）",
+    noteText.includes("現場3D"),
+    noteText.slice(0, 80) || "注記なし",
+  );
+
+  const scopeButtons = await cdp.eval(`(() => {
+    const labels = [...document.querySelectorAll("button")].map((b) => b.textContent.trim());
+    return { site: labels.includes("現場"), area: labels.some((l) => l.startsWith("地区")) };
+  })()`);
+  record(
+    "現場／地区の表示スコープ切替がある",
+    scopeButtons.site && scopeButtons.area,
+    `現場=${scopeButtons.site} 地区=${scopeButtons.area}`,
+  );
+
+  const siteShot = await sampleCanvasPixels();
+  await screenshot("09-site-scope");
+
+  // 地区スコープへ切り替えると絵が変わる（＝集約表示と現場表示が別物）
+  const toArea = await cdp.eval(`(() => {
+    const b = [...document.querySelectorAll("button")].find((x) => x.textContent.trim().startsWith("地区"));
+    if (!b) return false;
+    b.click();
+    return true;
+  })()`);
+  await sleep(4000);
+  const areaNote = await cdp.eval(`(document.querySelector('[class*="mapNote"]')?.innerText) ?? ""`);
+  const areaShot = await sampleCanvasPixels();
+  record(
+    "地区スコープへ切替で3Dの内容が変わる",
+    toArea && areaNote.includes("地区3D") && diffCount(siteShot, areaShot) > 0,
+    `差分 ${diffCount(siteShot, areaShot)}/${siteShot.length} 点`,
+  );
+
+  // 現場へ戻す
+  await cdp.eval(`(() => {
+    const b = [...document.querySelectorAll("button")].find((x) => x.textContent.trim() === "現場");
+    if (b) b.click();
+  })()`);
+  await sleep(3500);
+
+  /* ---------- データレイヤー ---------- */
+
+  await clickByText("button[role='tab']", "レイヤー");
+  await sleep(900);
+
+  const dataLayerNames = await cdp.eval(`(() => {
+    const wanted = ["BIM","CAD","GIS","点群","3DGS","スマホ","写真","施工進捗","点検","撮影軌跡","AI・指摘ピン"];
+    const text = document.querySelector("section")?.innerText ?? document.body.innerText;
+    return wanted.filter((w) => text.includes(w));
+  })()`);
+  record(
+    "レイヤーパネルに11種のデータレイヤーが並ぶ",
+    dataLayerNames.length === 11,
+    `${dataLayerNames.length}/11: ${dataLayerNames.join(", ")}`,
+  );
+
+  const beforeLayer = await sampleCanvasPixels();
+  const bimToggled = await cdp.eval(`(() => {
+    const rows = [...document.querySelectorAll("[class*='layerRow'], [class*='layer-row'], li, div")]
+      .filter((n) => (n.textContent || "").trim().startsWith("BIM"));
+    const target = rows[rows.length - 1];
+    if (!target) return false;
+    target.click();
+    return true;
+  })()`);
+  await sleep(2600);
+  const afterLayer = await sampleCanvasPixels();
+  record(
+    "データレイヤー（BIM）のON/OFFで3Dが変わる",
+    bimToggled && diffCount(beforeLayer, afterLayer) > 0,
+    `差分 ${diffCount(beforeLayer, afterLayer)}/${beforeLayer.length} 点`,
+  );
+  await screenshot("10-data-layer");
+
+  // BIM を元に戻す
+  await cdp.eval(`(() => {
+    const rows = [...document.querySelectorAll("[class*='layerRow'], [class*='layer-row'], li, div")]
+      .filter((n) => (n.textContent || "").trim().startsWith("BIM"));
+    const target = rows[rows.length - 1];
+    if (target) target.click();
+  })()`);
+  await sleep(1200);
+  await clickByText("button[role='tab']", "工事一覧");
+  await sleep(700);
+
+  /* ---------- 現場ギャラリー（24現場それぞれの3D） ---------- */
+
+  const galleryOpened = await cdp.eval(`(() => {
+    const b = [...document.querySelectorAll("button")].find((x) => x.textContent.includes("現場ギャラリー"));
+    if (!b) return false;
+    b.click();
+    return true;
+  })()`);
+  await sleep(2000);
+
+  const galleryTitle = await cdp.eval(`document.body.innerText.includes("現場ギャラリー")`);
+  record("現場ギャラリーが開く", galleryOpened && galleryTitle);
+
+  // 3Dプレビューの生成完了を待つ（SwiftShader では時間がかかる）
+  let generated = 0;
+  for (let i = 0; i < 40; i++) {
+    const tiles = await cdp.eval(`(() => {
+      const imgs = [...document.querySelectorAll('img[src^="data:image/png"]')];
+      return imgs.length;
+    })()`);
+    generated = tiles;
+    if (generated >= 24) break;
+    await sleep(1500);
+  }
+  record(
+    "24現場すべてが3Dプレビューとして生成される",
+    generated >= 24,
+    `${generated}/24 枚が3Dキャプチャ`,
+  );
+
+  const tileInfo = await cdp.eval(`(() => {
+    const imgs = [...document.querySelectorAll('img[src^="data:image/png"]')];
+    const photoImgs = [...document.querySelectorAll('img[src^="/images/"]')];
+    return { threed: imgs.length, photos: photoImgs.length };
+  })()`);
+  record(
+    "各現場の3Dとサンプル写真が並んで表示される",
+    tileInfo.threed >= 24 && tileInfo.photos >= 1,
+    `3D ${tileInfo.threed} / 写真 ${tileInfo.photos}`,
+  );
+
+  const galleryOverflow = await cdp.eval(
+    `({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth })`,
+  );
+  record(
+    "ギャラリーで横スクロールが発生しない",
+    galleryOverflow.sw <= galleryOverflow.cw + 2,
+    `scrollWidth=${galleryOverflow.sw} clientWidth=${galleryOverflow.cw}`,
+  );
+  await screenshot("11-gallery");
+
+  // 現場詳細タブ（大きい3D + 写真）
+  await clickByText("button[role='tab']", "現場詳細");
+  await sleep(4000);
+  const detailTabOk = await cdp.eval(`(() => {
+    const text = document.body.innerText;
+    const hasPhoto = !!document.querySelector('img[src^="/images/"]');
+    const has3d = !!document.querySelector("canvas");
+    return { hasPhoto, has3d, hasCredit: /CC BY|CC0|Wikimedia/.test(text) };
+  })()`);
+  record(
+    "現場詳細タブで3Dとサンプル写真とクレジットが出る",
+    detailTabOk.has3d && detailTabOk.hasPhoto && detailTabOk.hasCredit,
+    JSON.stringify(detailTabOk),
+  );
+  await screenshot("12-site-detail");
+
+  // 閉じる
+  await cdp.send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+  await cdp.send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+  await sleep(1500);
 
   /* ---------- モバイル ---------- */
 

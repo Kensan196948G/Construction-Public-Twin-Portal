@@ -8,6 +8,14 @@
  * 自前で持つことで、プリセット適用・フォーカス移動・ユーザー操作を
  * 同じ補間ループにまとめている。
  *
+ * 設計上の要点（2026-10-04 改訂）:
+ *   カメラの行き先は **親が `intent` として決める**。このコンポーネントは
+ *   `intent.key` が変わったときだけ距離・角度を適用し直し、注視点は毎フレーム同期する。
+ *   React の effect に依存せず `useFrame` 内で完結するため、
+ *   React StrictMode による effect の二重実行でも結果が変わらない
+ *   （以前は effect + ref ガードで実装しており、StrictMode で
+ *   カメラ距離が復元されない不具合があった）。
+ *
  * 操作:
  *   ドラッグ         … 回転
  *   Shift+ドラッグ / 右ドラッグ … 平行移動
@@ -18,27 +26,29 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
 import {
-  DEFAULT_CAMERA_TARGET,
   cameraPositionFor,
   clampDistance,
   clampPhi,
-  focusDistanceFor,
-  presetById,
   type CameraPresetId,
+  type Vec3Like,
 } from "@/lib/viewer/cameraPresets";
 
-/** フォーカス対象（選択中の工区） */
-export interface CameraFocus {
-  x: number;
-  z: number;
-  /** 工区の代表半径 (m) */
-  radius: number;
-}
-
-/** プリセット適用の指示。nonce は同じプリセットの再適用を検知するための番号。 */
-export interface CameraCommand {
-  preset: CameraPresetId;
-  nonce: number;
+/** カメラの行き先（親が決める） */
+export interface CameraIntent {
+  /**
+   * 「行き先が変わった」ことを示すキー。
+   * 例: `${scope}:${projectId}:${presetId}:${nonce}`
+   * これが変わると distance / theta / phi を適用し直す（手動操作の結果は保つ）。
+   */
+  key: string;
+  /** 注視点 */
+  target: Vec3Like;
+  /** 注視点からの距離 (m) */
+  distance: number;
+  /** 方位角 (rad) */
+  theta: number;
+  /** 天頂角 (rad) */
+  phi: number;
 }
 
 interface OrbitState {
@@ -50,8 +60,6 @@ interface OrbitState {
   phi: number;
 }
 
-const OVERVIEW = presetById("overview");
-
 /** 角度の補間（-π..π の近い側を通す） */
 function lerpAngle(current: number, desired: number, k: number): number {
   const twoPi = Math.PI * 2;
@@ -61,58 +69,39 @@ function lerpAngle(current: number, desired: number, k: number): number {
   return current + delta * k;
 }
 
-function initialState(): OrbitState {
+function orbitFrom(intent: CameraIntent): OrbitState {
   return {
-    targetX: DEFAULT_CAMERA_TARGET.x,
-    targetY: DEFAULT_CAMERA_TARGET.y,
-    targetZ: DEFAULT_CAMERA_TARGET.z,
-    distance: OVERVIEW.distance,
-    theta: OVERVIEW.theta,
-    phi: OVERVIEW.phi,
+    targetX: intent.target.x,
+    targetY: intent.target.y,
+    targetZ: intent.target.z,
+    distance: clampDistance(intent.distance),
+    theta: intent.theta,
+    phi: clampPhi(intent.phi),
   };
 }
 
-export interface CameraControllerProps {
-  focus: CameraFocus | null;
-  command: CameraCommand;
+/** プリセット適用の指示。nonce は同じプリセットの再適用を検知するための番号。 */
+export interface CameraCommand {
+  preset: CameraPresetId;
+  nonce: number;
 }
 
-export function CameraController({ focus, command }: CameraControllerProps) {
+export interface CameraControllerProps {
+  intent: CameraIntent;
+}
+
+export function CameraController({ intent }: CameraControllerProps) {
   const camera = useThree((state) => state.camera);
   const domElement = useThree((state) => state.gl.domElement);
 
-  const current = useRef<OrbitState>(initialState());
-  const desired = useRef<OrbitState>(initialState());
+  /** 現在の画角（補間中の実測値。ユーザー操作でも書き換わる） */
+  const current = useRef<OrbitState | null>(null);
+  /** 親が決めた行き先（ユーザーのパン・ズームもここへ反映する） */
+  const desired = useRef<OrbitState>(orbitFrom(intent));
+  /** 適用済みの行き先キー */
+  const appliedKey = useRef<string | null>(null);
 
-  const focusX = focus?.x ?? null;
-  const focusZ = focus?.z ?? null;
-  const focusRadius = focus?.radius ?? null;
-
-  // 工事選択 → 工区へ寄る
-  useEffect(() => {
-    const target = desired.current;
-    target.targetY = DEFAULT_CAMERA_TARGET.y;
-    if (focusX !== null && focusZ !== null) {
-      target.targetX = focusX;
-      target.targetZ = focusZ;
-      target.distance = focusDistanceFor(focusRadius ?? 40);
-    } else {
-      target.targetX = DEFAULT_CAMERA_TARGET.x;
-      target.targetZ = DEFAULT_CAMERA_TARGET.z;
-      target.distance = OVERVIEW.distance;
-    }
-  }, [focusX, focusZ, focusRadius]);
-
-  // プリセット適用
-  useEffect(() => {
-    const preset = presetById(command.preset);
-    const target = desired.current;
-    target.distance = preset.distance;
-    target.theta = preset.theta;
-    target.phi = preset.phi;
-  }, [command]);
-
-  // ポインタ・ホイール操作
+  // ポインタ・ホイール操作（操作結果は `desired` へ直接反映する）
   useEffect(() => {
     const element = domElement;
     if (!element) return;
@@ -147,7 +136,7 @@ export function CameraController({ focus, command }: CameraControllerProps) {
       if (panning) {
         right.setFromMatrixColumn(camera.matrix, 0);
         up.setFromMatrixColumn(camera.matrix, 1);
-        const k = current.current.distance * 0.0016;
+        const k = target.distance * 0.0016;
         target.targetX += (-right.x * dx + up.x * dy) * k;
         target.targetY += (-right.y * dx + up.y * dy) * k;
         target.targetZ += (-right.z * dx + up.z * dy) * k;
@@ -194,8 +183,21 @@ export function CameraController({ focus, command }: CameraControllerProps) {
   }, [camera, domElement]);
 
   useFrame((_, delta) => {
-    const cur = current.current;
+    const cur = current.current ?? (current.current = { ...desired.current });
     const target = desired.current;
+
+    // 親が決めた注視点は毎フレーム同期する（冪等）
+    target.targetX = intent.target.x;
+    target.targetY = intent.target.y;
+    target.targetZ = intent.target.z;
+    // 距離・角度は「行き先が変わったとき」だけ適用し直す
+    if (appliedKey.current !== intent.key) {
+      appliedKey.current = intent.key;
+      target.distance = clampDistance(intent.distance);
+      target.theta = intent.theta;
+      target.phi = clampPhi(intent.phi);
+    }
+
     const reduceMotion =
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;

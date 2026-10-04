@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  /**
+   * 開発サーバを 127.0.0.1 で開くと Next 16 が dev リソースを cross-origin として
+   * ブロックし、hydration が止まる（HMR が ERR_INVALID_HTTP_RESPONSE になる）。
+   * 検証ハーネス（headless Chrome）から安定して触れるよう明示的に許可する。
+   */
+  allowedDevOrigins: ["127.0.0.1", "localhost", "192.168.0.185"],
 };
 
 export default nextConfig;

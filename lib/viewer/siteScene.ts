@@ -450,6 +450,17 @@ function hexToRgb(hex: number): [number, number, number] {
   return [((hex >> 16) & 0xff) / 255, ((hex >> 8) & 0xff) / 255, (hex & 0xff) / 255];
 }
 
+/**
+ * `#rrggbb` 形式の CSS 色を three の数値 color へ。
+ * 解釈できない値は fallback を返す（例外は投げない）。
+ */
+export function cssHexToNumber(value: string, fallback: number): number {
+  const matched = /^#?([0-9a-f]{6})$/i.exec(value.trim());
+  if (!matched) return fallback;
+  const parsed = Number.parseInt(matched[1], 16);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
 /* ------------------------------------------------------------------ *
  * 施工進捗
  * ------------------------------------------------------------------ */
@@ -485,8 +496,13 @@ export function buildProgressBars(data: SiteModelData): ProgressBar[] {
     const centerX = (x0 + x1) / 2;
     const ratio = Math.max(0, Math.min(1, phase.ratio));
     const state: ProgressState = ratio >= 1 ? "done" : ratio > 0 ? "active" : "pending";
+    const phaseColor = cssHexToNumber(phase.color, SITE_COLORS.progressPending);
     const color =
-      state === "done" ? SITE_COLORS.progressDone : state === "pending" ? SITE_COLORS.progressPending : phase.color;
+      state === "done"
+        ? SITE_COLORS.progressDone
+        : state === "pending"
+          ? SITE_COLORS.progressPending
+          : phaseColor;
 
     const base: ProgressBar["base"] = {
       position: [centerX, SITE_LAYER_Y.progress + height / 2, z],

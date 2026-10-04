@@ -338,6 +338,127 @@
   line-height: 1.6;
 }
 
+/* --------------------------------------------------------------------------
+ * 現場未選択のガイド（3Dは描画したまま日本語で案内する）
+ * ------------------------------------------------------------------------*/
+
+.guide {
+  left: 50%;
+  top: 96px;
+  transform: translateX(-50%);
+  padding: 12px 16px;
+  display: grid;
+  gap: 3px;
+  max-width: min(440px, calc(100% - 32px));
+  text-align: center;
+}
+
+.guide strong {
+  font-size: 13px;
+  color: var(--fg);
+}
+
+.guide span {
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* --------------------------------------------------------------------------
+ * レイヤーパネル（基本表示 / データレイヤーの2グループ）
+ * ------------------------------------------------------------------------*/
+
+.layerSection {
+  display: grid;
+  gap: 3px;
+  margin-top: 6px;
+}
+
+.layerSubHead {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--faint);
+  padding: 4px 4px 0;
+}
+
+.layerHeadCount {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--faint);
+  margin-left: 6px;
+}
+
+/* 名称 + 1行説明の2段組み */
+.layerText {
+  display: grid;
+  gap: 1px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.layerDesc {
+  font-size: 10.5px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sampleBadge {
+  display: inline-block;
+  margin-left: 5px;
+  padding: 0 5px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  font-size: 9.5px;
+  line-height: 15px;
+  color: var(--muted);
+  vertical-align: 1px;
+}
+
+/* データレイヤーのスウォッチ（描画プリミティブごとの形） */
+.layerMarkMesh {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+
+.layerMarkDots {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+  border-radius: 2px;
+  background-image: radial-gradient(currentColor 1.1px, transparent 1.2px);
+  background-size: 4px 4px;
+}
+
+.layerMarkSplat {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background-image: radial-gradient(circle at 50% 50%, currentColor 0%, transparent 72%);
+}
+
+.layerMarkBillboard {
+  width: 12px;
+  height: 10px;
+  flex: 0 0 auto;
+  border: 1.5px solid;
+  border-radius: 2px;
+}
+
+.layerMarkPin {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+  border-radius: 2px 2px 2px 0;
+  transform: rotate(-45deg);
+}
+
 .srOnly {
   position: absolute;
   width: 1px;

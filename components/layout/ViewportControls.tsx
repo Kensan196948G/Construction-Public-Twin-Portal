@@ -12,8 +12,6 @@ export function ViewportControls() {
   const setViewMode = useAppStore((s) => s.setViewMode);
   const base3dSource = useAppStore((s) => s.base3dSource);
   const setBase3dSource = useAppStore((s) => s.setBase3dSource);
-  const viewScope = useAppStore((s) => s.viewScope);
-  const setViewScope = useAppStore((s) => s.setViewScope);
   const openSiteViewer = useAppStore((s) => s.openSiteViewer);
   const setMobileSheetOpen = useAppStore((s) => s.setMobileSheetOpen);
 
@@ -41,28 +39,12 @@ export function ViewportControls() {
 
       {viewMode === "3d" && (
         <>
-          <span className={styles.controlLabel}>3Dの範囲</span>
-          <div className="seg" role="group" aria-label="3D表示の範囲">
-            <button
-              type="button"
-              className={viewScope === "site" ? "active" : ""}
-              aria-pressed={viewScope === "site"}
-              onClick={() => setViewScope("site")}
-              title="選択した1現場だけを3D表示します"
-            >
-              現場
-            </button>
-            <button
-              type="button"
-              className={viewScope === "area" ? "active" : ""}
-              aria-pressed={viewScope === "area"}
-              onClick={() => setViewScope("area")}
-              title="地区全体の工区を俯瞰します"
-            >
-              地区
-            </button>
-          </div>
-
+          {/*
+            表示スコープ（現場 / 地区全体）の切替は 3D ビューア側のバーが持つ。
+            スコープ変更時はカメラプリセットの再適用が必要なため、
+            ビューア内部（components/viewer/PublicTwinViewer.tsx）に一元化している。
+            ここに重複して置かないこと。
+          */}
           <span className={styles.controlLabel}>3D背景</span>
           <div className="seg" role="group" aria-label="3D背景の切り替え">
             <button

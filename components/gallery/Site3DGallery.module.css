@@ -1,0 +1,329 @@
+/* ============================================================================
+ * 3Dギャラリー（components/gallery）
+ * 色・角丸・余白は app/globals.css のトークンを使う（独自 hex を増やさない）。
+ * ==========================================================================*/
+
+.gallery {
+  container-type: inline-size;
+  container-name: gallery;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+ * ヘッダ / 進捗
+ * ------------------------------------------------------------------------*/
+
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px 16px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.headText {
+  min-width: 0;
+  flex: 1 1 220px;
+}
+
+.headTitle {
+  font-size: 14.5px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.headLead {
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-top: 2px;
+}
+
+.status {
+  flex: 0 0 auto;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.statusRunning {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  color: var(--accent-ink);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: galleryPulse 1.1s ease-in-out infinite;
+}
+
+@keyframes galleryPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.28;
+  }
+}
+
+.bar {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.barFill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.25s ease-out;
+}
+
+.notice {
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--fg);
+  background: color-mix(in oklch, var(--st-active) 12%, white);
+  border: 1px solid color-mix(in oklch, var(--st-active) 34%, white);
+  border-radius: 9px;
+  padding: 7px 10px;
+  margin-bottom: 10px;
+}
+
+/* --------------------------------------------------------------------------
+ * グリッド（幅に応じて 2〜5 カラム / 360px でも横スクロールを出さない）
+ * ------------------------------------------------------------------------*/
+
+.grid {
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+@container gallery (min-width: 460px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@container gallery (min-width: 660px) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@container gallery (min-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+/* --------------------------------------------------------------------------
+ * タイル
+ * ------------------------------------------------------------------------*/
+
+.cell {
+  min-width: 0;
+  list-style: none;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin: 0;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface);
+  overflow: hidden;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.tile:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow);
+}
+
+.tileSelected {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 2px var(--accent-soft),
+    var(--shadow);
+}
+
+.button {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: var(--surface-2);
+  text-align: left;
+  line-height: 0;
+}
+
+.media {
+  position: relative;
+  display: block;
+  aspect-ratio: 8 / 5;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: var(--surface-2);
+}
+
+.badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.5;
+  padding: 1px 6px;
+  border-radius: 6px;
+  color: var(--muted);
+  background: color-mix(in oklch, white 88%, transparent);
+  border: 1px solid var(--border-strong);
+}
+
+.badge3d {
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+/* 3Dと並べて見せるサンプル写真（3D表示のときだけ重ねる） */
+.mini {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 42%;
+  max-width: 92px;
+  border-radius: 7px;
+  overflow: hidden;
+  line-height: 0;
+  border: 1px solid color-mix(in oklch, white 72%, transparent);
+  box-shadow: 0 1px 6px rgba(16, 24, 40, 0.35);
+}
+
+.mini img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 8 / 5;
+  object-fit: cover;
+  background: var(--surface-2);
+}
+
+.caption {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 9px 9px;
+  min-width: 0;
+}
+
+.pillRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 0;
+}
+
+.title {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--fg);
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  color: var(--muted);
+  min-width: 0;
+}
+
+.category {
+  flex: 0 0 auto;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.municipality {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.credit {
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--faint);
+  overflow-wrap: anywhere;
+}
+
+.credit a {
+  color: var(--accent-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.note {
+  font-size: 10.5px;
+  line-height: 1.7;
+  color: var(--faint);
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+/* --------------------------------------------------------------------------
+ * 撮影用 Canvas（画面外・非表示にしない）
+ * display:none / visibility:hidden にするとサイズが 0 になり描画されないため、
+ * 画面外へ追い出すだけにする。
+ * ------------------------------------------------------------------------*/
+
+.offscreen {
+  position: fixed;
+  top: 0;
+  left: -10000px;
+  overflow: hidden;
+  pointer-events: none;
+}

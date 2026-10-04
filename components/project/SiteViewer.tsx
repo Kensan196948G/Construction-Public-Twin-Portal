@@ -42,21 +42,22 @@ function siteCameraFor(projectId: string) {
   };
 }
 
+/** WebGL が使えるかを一度だけ判定する（例外を投げない） */
+function detectWebgl(): boolean {
+  if (typeof window === "undefined") return true; // SSR では判定不能。クライアントで再評価される
+  try {
+    const canvas = document.createElement("canvas");
+    return Boolean(canvas.getContext("webgl2") ?? canvas.getContext("webgl"));
+  } catch {
+    return false;
+  }
+}
+
 /** 3D を描けない環境でも写真・情報が残るよう、エラーを握って表示を継続する */
 function Safe3D({ projectId }: { projectId: string }) {
-  const [failed, setFailed] = useState(false);
+  // effect ではなく遅延初期化で判定する（set-state-in-effect を避ける）
+  const [failed] = useState(() => !detectWebgl());
   const camera = useMemo(() => siteCameraFor(projectId), [projectId]);
-
-  useEffect(() => {
-    // WebGL が使えない環境を先に検出する（例外を投げない）
-    try {
-      const canvas = document.createElement("canvas");
-      const gl = canvas.getContext("webgl2") ?? canvas.getContext("webgl");
-      if (!gl) setFailed(true);
-    } catch {
-      setFailed(true);
-    }
-  }, []);
 
   if (failed) {
     return (
