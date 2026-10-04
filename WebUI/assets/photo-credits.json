@@ -1,0 +1,58 @@
+[
+ {
+  "key": "sample-au1",
+  "title": "File:High-rise construction, Montreal 2017.jpg",
+  "artist": "MB-one",
+  "license": "CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:High-rise_construction,_Montreal_2017.jpg"
+ },
+ {
+  "key": "sample-au2",
+  "title": "File:High-rise construction in Kalasatama, Helsinki, 2023 February.jpg",
+  "artist": "Pete",
+  "license": "CC BY 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:High-rise_construction_in_Kalasatama,_Helsinki,_2023_February.jpg"
+ },
+ {
+  "key": "sample-ar1",
+  "title": "File:House construction site, Greenmeadow, Cwmbran - geograph.org.uk - 5343692.jpg",
+  "artist": "Jaggery",
+  "license": "CC BY-SA 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:House_construction_site,_Greenmeadow,_Cwmbran_-_geograph.org.uk_-_5343692.jpg"
+ },
+ {
+  "key": "sample-ar2",
+  "title": "File:House Construction site - Invermere, British Columbia.jpg",
+  "artist": "PatInver",
+  "license": "CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:House_Construction_site_-_Invermere,_British_Columbia.jpg"
+ },
+ {
+  "key": "sample-cu1",
+  "title": "File:Asphalt paver working.jpg",
+  "artist": "Sammya Nig Ltd",
+  "license": "CC BY-SA 4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Asphalt_paver_working.jpg"
+ },
+ {
+  "key": "sample-cu2",
+  "title": "File:Excavation for a trench box west of Queens Boulevard. (CQ033, 08-16-2018) (44048208672).jpg",
+  "artist": "MTA Capital Construction Mega Projects",
+  "license": "CC BY 2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Excavation_for_a_trench_box_west_of_Queens_Boulevard._(CQ033,_08-16-2018)_(44048208672).jpg"
+ },
+ {
+  "key": "sample-cr1",
+  "title": "File:Tura River embankment 022.JPG",
+  "artist": "Anastasiya Lvova",
+  "license": "CC BY-SA 3.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Tura_River_embankment_022.JPG"
+ },
+ {
+  "key": "sample-cr2",
+  "title": "File:Paver (vehicle) in Ukraine.jpg",
+  "artist": "Novoklimov",
+  "license": "CC0",
+  "page": "https://commons.wikimedia.org/wiki/File:Paver_(vehicle)_in_Ukraine.jpg"
+ }
+]

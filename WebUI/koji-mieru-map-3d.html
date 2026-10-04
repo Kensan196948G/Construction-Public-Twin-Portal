@@ -1,0 +1,1937 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Construction Public Twin Portal MVP 3D Beta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.119.0/Build/Cesium/Widgets/widgets.css" />
+<script>window.CESIUM_BASE_URL='https://cdn.jsdelivr.net/npm/cesium@1.119.0/Build/Cesium/';</script>
+<script defer src="https://cdn.jsdelivr.net/npm/cesium@1.119.0/Build/Cesium/Cesium.js"></script>
+<style>
+:root{
+  --bg:oklch(97.5% 0.005 250);
+  --surface:oklch(100% 0 0);
+  --surface-2:oklch(96.5% 0.006 250);
+  --fg:oklch(22% 0.02 240);
+  --muted:oklch(50% 0.018 240);
+  --faint:oklch(64% 0.014 240);
+  --border:oklch(90% 0.008 240);
+  --border-strong:oklch(83% 0.01 240);
+  --accent:oklch(58% 0.16 145);
+  --accent-ink:oklch(30% 0.09 150);
+  --accent-soft:color-mix(in oklch, oklch(58% 0.16 145) 12%, white);
+  --st-planned:oklch(58% 0.14 250);
+  --st-active:oklch(70% 0.16 60);
+  --st-reg:oklch(58% 0.2 27);
+  --st-done:oklch(58% 0.13 155);
+  --st-hold:oklch(60% 0.012 250);
+  --st-night:oklch(54% 0.15 300);
+  --st-detour:oklch(66% 0.11 220);
+  --font-body:"Zen Kaku Gothic New","Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --shadow:0 1px 2px rgba(16,24,40,.05),0 10px 28px -14px rgba(16,24,40,.28);
+  --radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none !important}
+html,body{height:100%}
+body{
+  background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:14px;line-height:1.65;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow:hidden;
+}
+button,input{font-family:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums;letter-spacing:0}
+.num{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.app{height:100vh;display:grid;grid-template-rows:auto 1fr auto;background:var(--bg)}
+
+.topbar{display:flex;align-items:center;gap:20px;height:60px;padding:0 18px;background:var(--surface);border-bottom:1px solid var(--border);z-index:40}
+.brand{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+.brand-mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(150deg,oklch(34% 0.05 245),oklch(22% 0.02 240));display:grid;place-items:center;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.brand-text{display:flex;flex-direction:column;line-height:1.05}
+.brand-text strong{font-size:14px;font-weight:700;letter-spacing:-.01em;white-space:nowrap}
+.brand-text em{font-style:normal;font-size:10.5px;color:var(--muted);letter-spacing:.14em;font-family:var(--font-mono);text-transform:uppercase}
+
+.search{position:relative;flex:1 1 auto;max-width:420px}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--faint);pointer-events:none}
+.search input{width:100%;height:40px;padding:0 14px 0 38px;border:1px solid var(--border-strong);border-radius:10px;background:var(--surface-2);font-size:13.5px;transition:border-color .15s,background .15s}
+.search input::placeholder{color:var(--faint)}
+.search input:hover{border-color:oklch(74% .02 240)}
+.search input:focus{outline:none;border-color:var(--accent);background:var(--surface);box-shadow:0 0 0 3px var(--accent-soft)}
+.search-results{position:absolute;top:46px;left:0;right:0;background:var(--surface);border:1px solid var(--border-strong);border-radius:10px;box-shadow:var(--shadow);overflow:hidden;z-index:60}
+.sr-item{display:flex;gap:10px;align-items:center;width:100%;text-align:left;padding:9px 12px;border-bottom:1px solid var(--border)}
+.sr-item:last-child{border-bottom:0}
+.sr-item:hover,.sr-item.hl{background:var(--surface-2)}
+.sr-item .sr-t{font-size:13px;font-weight:600}
+.sr-item .sr-s{font-size:11.5px;color:var(--muted)}
+
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.fchip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--border-strong);font-size:12.5px;font-weight:600;color:var(--muted);background:var(--surface);transition:background .15s,color .15s,border-color .15s}
+.fchip .fa{width:7px;height:7px;border-radius:50%;background:var(--faint)}
+.fchip:hover{color:var(--fg);border-color:var(--muted)}
+.fchip.active{color:var(--fg);background:oklch(35% .02 240);border-color:oklch(35% .02 240);color:#fff}
+.fchip.active .fa{background:#fff}
+.fchip .fc-n{font-family:var(--font-mono);font-size:10.5px;color:var(--faint);margin-left:1px}
+.fchip.active .fc-n{color:rgba(255,255,255,.78)}
+.fchip[data-f="active"] .fa{background:var(--st-active)}
+.fchip[data-f="planned"] .fa{background:var(--st-planned)}
+.fchip[data-f="reg"] .fa{background:var(--st-reg)}
+.fchip[data-f="done"] .fa{background:var(--st-done)}
+
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:14px;flex:0 0 auto}
+.updated{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:7px}
+.updated .dot{width:7px;height:7px;border-radius:50%;background:var(--st-done);box-shadow:0 0 0 3px color-mix(in oklch,var(--st-done) 22%,white)}
+.icon-btn{width:34px;height:34px;border-radius:9px;border:1px solid var(--border-strong);display:grid;place-items:center;font-weight:700;color:var(--muted);background:var(--surface)}
+.icon-btn:hover{color:var(--fg);border-color:var(--muted)}
+
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 396px;min-height:0;overflow:hidden}
+.viewport{position:relative;min-width:0;background:oklch(93% .008 250);overflow:hidden}
+.canvas-holder{position:absolute;inset:0}
+.map2d{position:absolute;inset:0;width:100%;height:100%;display:block;background:oklch(92.5% .01 250)}
+.cesium-holder{position:absolute;inset:0;background:#0e1116;z-index:5}
+.cesium-holder .cesium-viewer,.cesium-holder .cesium-viewer-cesiumWidgetContainer,.cesium-holder canvas{width:100%;height:100%}
+.cesium-holder .cesium-credit-container,.cesium-holder .cesium-viewer-bottom{font-size:10px}
+
+.float{position:absolute;background:color-mix(in oklch,white 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--border-strong);border-radius:var(--radius);box-shadow:var(--shadow);z-index:20}
+.tabs-panel{top:16px;left:16px;width:296px;max-height:calc(100% - 330px);display:flex;flex-direction:column;overflow:hidden}
+.tabs{display:flex;border-bottom:1px solid var(--border);flex:0 0 auto}
+.tab{flex:1;padding:11px 8px;font-size:12.5px;font-weight:700;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:6px;border-bottom:2px solid transparent}
+.tab.active{color:var(--fg);border-bottom-color:var(--accent)}
+.tab .count{font-family:var(--font-mono);font-size:11px;background:var(--surface-2);border:1px solid var(--border);border-radius:999px;padding:0 6px;color:var(--muted)}
+.tab-body{overflow-y:auto;padding:10px}
+
+.pcard{width:100%;text-align:left;border:1px solid var(--border);border-radius:10px;padding:11px;background:var(--surface);margin-bottom:8px;transition:border-color .15s,box-shadow .15s,transform .15s}
+.pcard:hover{border-color:var(--border-strong);box-shadow:0 6px 18px -12px rgba(16,24,40,.4)}
+.pcard.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.pcard .pc-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:5px}
+.pcard .pc-name{font-size:13px;font-weight:700;line-height:1.4}
+.pcard .pc-meta{font-size:11px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap}
+.pcard .pc-meta b{color:var(--fg);font-weight:600}
+.pcard .pc-loc{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-top:6px}
+.pcard .pc-loc svg{color:var(--faint);flex:0 0 auto}
+.pcard.dim{opacity:.5}
+
+.layer-row{display:flex;align-items:center;gap:10px;padding:8px 9px;border-radius:9px;cursor:pointer;border:1px solid transparent}
+.layer-row:hover{background:var(--surface-2)}
+.layer-row .sw{width:14px;height:14px;border-radius:4px;flex:0 0 auto;border:1px solid rgba(0,0,0,.15)}
+.layer-row .lname{font-size:12.5px;font-weight:600;flex:1}
+.layer-row .lg-type{font-size:10px;color:var(--faint);font-family:var(--font-mono)}
+.switch{width:34px;height:20px;border-radius:999px;background:oklch(84% .01 250);position:relative;flex:0 0 auto;transition:background .15s}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .15s}
+.layer-row.on .switch{background:var(--accent)}
+.layer-row.on .switch::after{transform:translateX(14px)}
+.lg-head{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);font-family:var(--font-mono);padding:11px 9px 4px}
+.lg-head:first-child{padding-top:2px}
+.grp-head{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;padding:10px 4px 5px;border-bottom:1px solid var(--border);margin-bottom:7px}
+.grp-head .gd{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.grp-head .gn{margin-left:auto;font-family:var(--font-mono);font-size:10.5px;color:var(--muted)}
+.sv-group{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:700;color:var(--muted);padding:9px 8px 5px}
+.sv-group .sv-gdot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.sv-group .sv-gn{margin-left:auto;font-family:var(--font-mono);font-size:10px;color:var(--faint)}
+.sv-empty{font-size:12px;color:var(--muted);padding:10px}
+.type-filter{display:flex;flex-wrap:wrap;gap:5px;padding:1px 1px 10px;border-bottom:1px solid var(--border);margin-bottom:9px}
+.tchip{font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;border:1px solid var(--border-strong);color:var(--muted);background:var(--surface)}
+.tchip:hover{color:var(--fg);border-color:var(--muted)}
+.tchip.active{background:oklch(35% .02 240);border-color:oklch(35% .02 240);color:#fff}
+.empty-note{font-size:12px;color:var(--muted);padding:8px}
+
+.view-controls{top:16px;right:16px;padding:8px;display:flex;flex-direction:column;gap:8px;align-items:stretch}
+.seg{display:flex;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:9px;padding:2px}
+.seg button{flex:1;height:28px;border-radius:7px;font-size:12px;font-weight:700;color:var(--muted);padding:0 12px}
+.seg button.active{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.cam-row{display:flex;gap:6px}
+.chip-btn{height:28px;padding:0 11px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);font-size:12px;font-weight:600;color:var(--muted)}
+.chip-btn:hover{color:var(--fg);border-color:var(--muted)}
+.chip-btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
+
+.legend{right:16px;bottom:16px;padding:10px 12px;max-width:206px;max-height:calc(100% - 170px);overflow-y:auto}
+.legend .lg-sub{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-family:var(--font-mono);margin:10px 0 6px}
+.legend h4{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-family:var(--font-mono);margin-bottom:8px}
+.legend ul{list-style:none;display:grid;gap:6px}
+.legend li{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--fg)}
+.legend .lg-mark{width:14px;height:8px;border-radius:2px;flex:0 0 auto}
+.legend .lg-line{width:16px;height:0;border-top:2px dashed;flex:0 0 auto}
+.site3d{position:relative;height:224px;border-radius:10px;overflow:hidden;background:linear-gradient(180deg,oklch(98% .004 250),oklch(92% .012 250));border:1px solid var(--border)}
+.site3d canvas{display:block;width:100%;height:100%}
+.s3d-badge{position:absolute;left:10px;top:10px;font-size:10px;font-family:var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:color-mix(in oklch,white 84%,transparent);border:1px solid var(--border);border-radius:6px;padding:2px 7px;pointer-events:none}
+.s3d-ctl{position:absolute;right:10px;bottom:10px;display:flex;gap:6px}
+.s3d-ctl button{font-size:11px;font-weight:600;padding:4px 9px;border-radius:7px;border:1px solid var(--border-strong);background:color-mix(in oklch,white 88%,transparent);color:var(--fg)}
+.s3d-ctl button:hover{border-color:var(--muted)}
+.s3d-fallback{display:grid;place-items:center;height:100%;font-size:12px;color:var(--muted);padding:16px;text-align:center}
+.photo-card{margin:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface-2)}
+.photo-card img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;background:oklch(90% .008 250)}
+.photo-card figcaption{padding:8px 11px;font-size:11px;color:var(--muted);line-height:1.6}
+.photo-card figcaption b{color:var(--fg);font-weight:600}
+.photo-card a{color:var(--accent-ink)}
+.top-btn{height:34px;padding:0 12px;border-radius:9px;border:1px solid var(--border-strong);background:var(--surface);font-size:12.5px;font-weight:600;color:var(--fg);display:inline-flex;align-items:center;gap:7px}
+.top-btn:hover{border-color:var(--muted)}
+.top-btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
+.top-btn .tcount{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+.siteviewer{position:fixed;top:60px;bottom:38px;left:0;right:0;background:var(--bg);z-index:35;display:flex;flex-direction:column;overflow:hidden}
+.sv-head{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:13px 18px;border-bottom:1px solid var(--border);flex:0 0 auto}
+.sv-head h2{font-size:17px;font-weight:900;letter-spacing:-.01em}
+.sv-head p{font-size:11.5px;color:var(--muted);margin-top:2px}
+.sv-nav{display:flex;align-items:center;gap:8px}
+.sv-count{font-family:var(--font-mono);font-size:12px;color:var(--muted);letter-spacing:.08em;min-width:60px;text-align:center}
+.sv-body{flex:1 1 auto;display:grid;grid-template-columns:290px minmax(0,1fr);min-height:0}
+.sv-list{border-right:1px solid var(--border);overflow-y:auto;padding:8px}
+.sv-item{display:flex;align-items:center;gap:9px;width:100%;text-align:left;padding:9px 10px;border-radius:9px;border:1px solid transparent;margin-bottom:4px}
+.sv-item:hover{background:var(--surface-2)}
+.sv-item.active{background:var(--accent-soft);border-color:var(--accent)}
+.sv-dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.sv-it{min-width:0;flex:1;display:flex;flex-direction:column}
+.sv-iname{font-size:12.5px;font-weight:700;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sv-iloc{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sv-itype{font-size:9.5px;font-family:var(--font-mono);color:var(--faint);flex:0 0 auto}
+.sv-stage{display:flex;flex-direction:column;min-width:0;min-height:0}
+.sv-layers{flex:0 0 auto;display:flex;gap:6px;overflow-x:auto;padding:8px 12px;border-bottom:1px solid var(--border)}
+.sv-layers .tchip{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.sv-lsw{width:9px;height:9px;border-radius:3px;flex:0 0 auto}
+.sv-canvas{flex:1 1 auto;height:auto;border:0;border-radius:0;min-height:220px;background:linear-gradient(180deg,oklch(98% .004 250),oklch(90% .012 250))}
+.sv-meta{flex:0 0 auto;border-top:1px solid var(--border);display:grid;grid-template-columns:minmax(0,1fr) 224px;min-height:0}
+.sv-mtext{padding:13px 18px}
+.sv-mtags{display:flex;gap:6px;margin-bottom:8px}
+.sv-mtext h3{font-size:16px;font-weight:800;line-height:1.4}
+.sv-mlead{font-size:12.5px;color:var(--muted);margin-top:3px}
+.sv-mdl{display:grid;grid-template-columns:1fr 1fr;gap:7px 16px;margin-top:10px}
+.sv-mdl dt{font-size:10px;color:var(--faint);letter-spacing:.04em}
+.sv-mdl dd{font-size:12px;font-weight:600}
+.sv-mdl div:first-child{grid-column:1/-1}
+.sv-photo{margin:0;border-left:1px solid var(--border);background:var(--surface-2)}
+.sv-photo img{display:block;width:100%;height:152px;object-fit:cover}
+.sv-photo figcaption{padding:7px 10px;font-size:10px;color:var(--muted);line-height:1.5}
+
+.timeline{left:50%;transform:translateX(-50%);bottom:16px;width:min(520px,calc(100% - 520px));padding:10px 14px 8px}
+.tl-head{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.tl-head #play{width:28px;height:28px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);display:grid;place-items:center;color:var(--fg)}
+.tl-head #play:hover{border-color:var(--muted)}
+.tl-date{font-family:var(--font-mono);font-size:15px;font-weight:600;letter-spacing:.02em}
+.tl-head .chip-btn{margin-left:auto}
+#tl-range{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:999px;background:linear-gradient(90deg,oklch(78% .02 250),oklch(88% .01 250));outline:none;margin:6px 0 4px}
+#tl-range::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--fg);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35);cursor:pointer}
+#tl-range::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--fg);border:2px solid #fff;cursor:pointer}
+.tl-axis{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:9.5px;color:var(--faint);letter-spacing:.04em}
+
+.map-note{top:16px;left:50%;transform:translateX(-50%);padding:6px 12px;font-size:11px;color:var(--muted);white-space:nowrap;border-radius:999px}
+.map-note b{color:var(--fg);font-weight:600}
+
+.detail{background:var(--surface);border-left:1px solid var(--border);overflow-y:auto;min-height:0}
+.d-hero{padding:18px 18px 16px;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.d-hero::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--status,var(--muted))}
+.d-tags{display:flex;gap:6px;align-items:center;margin-bottom:10px}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;letter-spacing:.02em}
+.pill.planned{color:oklch(44% .14 250);background:color-mix(in oklch,var(--st-planned) 14%,white);border:1px solid color-mix(in oklch,var(--st-planned) 34%,white)}
+.pill.active{color:oklch(42% .12 60);background:color-mix(in oklch,var(--st-active) 16%,white);border:1px solid color-mix(in oklch,var(--st-active) 40%,white)}
+.pill.reg{color:oklch(42% .18 27);background:color-mix(in oklch,var(--st-reg) 13%,white);border:1px solid color-mix(in oklch,var(--st-reg) 34%,white)}
+.pill.done{color:oklch(38% .1 155);background:color-mix(in oklch,var(--st-done) 13%,white);border:1px solid color-mix(in oklch,var(--st-done) 34%,white)}
+.pill.cat{color:var(--muted);background:var(--surface-2);border:1px solid var(--border)}
+.pill.solid{color:#fff;background:var(--status);border:1px solid var(--status)}
+.d-title{font-size:20px;font-weight:900;line-height:1.35;letter-spacing:-.01em;margin-bottom:4px}
+.d-formal{font-size:12px;color:var(--muted);margin-bottom:12px}
+.d-meta{display:grid;grid-template-columns:1fr 1fr;gap:9px 14px;padding-top:12px;border-top:1px dashed var(--border)}
+.d-meta .k{font-size:10.5px;color:var(--faint);letter-spacing:.04em}
+.d-meta .v{font-size:12.5px;font-weight:600;line-height:1.45}
+.d-meta .v small{display:block;font-weight:400;color:var(--muted);font-size:11px}
+
+.d-sec{padding:16px 18px;border-bottom:1px solid var(--border)}
+.d-sec h3{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-family:var(--font-mono);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.d-sec p.lead{font-size:13.5px;line-height:1.75}
+.benefits{list-style:none;display:grid;gap:8px;margin-top:4px}
+.benefits li{display:flex;gap:9px;font-size:13px;align-items:flex-start}
+.benefits li svg{flex:0 0 auto;margin-top:3px;color:var(--accent)}
+
+.cta-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{height:42px;border-radius:10px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid transparent;transition:background .15s,border-color .15s,color .15s}
+.btn.primary{grid-column:1/-1;background:var(--accent);color:#fff}
+.btn.primary:hover{background:oklch(52% .16 145)}
+.btn.ghost{background:var(--surface);border-color:var(--border-strong);color:var(--fg)}
+.btn.ghost:hover{background:var(--surface-2);border-color:var(--muted)}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
+
+.imp{list-style:none;display:grid;gap:10px}
+.imp li{border:1px solid var(--border);border-radius:10px;padding:11px 12px;border-left:4px solid var(--sev,var(--muted))}
+.imp .imp-top{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:4px}
+.imp .imp-title{font-size:13px;font-weight:700}
+.imp .imp-desc{font-size:11.5px;color:var(--muted);line-height:1.6}
+.imp .imp-period{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.imp .imp-period b{color:var(--fg);font-weight:600}
+.imp.inactive{opacity:.55}
+.sev-pill{font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;white-space:nowrap}
+.sev-pill.info{color:oklch(40% .1 220);background:color-mix(in oklch,var(--st-detour) 16%,white)}
+.sev-pill.notice{color:oklch(42% .12 60);background:color-mix(in oklch,var(--st-active) 18%,white)}
+.sev-pill.warning{color:oklch(42% .18 27);background:color-mix(in oklch,var(--st-reg) 15%,white)}
+
+.src{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px}
+.src a{color:var(--accent-ink);font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:5px;border-bottom:1px solid color-mix(in oklch,var(--accent) 40%,white)}
+.src a:hover{border-bottom-color:var(--accent)}
+.disclaimer{font-size:11px;color:var(--muted);line-height:1.65;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;display:flex;gap:9px}
+.disclaimer svg{flex:0 0 auto;margin-top:2px;color:var(--faint)}
+
+.statusbar{display:flex;align-items:center;gap:0;height:38px;padding:0 18px;background:var(--surface);border-top:1px solid var(--border);font-size:11.5px;color:var(--muted);overflow:hidden;white-space:nowrap}
+.statusbar .sep{width:1px;height:14px;background:var(--border);margin:0 14px}
+.statusbar b{color:var(--fg);font-weight:600}
+.statusbar .spacer{margin-left:auto}
+.statusbar .tag{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;color:var(--faint)}
+
+.toast{position:fixed;bottom:56px;left:50%;transform:translateX(-50%) translateY(8px);background:oklch(24% .02 240);color:#fff;font-size:12.5px;padding:10px 16px;border-radius:10px;box-shadow:var(--shadow);z-index:120;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.modal-bg{position:fixed;inset:0;background:rgba(16,24,40,.42);backdrop-filter:blur(3px);z-index:110;display:grid;place-items:center;padding:24px}
+.modal{background:var(--surface);border-radius:16px;max-width:520px;width:100%;box-shadow:0 30px 80px -20px rgba(16,24,40,.6);overflow:hidden}
+.modal header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal header h2{font-size:16px;font-weight:800}
+.modal .body{padding:18px 20px;display:grid;gap:14px}
+.qa{display:flex;gap:12px}
+.qa .qn{width:26px;height:26px;border-radius:8px;background:var(--accent-soft);color:var(--accent-ink);font-family:var(--font-mono);font-weight:600;display:grid;place-items:center;flex:0 0 auto;font-size:12px}
+.qa .qt{font-size:13px;font-weight:700}
+.qa .qd{font-size:12px;color:var(--muted)}
+
+.crosshair{position:absolute;left:50%;top:50%;width:14px;height:14px;transform:translate(-50%,-50%);pointer-events:none;color:rgba(20,28,40,.28);z-index:15}
+.spinner{position:absolute;inset:0;display:grid;place-items:center;background:oklch(93% .008 250);z-index:10;gap:10px}
+.spinner .ring{width:26px;height:26px;border-radius:50%;border:3px solid var(--border-strong);border-top-color:var(--accent);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media (max-width:1080px){
+  .workspace{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto}
+  .detail{border-left:0;border-top:1px solid var(--border);max-height:46vh}
+  .map-note{display:none}
+  .timeline{width:calc(100% - 32px);bottom:12px}
+  .legend{display:none}
+  .tabs-panel{max-height:calc(100% - 150px)}
+  .siteviewer{top:0;bottom:0}
+  .sv-body{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}
+  .sv-list{display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;border-right:0;border-bottom:1px solid var(--border);padding:8px}
+  .sv-item{width:auto;flex:0 0 auto;min-width:186px;margin-bottom:0}
+  .sv-meta{grid-template-columns:1fr}
+  .sv-photo{border-left:0;border-top:1px solid var(--border)}
+  .sv-photo img{height:128px}
+  .topbar{flex-wrap:wrap;height:auto;padding:10px 14px;gap:10px}
+  .filters{order:3;width:100%}
+  .search{max-width:none}
+}
+@media (max-width:640px){
+  .tabs-panel{width:calc(100% - 32px)}
+  .view-controls{top:auto;bottom:104px;right:16px}
+  .detail{max-height:52vh}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar" data-od-id="topbar">
+    <div class="brand" data-od-id="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V9l7-5 7 5v11"/><path d="M9 20v-5h6v5"/></svg>
+      </span>
+      <span class="brand-text"><strong>Construction Public Twin Portal MVP</strong><em>3D Beta</em></span>
+    </div>
+
+    <div class="search" role="search" data-od-id="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="search-input" type="search" placeholder="住所・駅・工事件名で検索" aria-label="工事を検索" autocomplete="off" />
+      <div class="search-results" id="search-results" hidden></div>
+    </div>
+
+    <div class="filters" id="filters" data-od-id="status-filters"></div>
+
+    <div class="topbar-right">
+      <span class="updated"><span class="dot"></span>最終更新 <time class="num">2026/10/04 07:00</time></span>
+      <button class="top-btn" id="sv-open" data-od-id="sv-open" aria-expanded="false">現場3Dビュー</button>
+      <button class="icon-btn" id="help-btn" aria-label="使い方" title="使い方">?</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <section class="viewport" id="viewport" data-od-id="viewport">
+      <div class="canvas-holder" id="canvas-holder" data-od-id="viewport-3d"></div>
+      <svg class="map2d" id="map2d" data-od-id="viewport-2d" hidden></svg>
+      <div class="cesium-holder" id="cesium-holder" data-od-id="viewport-cesium" hidden></div>
+      <div class="spinner" id="spinner"><div class="ring"></div><span style="font-size:12px;color:var(--muted)">3D都市モデルを読み込み中…</span></div>
+      <svg class="crosshair" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg>
+
+      <div class="float tabs-panel" data-od-id="layer-panel">
+        <div class="tabs">
+          <button class="tab active" data-tab="list">工事一覧 <span class="count num" id="list-count">0</span></button>
+          <button class="tab" data-tab="layers">レイヤー</button>
+        </div>
+        <div class="tab-body" id="panel-body"></div>
+      </div>
+
+      <div class="float view-controls" data-od-id="view-controls">
+        <div class="seg" role="group" aria-label="表示モード">
+          <button id="mode-3d" class="active">3D</button>
+          <button id="mode-2d">2D</button>
+          <button id="mode-cesium">リアル</button>
+        </div>
+        <div class="cam-row">
+          <button class="chip-btn" data-cam="top">俯瞰</button>
+          <button class="chip-btn" data-cam="front">正面</button>
+          <button class="chip-btn" data-cam="reset">リセット</button>
+        </div>
+        <div class="cam-row">
+          <button class="chip-btn" id="iso-btn">選択現場のみ表示</button>
+        </div>
+      </div>
+
+      <div class="float legend" id="legend" data-od-id="legend"></div>
+
+      <div class="float timeline" data-od-id="timeline">
+        <div class="tl-head">
+          <button id="play" aria-label="再生" title="時間を再生">
+            <svg id="play-icon" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <span class="tl-date num" id="tl-date">2026/10/04</span>
+          <button id="tl-now" class="chip-btn">現在に戻す</button>
+        </div>
+        <input id="tl-range" type="range" min="0" max="364" value="186" step="1" aria-label="日付" />
+        <div class="tl-axis" id="tl-axis"></div>
+      </div>
+    </section>
+
+    <aside class="detail" id="detail" data-od-id="detail-panel" aria-label="工事の詳細"></aside>
+  </main>
+
+  <section class="siteviewer" id="siteviewer" data-od-id="siteviewer" hidden aria-label="現場3Dビュー">
+    <header class="sv-head">
+      <div>
+        <h2>現場3Dビュー</h2>
+        <p>1現場ずつ切り出した3Dモデル（全24件・デモ用サンプル）</p>
+      </div>
+      <div class="sv-nav">
+        <button class="icon-btn" id="sv-prev" aria-label="前の現場" title="前の現場">‹</button>
+        <span class="sv-count"><span id="sv-cur">01</span> / <span id="sv-total">24</span></span>
+        <button class="icon-btn" id="sv-next" aria-label="次の現場" title="次の現場">›</button>
+        <button class="icon-btn" id="sv-close" aria-label="閉じる" title="閉じる">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </header>
+    <div class="sv-body">
+      <aside class="sv-list" id="sv-list" aria-label="現場一覧"></aside>
+      <div class="sv-stage">
+        <div class="sv-layers" id="sv-layers" aria-label="データレイヤー"></div>
+        <div class="site3d sv-canvas" id="sv3d-holder">
+          <span class="s3d-badge" id="sv-badge">3D</span>
+          <div class="s3d-ctl">
+            <button type="button" id="sv-reset">リセット</button>
+            <button type="button" id="sv-spin">停止</button>
+          </div>
+        </div>
+        <div class="sv-meta" id="sv-meta"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="statusbar" data-od-id="statusbar">
+    <span>最終更新 <b class="num">2026/10/04 07:00</b></span>
+    <span class="sep"></span>
+    <span>情報提供: <b>大田区 建設部</b></span>
+    <span class="sep"></span>
+    <span>現地の案内・標識を優先してください</span>
+    <span class="sep"></span>
+    <span>サンプル写真: Wikimedia Commons（各画像に帰属表示）</span>
+    <span class="spacer"></span>
+    <span class="tag">DEMO SAMPLE DATA ・ NOT OFFICIAL</span>
+  </footer>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="modal-bg" id="help" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="help-title">
+    <header>
+      <h2 id="help-title">この地図でわかること</h2>
+      <button class="icon-btn" id="help-close" aria-label="閉じる">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </header>
+    <div class="body">
+      <div class="qa"><span class="qn">1</span><div><div class="qt">何の工事をしているか</div><div class="qd">3D都市モデル上の工区をクリックすると、工事の目的と内容が表示されます。</div></div></div>
+      <div class="qa"><span class="qn">2</span><div><div class="qt">いつからいつまでか</div><div class="qd">下の時間スライダーで着工前・施工中・完成後の状態を切り替えられます。</div></div></div>
+      <div class="qa"><span class="qn">3</span><div><div class="qt">移動・生活への影響があるか</div><div class="qd">車線規制・歩道切替・迂回路を地図と一覧で確認できます。</div></div></div>
+      <div class="qa"><span class="qn">4</span><div><div class="qt">完成後にどう変わるか</div><div class="qd">「完成予想を見る」で、完成後の広場・道路の姿を重ねて表示します。</div></div></div>
+      <div class="qa"><span class="qn">5</span><div><div class="qt">現場ごとの3Dを見る</div><div class="qd">「現場3Dビュー」で1現場ずつ切り出した3Dを表示します。左の一覧・前後ボタンで切り替え、ドラッグで回転・ホイールで拡大できます。</div></div></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+"use strict";
+
+var ORIGIN={lon:139.668,lat:35.593};
+var M_LON=111320*Math.cos(ORIGIN.lat*Math.PI/180);
+var M_LAT=110540;
+function toLocal(lon,lat){return{x:(lon-ORIGIN.lon)*M_LON,z:-(lat-ORIGIN.lat)*M_LAT};}
+
+var C={
+  planned:'#3b7dd8', active:'#e08a2e', reg:'#d23b2e', done:'#2f9d6b',
+  hold:'#8a8f98', night:'#7a53c9', detour:'#35a3c4',
+  built:'#cfd3da', built2:'#c4c9d1', glass:'#aeb6c2', road:'#4a505a',
+  green:'#8fb98a', water:'#8fbfd6'
+};
+
+var PROJECTS=[
+ {
+  id:'tokyo-demo-002', slug:'denenchofu-station-plaza', status:'under_construction', category:'広場',
+  siteType:'civil-urban',
+  name:'田園調布駅前広場整備工事', publicTitle:'駅前広場を歩行者中心に整える工事',
+  purpose:'駅前の歩行空間を広げ、段差を解消してバリアフリー動線を確保します。通勤・通学時の安全性と回遊性を高めるための整備です。',
+  benefits:['広場の拡幅と段差の解消','バス・タクシー乗降場の再配置','緑陰・ベンチ・案内サインの整備'],
+  owner:{name:'大田区 建設部 まちづくり課'}, contractor:{name:'田園調布建設株式会社'},
+  start:'2026-04-01', end:'2027-03-31', phase:'広場舗装・植栽工事', updated:'2026-10-04T07:00:00+09:00',
+  lon:139.6680, lat:35.5930,
+  zone:[[-72,-30],[46,-30],[46,30],[-72,30]],
+  regulation:[[-104,0],[-12,0]],
+  detour:[[-34,36],[-34,62],[22,62],[22,44]],
+  pedestrian:[[-84,20],[44,20]],
+  completion:'plaza'
+ },
+ {
+  id:'tokyo-demo-001', slug:'denenchofu-road-improvement', status:'under_construction', category:'道路',
+  siteType:'civil-urban',
+  name:'田園調布地区 歩道整備工事', publicTitle:'駅周辺の歩道を広げる工事',
+  purpose:'通学・通勤時の歩行の安全性を高め、段差を解消するための整備です。あわせて歩道の排水設備を更新します。',
+  benefits:['歩道の拡幅','バリアフリー化','横断歩道周辺の視認性改善'],
+  owner:{name:'大田区 建設部 道路課'}, contractor:{name:'多摩川土木株式会社'},
+  start:'2026-05-15', end:'2027-01-31', phase:'歩道改良・排水設備工事', updated:'2026-10-03T18:30:00+09:00',
+  lon:139.6700, lat:35.5924,
+  zone:[[-84,-13],[46,-13],[46,13],[-84,13]],
+  regulation:[[-96,0],[56,0]],
+  detour:null,
+  pedestrian:[[-76,14],[40,14]],
+  completion:'sidewalk'
+ },
+ {
+  id:'tokyo-demo-003', slug:'denenchofu-sewer-renewal', status:'planned', category:'下水道',
+  siteType:'civil-urban',
+  name:'田園調布駅周辺 下水道管更新工事', publicTitle:'古い下水道管を入れ替える工事',
+  purpose:'老朽化した下水道管を耐震管に入れ替え、地震時の排水機能と道路の安全性を確保します。',
+  benefits:['耐震管への更新','浸水リスクの低減','マンホールの段差解消'],
+  owner:{name:'大田区 下水道部 管路課'}, contractor:{name:'調整中'},
+  start:'2026-12-01', end:'2027-03-31', phase:'開削工事（準備期間を含む）', updated:'2026-10-01T09:00:00+09:00',
+  lon:139.6666, lat:35.5941,
+  zone:[[-26,-22],[26,-22],[26,22],[-26,22]],
+  regulation:[[-44,0],[44,0]],
+  detour:null,
+  pedestrian:null,
+  completion:'utility'
+ },
+ {
+  id:'tokyo-demo-004', slug:'tamagawa-park-plaza', status:'completed', category:'公園',
+  siteType:'civil-urban',
+  name:'多摩川台公園 防災広場整備工事', publicTitle:'公園に防災広場をつくる工事',
+  purpose:'災害時に一時避難できる広場と、かまどベンチ・防災倉庫を整備しました。',
+  benefits:['一時避難広場の確保','かまどベンチ・防災倉庫','園路のバリアフリー化'],
+  owner:{name:'大田区 都市整備部 公園課'}, contractor:{name:'緑地建設株式会社'},
+  start:'2025-06-01', end:'2026-02-28', phase:'工事完了・供用中', updated:'2026-03-05T10:00:00+09:00',
+  lon:139.6695, lat:35.5952,
+  zone:[[-62,-46],[62,-46],[62,46],[-62,46]],
+  regulation:null,
+  detour:null,
+  pedestrian:[[-70,30],[70,30]],
+  completion:'park'
+ }
+];
+
+var IMPACTS=[
+ {id:'imp-002-sidewalk',projectId:'tokyo-demo-002',type:'歩道切替',severity:'notice',title:'駅前歩道の切替',
+  desc:'駅前の歩道を仮設歩道へ切り替えます。幅員は確保していますが、朝夕は混雑します。',
+  from:'2026-06-01',to:'2027-02-28',rec:'終日',geom:'pedestrian'},
+ {id:'imp-002-night-lane',projectId:'tokyo-demo-002',type:'車線規制',severity:'warning',title:'夜間の片側交互通行',
+  desc:'舗装工事のため、夜間に片側交互通行を実施します。誘導員が配置されます。',
+  from:'2026-10-10',to:'2026-10-31',rec:'平日 21:00〜翌5:00',geom:'regulation'},
+ {id:'imp-002-detour',projectId:'tokyo-demo-002',type:'迂回路',severity:'info',title:'駅前の迂回路',
+  desc:'広場前の通りを通行止めにし、北側の市道へ迂回していただきます。',
+  from:'2026-10-10',to:'2027-03-31',rec:'終日',geom:'detour'},
+ {id:'imp-001-day-lane',projectId:'tokyo-demo-001',type:'車線規制',severity:'notice',title:'昼間の車線規制（片側1車線）',
+  desc:'歩道の拡幅工事に伴い、昼間は片側1車線の規制を行います。',
+  from:'2026-08-01',to:'2026-12-20',rec:'平日 9:00〜16:00',geom:'regulation'},
+ {id:'imp-003-notice',projectId:'tokyo-demo-003',type:'事前周知',severity:'info',title:'着工前の事前周知',
+  desc:'着工前に、周辺住民の皆さまへ工事説明と交通規制の予定を周知します。',
+  from:'2026-11-01',to:'2026-11-30',rec:'終日',geom:null},
+ {id:'imp-004-done',projectId:'tokyo-demo-004',type:'完了',severity:'info',title:'工事完了・供用開始',
+  desc:'防災広場は完成し、現在は供用中です。',
+  from:'2026-02-01',to:'2026-03-31',rec:'終了',geom:null}
+];
+var SITE_TMPL={
+ 'arch-urban':{label:'都市部建設',cat:'建築・都市部',arch:true,urban:true,
+  purpose:'利便性の高い市街地に、住戸と低層部の店舗・事務所を備えた建物を新築します。周辺の街並みと歩行者動線に配慮した計画です。',
+  benefits:['住戸・事務所の供給','低層部に店舗・公共通路を確保','敷地境界の緑化と歩道の確保'],
+  phase:'躯体・外装工事',owner:'大田区 建築部 市街地整備課',contractor:'◯◯建設株式会社',
+  w:64,d:46,floors:12,completion:'tower',imp:'車両搬入規制',sev:'notice'},
+ 'arch-rural':{label:'地方建設',cat:'建築・地方',arch:true,urban:false,
+  purpose:'地域の生活和施設を更新するため、木造・鉄骨造の低層施設を新築します。地域産材と地元施工を前提としています。',
+  benefits:['生活・福祉施設の更新','地域産材・地元施工の活用','敷地内の駐車・緑地の確保'],
+  phase:'基礎・躯体工事',owner:'◯◯町 建設課',contractor:'◯◯建設工業',
+  w:54,d:42,floors:3,completion:'rural',imp:'車両搬入規制',sev:'notice'},
+ 'civil-urban':{label:'都市部土木',cat:'土木・都市部',arch:false,urban:true,
+  purpose:'都市部の道路・上下水道・広場を更新し、安全で使いやすい歩行者・自転車空間と防災機能を確保します。',
+  benefits:['老朽インフラの更新','歩行者・自転車空間の再整備','浸水・震災対策の強化'],
+  phase:'開削・構造物工事',owner:'大田区 建設部 土木課',contractor:'◯◯土木株式会社',
+  w:120,d:24,floors:0,completion:'road',imp:'車線規制',sev:'warning'},
+ 'civil-rural':{label:'地方土木',cat:'土木・地方',arch:false,urban:false,
+  purpose:'地域の幹線道路・農道・河川護岸を改良し、安全性と災害時の通行確保を図ります。',
+  benefits:['狭隘区間・急勾配の改良','法面・護岸の補強','災害時の輸送路の確保'],
+  phase:'盛土・法面工事',owner:'◯◯県 地域整備部',contractor:'◯◯建設株式会社',
+  w:150,d:30,floors:0,completion:'levee',imp:'片側交互通行',sev:'notice'}
+};
+var SITE_DEFS=[
+ ['site-au-1','arch-urban','田園調布二丁目 マンション新築工事','高層マンションを建てる工事',150,190,'2026-03-01','2027-02-28'],
+ ['site-au-2','arch-urban','田園調布駅東口 オフィスビル新築工事','駅東口にオフィスビルを建てる工事',-230,150,'2026-05-10','2027-03-31'],
+ ['site-au-3','arch-urban','中央通り 商業施設建替工事','中央通りの商業施設を建て替える工事',-270,-180,'2026-04-15','2027-01-31'],
+ ['site-au-4','arch-urban','市役所前 複合ビル新築工事','市役所前に複合ビルを建てる工事',300,-320,'2026-06-01','2027-03-15'],
+ ['site-au-5','arch-urban','公園通り 分譲住宅新築工事','公園通りに分譲住宅を建てる工事',-40,-360,'2026-02-20','2026-12-20'],
+ ['site-cu-1','civil-urban','中央通り 下水道管更新工事','中央通りの下水道管を更新する工事',400,40,'2026-04-01','2027-01-31'],
+ ['site-cu-2','civil-urban','駅南 道路拡幅工事','駅南の道路を拡幅する工事',-400,-60,'2026-05-01','2027-02-28'],
+ ['site-cu-3','civil-urban','桜並木通り 無電柱化・歩道整備工事','桜並木通りの電柱を地中化する工事',-120,360,'2026-03-15','2026-12-28'],
+ ['site-cu-4','civil-urban','市街地 雨水貯留施設整備工事','浸水対策の雨水貯留施設をつくる工事',280,400,'2026-06-15','2027-03-31'],
+ ['site-cu-5','civil-urban','文化会館前 広場再整備工事','文化会館前の広場を再整備する工事',-380,320,'2026-07-01','2027-02-28'],
+ ['site-ar-1','arch-rural','みなみ野 地域福祉施設新築工事','地域の福祉施設を新築する工事',560,540,'2026-09-01','2027-03-31'],
+ ['site-ar-2','arch-rural','川辺町 農産物直売所新築工事','農産物直売所を新築する工事',-600,500,'2026-11-15','2027-03-31'],
+ ['site-ar-3','arch-rural','山手集落 診療所建替工事','集落の診療所を建て替える工事',-640,-440,'2026-12-01','2027-03-31'],
+ ['site-ar-4','arch-rural','湖畔 保育所新築工事','湖畔に保育所を新築する工事',600,-540,'2026-08-01','2027-03-31'],
+ ['site-ar-5','arch-rural','東野 公民館改築工事','老朽化した公民館を改築する工事',20,-720,'2025-09-01','2026-05-31'],
+ ['site-cr-1','civil-rural','県道 山間部 法面補強工事','県道の法面を補強する工事',720,180,'2026-10-20','2027-03-31'],
+ ['site-cr-2','civil-rural','一級河川 護岸改修工事','河川の護岸を改修する工事',-760,140,'2026-04-01','2026-11-30'],
+ ['site-cr-3','civil-rural','西部農道 舗装改良工事','農道を舗装改良する工事',-220,700,'2026-09-15','2027-03-31'],
+ ['site-cr-4','civil-rural','峠区間 線形改良工事','峠の急カーブを改良する工事',440,-700,'2027-01-10','2027-03-31'],
+ ['site-cr-5','civil-rural','橋梁 耐震補強工事','古い橋を耐震補強する工事',760,-360,'2025-08-01','2026-03-31']
+];
+function makeSites(){
+  var projects=[],impacts=[];
+  SITE_DEFS.forEach(function(def){
+    var id=def[0],type=def[1],name=def[2],title=def[3],x=def[4],z=def[5],start=def[6],end=def[7];
+    var t=SITE_TMPL[type],w=t.w,d=t.d;
+    var zon=[[-w/2,-d/2],[w/2,-d/2],[w/2,d/2],[-w/2,d/2]];
+    var reg=null,det=null,ped=null;
+    if(t.arch){ped=[[-w/2,d/2-4],[w/2,d/2-4]];}
+    else{
+      reg=[[-w/2,0],[w/2,0]];
+      det=[[-w/2-12,d/2+8],[-w/2-12,d/2+26],[w/2+12,d/2+26],[w/2+12,d/2+8]];
+      ped=[[-w/2,d/2+6],[w/2,d/2+6]];
+    }
+    projects.push({
+      id:id,slug:id,siteType:type,status:'under_construction',category:t.cat,
+      name:name,publicTitle:title,purpose:t.purpose,benefits:t.benefits.slice(),
+      owner:{name:t.owner},contractor:{name:t.contractor},
+      start:start,end:end,phase:t.phase,updated:'2026-10-04T07:00:00+09:00',
+      lon:ORIGIN.lon+x/M_LON,lat:ORIGIN.lat-z/M_LAT,
+      zone:zon,regulation:reg,detour:det,pedestrian:ped,
+      completion:t.completion,siteW:w,siteD:d,floors:t.floors
+    });
+    impacts.push({id:id+'-reg',projectId:id,type:t.imp,severity:t.sev,
+      title:t.imp+'（'+title.replace('工事','')+'）',
+      desc:name+'に伴い、'+t.imp+'を実施します。現地の誘導・標識に従ってください。',
+      from:start,to:end,rec:t.arch?'平日 8:00〜18:00':'終日',geom:t.arch?'pedestrian':'regulation'});
+    if(t.urban){
+      impacts.push({id:id+'-night',projectId:id,type:'夜間作業',severity:'warning',
+        title:'夜間作業の実施（'+title.replace('工事','')+'）',
+        desc:'交通量の少ない夜間に、搬入・舗装などの作業を行います。',
+        from:start,to:end,rec:'原則 平日 22:00〜翌5:00',geom:null});
+    }
+  });
+  return {projects:projects,impacts:impacts};
+}
+var GEN=makeSites();
+PROJECTS=PROJECTS.concat(GEN.projects);
+IMPACTS=IMPACTS.concat(GEN.impacts);
+var SITE_LABEL={'arch-urban':'都市部建設','arch-rural':'地方建設','civil-urban':'都市部土木','civil-rural':'地方土木'};
+var PHOTO_FILES={
+ 'arch-urban':['assets/sample-au1.jpg','assets/sample-au2.jpg'],
+ 'arch-rural':['assets/sample-ar1.jpg','assets/sample-ar2.jpg'],
+ 'civil-urban':['assets/sample-cu1.jpg','assets/sample-cu2.jpg'],
+ 'civil-rural':['assets/sample-cr1.jpg','assets/sample-cr2.jpg']
+};
+var PHOTO_CREDIT={
+ 'assets/sample-au1.jpg':{a:'MB-one',l:'CC BY-SA 4.0',u:'https://commons.wikimedia.org/wiki/File:High-rise_construction,_Montreal_2017.jpg'},
+ 'assets/sample-au2.jpg':{a:'Pete',l:'CC BY 2.0',u:'https://commons.wikimedia.org/wiki/File:High-rise_construction_in_Kalasatama,_Helsinki,_2023_February.jpg'},
+ 'assets/sample-ar1.jpg':{a:'Jaggery',l:'CC BY-SA 2.0',u:'https://commons.wikimedia.org/wiki/File:House_construction_site,_Greenmeadow,_Cwmbran_-_geograph.org.uk_-_5343692.jpg'},
+ 'assets/sample-ar2.jpg':{a:'PatInver',l:'CC BY-SA 4.0',u:'https://commons.wikimedia.org/wiki/File:House_Construction_site_-_Invermere,_British_Columbia.jpg'},
+ 'assets/sample-cu1.jpg':{a:'Sammya Nig Ltd',l:'CC BY-SA 4.0',u:'https://commons.wikimedia.org/wiki/File:Asphalt_paver_working.jpg'},
+ 'assets/sample-cu2.jpg':{a:'MTA Capital Construction Mega Projects',l:'CC BY 2.0',u:'https://commons.wikimedia.org/wiki/File:Excavation_for_a_trench_box_west_of_Queens_Boulevard._(CQ033,_08-16-2018)_(44048208672).jpg'},
+ 'assets/sample-cr1.jpg':{a:'Anastasiya Lvova',l:'CC BY-SA 3.0',u:'https://commons.wikimedia.org/wiki/File:Tura_River_embankment_022.JPG'},
+ 'assets/sample-cr2.jpg':{a:'Novoklimov',l:'CC0',u:'https://commons.wikimedia.org/wiki/File:Paver_(vehicle)_in_Ukraine.jpg'}
+};
+
+var LOC={
+ 'tokyo-demo-001':['145-0071','東京都','','大田区','田園調布一丁目 1-8-5'],
+ 'tokyo-demo-002':['145-0071','東京都','','大田区','田園調布本町 1-1-1'],
+ 'tokyo-demo-003':['145-0071','東京都','','大田区','田園調布三丁目 3-2-4'],
+ 'tokyo-demo-004':['145-0073','東京都','','大田区','多摩川台 2-1-1'],
+ 'site-au-1':['145-0071','東京都','','大田区','田園調布二丁目 2-5-12'],
+ 'site-au-2':['145-0071','東京都','','大田区','田園調布駅東口 1-3-8'],
+ 'site-au-3':['145-0071','東京都','','大田区','中央通り 4-6-2'],
+ 'site-au-4':['145-0071','東京都','','大田区','市役所前 1-1-1'],
+ 'site-au-5':['145-0071','東京都','','大田区','公園通り 5-2-9'],
+ 'site-cu-1':['145-0071','東京都','','大田区','中央通り 3-4-11'],
+ 'site-cu-2':['145-0071','東京都','','大田区','駅南口 2-7-3'],
+ 'site-cu-3':['145-0071','東京都','','大田区','桜並木通り 6-1-4'],
+ 'site-cu-4':['145-0071','東京都','','大田区','市街地中央 1-9-6'],
+ 'site-cu-5':['145-0071','東京都','','大田区','文化会館前 2-3-1'],
+ 'site-ar-1':['330-0001','埼玉県','みなみ野市','','みなみ野 12-4'],
+ 'site-ar-2':['330-0002','埼玉県','川辺町','','川辺 45-2'],
+ 'site-ar-3':['380-0003','長野県','山手村','','山手 890-1'],
+ 'site-ar-4':['400-0004','山梨県','湖畔町','','湖畔 3-7-1'],
+ 'site-ar-5':['300-0005','茨城県','東野市','','東野 77-5'],
+ 'site-cr-1':['380-0011','長野県','南信濃町','','山間 10-3'],
+ 'site-cr-2':['330-0021','埼玉県','入間川市','','河岸 2-14-6'],
+ 'site-cr-3':['370-0031','群馬県','利根町','','西部 55-8'],
+ 'site-cr-4':['400-0041','山梨県','桂川町','','峠 9-2'],
+ 'site-cr-5':['420-0051','静岡県','大井川市','','橋梁 1-22-4']
+};
+
+var impactById={};
+IMPACTS.forEach(function(i){impactById[i.id]=i;});
+PROJECTS.forEach(function(p){
+  var c=toLocal(p.lon,p.lat);p.cx=c.x;p.cz=c.z;
+  p.impacts=IMPACTS.filter(function(i){return i.projectId===p.id;}).map(function(i){return i.id;});
+  if(!p.siteType)p.siteType='civil-urban';
+  if(!p.siteW){var xs=p.zone.map(function(q){return q[0];}),zs=p.zone.map(function(q){return q[1];});p.siteW=Math.max.apply(null,xs)-Math.min.apply(null,xs);p.siteD=Math.max.apply(null,zs)-Math.min.apply(null,zs);}
+  if(p.floors==null)p.floors=0;
+  var L=LOC[p.id]||['','','','',''];
+  p.zip=L[0];p.loc={pref:L[1],city:L[2],ward:L[3],town:L[4]};
+  p.address=[L[1],L[2],L[3],L[4]].filter(function(v){return v;}).join(' ');
+  p.addrFull=(L[0]?'〒'+L[0]+' ':'')+p.address;
+});
+var pc={};
+PROJECTS.forEach(function(q){q.photo=PHOTO_FILES[q.siteType]?PHOTO_FILES[q.siteType][pc[q.siteType]%PHOTO_FILES[q.siteType].length]:null;pc[q.siteType]=(pc[q.siteType]||0)+1;});
+
+var START=new Date(2026,3,1);
+var MAXIDX=364;
+var TODAY_IDX=186;
+
+var state={
+  view:'cesium',
+  selected:'tokyo-demo-002',
+  filter:'all',
+  typeFilter:'all',
+  isolate:true,
+  sv:false,
+  tab:'list',
+  layers:{buildings:true,structure:true,scaffold:true,yard:true,excavation:true,earthwork:true,utilities:true,tempRoad:true,zone:true,markers:true,safety:true,regulation:true,detour:true,pedestrian:false,completion:false,bim:true,cad:true,gis:false,points:true,gs3d:false,smartphone:false,photo:false,progress:true,inspect:false,track:false,aipin:true},
+  idx:TODAY_IDX,
+  playing:false
+};
+
+var DAY=86400000;
+function dateAt(i){return new Date(START.getTime()+i*DAY);}
+function fmtDate(d){return d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0');}
+function parseDate(s){var p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2]);}
+function dateIdx(d){return Math.round((d.getTime()-START.getTime())/DAY);}
+
+function statusAt(p,date){
+  if(date<parseDate(p.start))return 'planned';
+  if(date>parseDate(p.end))return 'completed';
+  return 'active';
+}
+function statusColor(st){
+  return st==='planned'?C.planned:st==='completed'?C.done:st==='active'?C.active:C.hold;
+}
+function statusLabel(st){
+  return st==='planned'?'着工前':st==='completed'?'完成':st==='active'?'施工中':'確認中';
+}
+function impactsAt(p,date){
+  return p.impacts.map(function(id){return impactById[id];}).filter(function(im){
+    return date>=parseDate(im.from)&&date<=parseDate(im.to);
+  });
+}
+function hasReg(p,date){return impactsAt(p,date).length>0;}
+var STATUS_GROUPS=[
+  {id:'planned',label:'着工前',color:C.planned},
+  {id:'active',label:'施工中',color:C.active},
+  {id:'reg',label:'規制中',color:C.reg},
+  {id:'done',label:'完成',color:C.done}
+];
+function statusGroup(p,date){
+  var st=statusAt(p,date);
+  if(st==='planned')return 'planned';
+  if(st==='completed')return 'done';
+  return impactsAt(p,date).some(function(im){return im.severity==='warning';})?'reg':'active';
+}
+function projectById(id){for(var i=0;i<PROJECTS.length;i++)if(PROJECTS[i].id===id)return PROJECTS[i];return null;}
+function visibleProjects(date){
+  return PROJECTS.filter(function(p){
+    if(state.typeFilter&&state.typeFilter!=='all'&&p.siteType!==state.typeFilter)return false;
+    if(state.filter&&state.filter!=='all'&&statusGroup(p,date)!==state.filter)return false;
+    return true;
+  });
+}
+function localPoly(p,rel){return rel.map(function(q){return{x:p.cx+q[0],z:p.cz+q[1]};});}
+function searchProjects(q){
+  q=q.trim().toLowerCase();if(!q)return [];
+  return PROJECTS.filter(function(p){
+    return (p.name+p.publicTitle+p.owner.name+p.slug+p.addrFull).toLowerCase().indexOf(q)>=0;
+  });
+}
+
+function el(tag,attrs,html){
+  var e=document.createElement(tag);
+  if(attrs)for(var k in attrs){if(k==='class')e.className=attrs[k];else if(k==='html')e.innerHTML=attrs[k];else e.setAttribute(k,attrs[k]);}
+  if(html!=null)e.innerHTML=html;
+  return e;
+}
+var ICON={
+  search:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
+  check:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  ext:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>',
+  alert:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>',
+  eye:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>',
+  cone:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 6 21"/><path d="M12 3l6 18"/><path d="M7.5 15h9"/><path d="M4 21h16"/></svg>',
+  pin:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="2.6"/></svg>'
+};
+
+/* ---------- 3D scene ---------- */
+var scene,renderer,camera,groups={},zoneMeshes={},markerMeshes={},camCtl,clock;
+var cityLayout=buildCityLayout();
+
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+function buildCityLayout(){
+  var rnd=mulberry32(20261004);
+  var plates=[],buildings=[],trees=[],parks=[];
+  var min=-840,max=840,step=80;
+  for(var x=min;x<max;x+=step){
+    for(var z=min;z<max;z+=step){
+      var cxp=x+step/2,czp=z+step/2;
+      var dist=Math.sqrt(cxp*cxp+czp*czp);
+      if(dist<58)continue;
+      var isPark=(cxp>40&&cxp<200&&czp>120&&czp<320);
+      if(isPark){parks.push({x:cxp,z:czp,w:74,d:74});continue;}
+      var nearSite=false;
+      for(var si=0;si<PROJECTS.length;si++){var sp=PROJECTS[si];if(Math.abs(cxp-sp.cx)<sp.siteW/2+8&&Math.abs(czp-sp.cz)<sp.siteD/2+8){nearSite=true;break;}}
+      if(nearSite){plates.push({x:cxp,z:czp,w:step-12,d:step-12});continue;}
+      if(dist>520&&rnd()<0.35){if(rnd()<0.6)parks.push({x:cxp,z:czp,w:step-14,d:step-14});continue;}
+      plates.push({x:cxp,z:czp,w:step-12,d:step-12});
+      var n=dist<260?3:dist<520?2:1;
+      var hmax=dist<300?52:dist<560?34:22;
+      for(var b=0;b<n;b++){
+        var bw=10+rnd()*16,bd=10+rnd()*16;
+        var bx=cxp+(rnd()-0.5)*(step-24-bw);
+        var bz=czp+(rnd()-0.5)*(step-24-bd);
+        var bh=8+rnd()*rnd()*hmax;
+        buildings.push({x:bx,z:bz,w:bw,d:bd,h:bh,c:rnd()<0.22?C.built2:C.built,glass:rnd()<0.3});
+      }
+      if(rnd()<0.45){
+        trees.push({x:cxp+(rnd()-0.5)*(step-18),z:czp+(rnd()-0.5)*(step-18),s:0.8+rnd()*0.8});
+      }
+    }
+  }
+  return {plates:plates,buildings:buildings,trees:trees,parks:parks};
+}
+
+function flatPolyMesh(poly,color,opacity){
+  var shape=new THREE.Shape();
+  poly.forEach(function(p,i){if(i===0)shape.moveTo(p.x,p.z);else shape.lineTo(p.x,p.z);});
+  var geo=new THREE.ShapeGeometry(shape);
+  geo.rotateX(Math.PI/2);
+  var mat=new THREE.MeshBasicMaterial({color:color,transparent:true,opacity:opacity,side:THREE.DoubleSide,depthWrite:false});
+  var m=new THREE.Mesh(geo,mat);
+  m.position.y=0.6;
+  return m;
+}
+function lineMesh(pts,color,dashed,width){
+  var v=pts.map(function(p){return new THREE.Vector3(p.x,1.4,p.z);});
+  var g=new THREE.BufferGeometry().setFromPoints(v);
+  var mat=dashed?new THREE.LineDashedMaterial({color:color,dashSize:8,gapSize:6,linewidth:width||1.4}):new THREE.LineBasicMaterial({color:color,linewidth:width||1.4});
+  var l=new THREE.Line(g,mat);
+  if(dashed)l.computeLineDistances();
+  return l;
+}
+
+var MATCACHE={},SITE_P=null;
+function mat(color,opts){
+  var key=color+'|'+JSON.stringify(opts||{});
+  if(!MATCACHE[key]){var o={color:color};if(opts)for(var k in opts)o[k]=opts[k];MATCACHE[key]=new THREE.MeshLambertMaterial(o);}
+  return MATCACHE[key];
+}
+function reg(m){if(SITE_P){SITE_P._nodes.push(m);m._site=SITE_P;}return m;}
+function addBox(g,w,h,d,x,y,z,material){
+  var m=reg(new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material));
+  m.position.set(x,y,z);g.add(m);return m;
+}
+function addTree(g,x,z,material,scale){
+  var t=reg(new THREE.Mesh(new THREE.SphereGeometry(3*(scale||1),8,6),material));
+  t.position.set(x,4.2*(scale||1),z);g.add(t);return t;
+}
+function addCone(g,r,h,x,y,z,material){
+  var c=reg(new THREE.Mesh(new THREE.ConeGeometry(r,h,8),material));
+  c.position.set(x,y,z);g.add(c);return c;
+}
+var LAYER_KEYS=['structure','scaffold','yard','excavation','earthwork','utilities','tempRoad','safety','bim','cad','gis','points','gs3d','smartphone','photo','progress','inspect','track','aipin'];
+function addEdges(g,geo,color,x,y,z){
+  var l=reg(new THREE.LineSegments(new THREE.EdgesGeometry(geo),new THREE.LineBasicMaterial({color:color})));
+  l.position.set(x,y,z);g.add(l);return l;
+}
+function buildBIM(p,g){
+  var arch=p.siteType.indexOf('arch')===0;
+  var H=arch?Math.max(14,(p.floors||8)*3.2):9;
+  var bw=p.siteW*(arch?0.6:0.5),bd=p.siteD*(arch?0.6:0.5);
+  var shell=mat(0x4f8fbf,{transparent:true,opacity:0.14,depthWrite:false});
+  var m=reg(new THREE.Mesh(new THREE.BoxGeometry(bw,H,bd),shell));m.position.set(p.cx,H/2,p.cz);g.add(m);
+  addEdges(g,new THREE.BoxGeometry(bw,H,bd),0x4f8fbf,p.cx,H/2,p.cz);
+  [0x3b7dd8,0x2f9d6b,0xc9a227].forEach(function(c,i){
+    var b=reg(new THREE.Mesh(new THREE.BoxGeometry(bw,1.0,bd),mat(c)));b.position.set(p.cx,(i+1)*H/4,p.cz);g.add(b);
+  });
+}
+function buildCAD(p,g){
+  var arch=p.siteType.indexOf('arch')===0;
+  var w=p.siteW*1.08,d=p.siteD*1.08,h=arch?Math.max(12,(p.floors||8)*3.2):7;
+  addEdges(g,new THREE.BoxGeometry(w,h,d),0x64748b,p.cx,h/2,p.cz);
+  var grid=reg(new THREE.GridHelper(Math.max(w,d),10,0x64748b,0x94a3b8));grid.position.set(p.cx,0.35,p.cz);g.add(grid);
+}
+function buildGIS(p,g){
+  var poly=localPoly(p,p.zone);
+  g.add(reg(flatPolyMesh(poly,0x2f9d6b,0.14)));
+  g.add(reg(lineMesh(poly.concat([poly[0]]),0x2f9d6b,true,2)));
+}
+function buildCloud(p,g,color,size,count,spread,hmax){
+  var arr=new Float32Array(count*3);
+  for(var i=0;i<count;i++){
+    arr[i*3]=p.cx+(Math.random()-0.5)*p.siteW*spread;
+    arr[i*3+1]=Math.random()*hmax;
+    arr[i*3+2]=p.cz+(Math.random()-0.5)*p.siteD*spread;
+  }
+  var geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(arr,3));
+  g.add(reg(new THREE.Points(geo,new THREE.PointsMaterial({color:color,size:size,sizeAttenuation:true,transparent:true,opacity:0.9}))));
+}
+function buildPins(p,g,color,count,h,kind){
+  for(var i=0;i<count;i++){
+    var a=(i/count)*Math.PI*2+0.4;
+    var x=p.cx+Math.cos(a)*p.siteW*0.3,z=p.cz+Math.sin(a)*p.siteD*0.34;
+    addBox(g,0.6,h,0.6,x,h/2,z,mat(0x374151));
+    if(kind==='phone'){addBox(g,0.5,2.2,0.16,x,h+1.1,z,mat(0x8b5cf6));}
+    else if(kind==='camera'){addBox(g,1.6,1.2,1.0,x,h+0.9,z,mat(0xf97316));addCone(g,0.5,1.1,x,h+2.0,z,mat(0xf97316));}
+    else{var s=reg(new THREE.Mesh(new THREE.SphereGeometry(1.3,8,6),mat(color)));s.position.set(x,h+1.2,z);g.add(s);}
+  }
+}
+function buildProgress(p,g,date){
+  var s=parseDate(p.start),e=parseDate(p.end);
+  var prog=(date.getTime()-s.getTime())/(e.getTime()-s.getTime());
+  prog=isFinite(prog)?Math.max(0,Math.min(1,prog)):0;
+  var n=6,done=Math.round(n*prog);
+  for(var i=0;i<n;i++){
+    var seg=p.siteW/n;
+    addBox(g,seg*0.82,1.1,2.6,p.cx-p.siteW/2+(i+0.5)*seg,2.6,p.cz+p.siteD/2+3.2,mat(i<done?0x2f9d6b:0xcbd0d6));
+  }
+}
+function buildTrack(p,g){
+  var n=7,pts=[];
+  for(var i=0;i<n;i++){pts.push({x:p.cx-p.siteW*0.46+i*(p.siteW*0.92/(n-1)),z:p.cz+Math.sin(i*1.1)*p.siteD*0.32});}
+  g.add(reg(lineMesh(pts,0xec4899,false,2)));
+  for(var j=1;j<pts.length;j+=2){addCone(g,0.7,1.6,pts[j].x,1.6,pts[j].z,mat(0xec4899));}
+}
+function buildDataLayers(p){
+  var g=groups;
+  var arch=p.siteType.indexOf('arch')===0;
+  var H=arch?Math.max(12,(p.floors||6)*3.2):8;
+  if(g.bim)buildBIM(p,g.bim);
+  if(g.cad)buildCAD(p,g.cad);
+  if(g.gis)buildGIS(p,g.gis);
+  if(g.points)buildCloud(p,g.points,0x8bd450,1.6,220,1.05,H*0.9);
+  if(g.gs3d)buildCloud(p,g.gs3d,0x22d3ee,1.1,380,1.0,H*0.8);
+  if(g.smartphone)buildPins(p,g.smartphone,0x8b5cf6,3,3.5,'phone');
+  if(g.photo)buildPins(p,g.photo,0xf97316,3,3.2,'camera');
+  if(g.progress)buildProgress(p,g.progress,dateAt(TODAY_IDX));
+  if(g.inspect)buildPins(p,g.inspect,0x14b8a6,4,3.0,'');
+  if(g.track)buildTrack(p,g.track);
+  if(g.aipin)buildPins(p,g.aipin,0xef4444,3,4.2,'');
+}
+function addCrane(p,H){
+  var g=groups.scaffold,m=mat(0xe08a2e);
+  var cx=p.cx+p.siteW/2+9,cz=p.cz-p.siteD/2-5;
+  addBox(g,2.4,H,2.4,cx,H/2,cz,m);
+  addBox(g,3.2,H*0.16,3.2,cx,H*0.08,cz,m);
+  var jib=H*0.72;
+  addBox(g,jib,1.5,1.5,cx-jib*0.18,H-1,cz,m);
+  addBox(g,jib*0.32,2.6,2.6,cx+jib*0.32,H-2.3,cz,m);
+  addBox(g,0.4,H*0.34,0.4,cx-jib*0.02,H-1-H*0.17,cz,mat(0x6b7280));
+}
+function buildArch(p){
+  var urban=p.siteType==='arch-urban';
+  var w=p.siteW,d=p.siteD,F=urban?12:(p.floors||3);
+  var cx=p.cx,cz=p.cz,fh=3.4,colH=F*fh;
+  var conc=mat(0xb7bbc2),slab=mat(0xcbced4),core=mat(0xa9aeb6);
+  var sg=groups.structure;
+  [[-w/2+2,-d/2+2],[w/2-2,-d/2+2],[w/2-2,d/2-2],[-w/2+2,d/2-2]].forEach(function(c){
+    addBox(sg,1.1,colH,1.1,cx+c[0],colH/2,cz+c[1],conc);
+  });
+  for(var f=1;f<=F;f++){addBox(sg,w,0.45,d,cx,f*fh,cz,slab);}
+  addBox(sg,6,colH,4,cx,colH/2,cz,core);
+  var sc=groups.scaffold,scm=mat(0x8f98a3);
+  for(var px=-1;px<=1;px+=2){for(var pz=-1;pz<=1;pz+=2){
+    addBox(sc,0.6,colH+2,0.6,cx+px*(w/2+1.6),(colH+2)/2,cz+pz*(d/2+1.6),scm);
+  }}
+  addBox(sc,w+3.2,0.5,0.5,cx,colH+0.8,cz-d/2-1.6,scm);
+  addBox(sc,w+3.2,0.5,0.5,cx,colH+0.8,cz+d/2+1.6,scm);
+  addBox(sc,0.5,0.5,d+3.2,cx-w/2-1.6,colH+0.8,cz,scm);
+  addBox(sc,0.5,0.5,d+3.2,cx+w/2-1.6,colH+0.8,cz,scm);
+  for(var bb=3;bb<F;bb+=3){
+    addBox(sc,w+3.2,0.3,0.3,cx,bb*fh,cz-d/2-1.6,scm);
+    addBox(sc,w+3.2,0.3,0.3,cx,bb*fh,cz+d/2+1.6,scm);
+  }
+  addCrane(p,urban?46:20);
+  var yg=groups.yard,fence=mat(0xdfe3e8),stack=mat(0xb08d5a),office=mat(0xd7dbe0);
+  addBox(yg,w+8,2.2,0.6,cx,1.1,cz-d/2-4,fence);
+  addBox(yg,w+8,2.2,0.6,cx,1.1,cz+d/2+4,fence);
+  addBox(yg,0.6,2.2,d+8,cx-w/2-4,1.1,cz,fence);
+  addBox(yg,0.6,2.2,d+8,cx+w/2+4,1.1,cz,fence);
+  addBox(yg,10,2,7,cx+w/2-6,1.4,cz-d/2+5,office);
+  for(var s=0;s<3;s++){addBox(yg,5,1.6,3,cx-w/2+6+s*6,1.3,cz+d/2-6,stack);}
+}
+function buildCivil(p){
+  var urban=p.siteType==='civil-urban';
+  var w=p.siteW,d=p.siteD,cx=p.cx,cz=p.cz;
+  var eg=groups.excavation,earth=mat(0x9a8a70);
+  addBox(eg,w-4,0.6,d-4,cx,0.35,cz,mat(0x6b5f4e));
+  addBox(eg,w,3.2,1.4,cx,1.6,cz-d/2,earth);
+  addBox(eg,w,3.2,1.4,cx,1.6,cz+d/2,earth);
+  addBox(eg,1.4,3.2,d,cx-w/2,1.6,cz,earth);
+  addBox(eg,1.4,3.2,d,cx+w/2,1.6,cz,earth);
+  var ew=groups.earthwork,pile=mat(0x8a949e),soil=mat(0x8a7455);
+  var n=Math.max(4,Math.round(w/14));
+  for(var i=0;i<n;i++){addBox(ew,1.2,4,1.2,cx-w/2+(i+0.5)*(w/n),2,cz-d/2+1.4,pile);}
+  for(var sp=0;sp<3;sp++){addCone(ew,3,5,cx-w/4+sp*(w/4),2.5,cz+d/2-4,soil);}
+  var ug=groups.utilities;
+  var pipeGeo=new THREE.CylinderGeometry(1.1,1.1,w*0.82,10);
+  [[0x4f8fbf,-4],[0x6b7280,0],[0xc9a227,4]].forEach(function(pd){
+    var m=reg(new THREE.Mesh(pipeGeo,mat(pd[0])));
+    m.rotation.z=Math.PI/2;m.position.set(cx,1.5,cz+pd[1]);ug.add(m);
+  });
+  addBox(ug,3,0.7,3,cx-w*0.25,0.55,cz,mat(0x6b7280));
+  addBox(ug,3,0.7,3,cx+w*0.25,0.55,cz,mat(0x6b7280));
+  var tg=groups.tempRoad,road=mat(0xc9ced5);
+  addBox(tg,w,0.3,8,cx,0.4,cz+d/2+11,road);
+  if(urban)addBox(tg,w,0.3,8,cx,0.4,cz-d/2-11,road);
+}
+function buildSafety(p){
+  var g=groups.safety,cx=p.cx,cz=p.cz;
+  var cone=mat(0xe0662b),white=mat(0xf2f3f5);
+  p.zone.forEach(function(q){addCone(g,1.1,3,cx+q[0],1.5,cz+q[1],cone);});
+  addBox(g,7,0.35,0.5,cx-7,1.4,cz+p.siteD/2+2,white);
+  addBox(g,7,0.35,0.5,cx+7,1.4,cz+p.siteD/2+2,white);
+  addBox(g,0.4,1.6,0.4,cx-10.4,0.8,cz+p.siteD/2+2,white);
+  addBox(g,0.4,1.6,0.4,cx+10.4,0.8,cz+p.siteD/2+2,white);
+}
+function buildSiteModel(p){
+  p._nodes=p._nodes||[];
+  SITE_P=p;
+  buildDataLayers(p);
+  if(statusAt(p,dateAt(TODAY_IDX))!=='completed'){
+    if(p.siteType.indexOf('arch')===0)buildArch(p);else buildCivil(p);
+    buildSafety(p);
+  }
+  SITE_P=null;
+}
+
+function buildPreviewGroup(p){
+  var saved=groups,savedP=SITE_P;
+  groups={};LAYER_KEYS.forEach(function(k){groups[k]=new THREE.Group();});
+  SITE_P=null;
+  if(p.siteType.indexOf('arch')===0)buildArch(p);else buildCivil(p);
+  buildSafety(p);
+  buildDataLayers(p);
+  var wrap=new THREE.Group(),sub={};
+  LAYER_KEYS.forEach(function(k){wrap.add(groups[k]);sub[k]=groups[k];});
+  groups=saved;SITE_P=savedP;
+  wrap.position.set(-p.cx,0,-p.cz);
+  pv.sub[p.id]=sub;
+  return wrap;
+}
+var pv={ok:false,renderer:null,scene:null,camera:null,canvas:null,groups:{},sizes:{},sub:{},cur:null,rot:0,spin:true};
+function initPreview(){
+  if(!window.THREE)return;
+  try{pv.renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});}catch(e){return;}
+  pv.canvas=pv.renderer.domElement;
+  pv.canvas.style.display='block';pv.canvas.style.width='100%';pv.canvas.style.height='100%';
+  pv.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  pv.scene=new THREE.Scene();
+  pv.camera=new THREE.PerspectiveCamera(38,1.6,0.5,6000);
+  pv.scene.add(new THREE.HemisphereLight(0xf4f7fa,0x9aa0a8,1.0));
+  var d=new THREE.DirectionalLight(0xffffff,0.78);d.position.set(-120,220,150);pv.scene.add(d);
+  var d2=new THREE.DirectionalLight(0xffffff,0.24);d2.position.set(170,120,-150);pv.scene.add(d2);
+  var ground=new THREE.Mesh(new THREE.PlaneGeometry(720,720),new THREE.MeshLambertMaterial({color:0xe3e7ec}));
+  ground.rotation.x=-Math.PI/2;ground.position.y=-0.06;pv.scene.add(ground);
+  var grid=new THREE.GridHelper(720,60,0xc2c9d1,0xd6dbe1);grid.position.y=0.02;pv.scene.add(grid);
+  PROJECTS.forEach(function(p){
+    var g=buildPreviewGroup(p);g.visible=false;pv.scene.add(g);pv.groups[p.id]=g;
+    var box=new THREE.Box3().setFromObject(g);var size=box.getSize(new THREE.Vector3());
+    pv.sizes[p.id]=Math.max(size.x,size.z,size.y*1.25,40);
+  });
+  pv.ok=true;
+}
+function showPreview(id){
+  if(!pv.ok)return;
+  for(var k in pv.groups)pv.groups[k].visible=(k===id);
+  pv.cur=id;
+}
+function resizePreview(){
+  if(!pv.ok)return;
+  var holder=document.getElementById('site3d-holder');
+  if(!holder||!holder.clientWidth)return;
+  pv.renderer.setSize(holder.clientWidth,holder.clientHeight,false);
+  pv.camera.aspect=holder.clientWidth/holder.clientHeight;pv.camera.updateProjectionMatrix();
+}
+function renderPreview(){
+  if(!pv.ok||!pv.cur)return;
+  if(pv.spin)pv.rot+=0.006;
+  var s=pv.sizes[pv.cur]||120,r=s*1.25+42;
+  pv.camera.position.set(r*Math.sin(pv.rot),r*0.5,r*Math.cos(pv.rot));
+  pv.camera.lookAt(0,s*0.26,0);
+  pv.renderer.render(pv.scene,pv.camera);
+}
+var sv={ok:false,renderer:null,camera:null,rot:0.7,tilt:0.5,zoom:1,spin:true};
+function initSV(){
+  var holder=document.getElementById('sv3d-holder');
+  if(!holder||!window.THREE||!pv.ok)return;
+  try{sv.renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});}catch(e){return;}
+  var c=sv.renderer.domElement;
+  c.style.display='block';c.style.width='100%';c.style.height='100%';
+  sv.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  sv.camera=new THREE.PerspectiveCamera(38,1.6,0.5,6000);
+  holder.appendChild(c);
+  bindSVControls(c);
+  sv.ok=true;
+}
+function bindSVControls(c){
+  var down=false,lx=0,ly=0;
+  c.addEventListener('pointerdown',function(e){down=true;lx=e.clientX;ly=e.clientY;try{c.setPointerCapture(e.pointerId);}catch(_){}});
+  c.addEventListener('pointerup',function(e){down=false;try{c.releasePointerCapture(e.pointerId);}catch(_){}});
+  c.addEventListener('pointermove',function(e){
+    if(!down)return;var dx=e.clientX-lx,dy=e.clientY-ly;lx=e.clientX;ly=e.clientY;
+    sv.spin=false;updateSVToggle();
+    sv.rot-=dx*0.008;sv.tilt=Math.max(0.15,Math.min(0.95,sv.tilt-dy*0.005));
+  });
+  c.addEventListener('wheel',function(e){e.preventDefault();sv.zoom=Math.max(0.5,Math.min(2.6,sv.zoom*Math.exp(e.deltaY*0.0012)));},{passive:false});
+  c.addEventListener('contextmenu',function(e){e.preventDefault();});
+}
+function updateSVToggle(){var b=document.getElementById('sv-spin');if(b)b.textContent=sv.spin?'停止':'回転';}
+function resizeSV(){
+  if(!sv.ok)return;
+  var holder=document.getElementById('sv3d-holder');
+  if(!holder||!holder.clientWidth)return;
+  sv.renderer.setSize(holder.clientWidth,holder.clientHeight,false);
+  sv.camera.aspect=holder.clientWidth/holder.clientHeight;sv.camera.updateProjectionMatrix();
+}
+function renderSV(){
+  if(!sv.ok||!state.sv||!pv.cur)return;
+  if(sv.spin)sv.rot+=0.006;
+  var s=pv.sizes[pv.cur]||120,r=(s*1.25+42)*sv.zoom;
+  sv.camera.position.set(r*Math.sin(sv.rot),r*sv.tilt,r*Math.cos(sv.rot));
+  sv.camera.lookAt(0,s*0.26,0);
+  sv.renderer.render(pv.scene,sv.camera);
+}
+function pad2(n){return (n<10?'0':'')+n;}
+function svOrder(){return visibleProjects(dateAt(state.idx));}
+function svIndex(){var o=svOrder();for(var i=0;i<o.length;i++)if(o[i].id===state.selected)return i;return -1;}
+function renderSVList(){
+  var list=document.getElementById('sv-list');
+  if(!list)return;
+  var date=dateAt(state.idx),items=svOrder(),h='';
+  STATUS_GROUPS.forEach(function(sg){
+    var g=items.filter(function(p){return statusGroup(p,date)===sg.id;});
+    if(!g.length)return;
+    h+='<div class="sv-group"><span class="sv-gdot" style="background:'+sg.color+'"></span>'+sg.label+'<span class="sv-gn num">'+g.length+'</span></div>';
+    g.forEach(function(p){
+      h+='<button class="sv-item'+(p.id===state.selected?' active':'')+'" data-id="'+p.id+'" data-od-id="sv-item-'+p.id+'" type="button">'+
+        '<span class="sv-dot" style="background:'+sg.color+'"></span>'+
+        '<span class="sv-it"><span class="sv-iname">'+p.name+'</span><span class="sv-iloc">'+p.addrFull+'</span></span>'+
+        '<span class="sv-itype">'+SITE_LABEL[p.siteType]+'</span></button>';
+    });
+  });
+  list.innerHTML=h||'<p class="sv-empty">条件に合う現場がありません。</p>';
+  list.querySelectorAll('.sv-item').forEach(function(b){b.addEventListener('click',function(){openSV(b.getAttribute('data-id'));});});
+  var idx=svIndex();
+  document.getElementById('sv-cur').textContent=idx>=0?pad2(idx+1):'--';
+  document.getElementById('sv-total').textContent=pad2(items.length);
+  var act=list.querySelector('.sv-item.active');
+  if(act){var top=act.offsetTop-list.offsetTop;if(top<list.scrollTop||top+act.offsetHeight>list.scrollTop+list.clientHeight)list.scrollTop=top-list.clientHeight/2+act.offsetHeight/2;}
+}
+function renderSVLayers(){
+  var wrap=document.getElementById('sv-layers');if(!wrap)return;
+  wrap.innerHTML=DATA_LAYERS.map(function(d){
+    return '<button class="tchip'+(state.layers[d.k]?' active':'')+'" data-k="'+d.k+'" type="button"><span class="sv-lsw" style="background:'+d.c+'"></span>'+d.n+'</button>';
+  }).join('');
+  wrap.querySelectorAll('.tchip').forEach(function(b){
+    b.addEventListener('click',function(){
+      var k=b.getAttribute('data-k');
+      state.layers[k]=!state.layers[k];
+      syncLayers();refreshMapColors();renderSVLayers();renderPanel();
+    });
+  });
+}
+function renderSVMeta(){
+  var p=projectById(state.selected);var el=document.getElementById('sv-meta');
+  if(!p||!el)return;
+  var st=statusAt(p,dateAt(state.idx));
+  var sg=null;STATUS_GROUPS.forEach(function(x){if(x.id===statusGroup(p,dateAt(state.idx)))sg=x;});
+  var credit=PHOTO_CREDIT[p.photo]||{};
+  el.innerHTML=
+    '<div class="sv-mtext">'+
+      '<div class="sv-mtags"><span class="pill solid" style="--status:'+(sg?sg.color:statusColor(st))+'">'+(sg?sg.label:statusLabel(st))+'</span><span class="pill cat">'+SITE_LABEL[p.siteType]+'</span></div>'+
+      '<h3>'+p.name+'</h3><p class="sv-mlead">'+p.publicTitle+'</p>'+
+      '<dl class="sv-mdl"><div><dt>所在地</dt><dd>'+p.addrFull+'</dd></div><div><dt>工期</dt><dd class="num">'+fmtDate(parseDate(p.start))+' 〜 '+fmtDate(parseDate(p.end))+'</dd></div><div><dt>発注者</dt><dd>'+p.owner.name+'</dd></div></dl>'+
+    '</div>'+
+    (p.photo?'<figure class="sv-photo"><img src="'+p.photo+'" alt="'+p.name+'のサンプル写真" loading="lazy"><figcaption>サンプル写真: '+(credit.a||'')+' / '+(credit.l||'')+'（Wikimedia Commons）</figcaption></figure>':'');
+  var badge=document.getElementById('sv-badge');if(badge)badge.textContent=SITE_LABEL[p.siteType];
+}
+function openSV(id){
+  if(id)selectProject(id,false);
+  state.sv=true;
+  var g=document.getElementById('siteviewer');g.hidden=false;
+  var b=document.getElementById('sv-open');if(b){b.classList.add('on');b.setAttribute('aria-expanded','true');}
+  showPreview(state.selected);
+  var holder=document.getElementById('sv3d-holder');
+  if(sv.ok){sv.rot=0.7;sv.tilt=0.5;sv.zoom=1;resizeSV();if(holder){var f=holder.querySelector('.s3d-fallback');if(f)f.remove();}}
+  else if(holder&&!holder.querySelector('.s3d-fallback')){holder.insertAdjacentHTML('beforeend','<div class="s3d-fallback">この環境では3Dを表示できません。サンプル写真をご覧ください。</div>');}
+  renderSVList();renderSVMeta();renderSVLayers();updateSVToggle();
+}
+function closeSV(){
+  state.sv=false;
+  var g=document.getElementById('siteviewer');if(g)g.hidden=true;
+  var b=document.getElementById('sv-open');if(b){b.classList.remove('on');b.setAttribute('aria-expanded','false');}
+}
+function svStep(d){
+  var o=svOrder();if(!o.length)return;
+  var i=svIndex();if(i<0)i=(d>0?-1:0);
+  i=Math.max(0,Math.min(o.length-1,i+d));
+  openSV(o[i].id);
+}
+
+function init3D(){
+  var holder=document.getElementById('canvas-holder');
+  if(!window.THREE){showFallback('3Dライブラリを読み込めませんでした');return false;}
+  try{
+    renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});
+  }catch(e){showFallback('WebGLを利用できません');return false;}
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.setSize(holder.clientWidth,holder.clientHeight);
+  holder.appendChild(renderer.domElement);
+
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0xe9edf2);
+  scene.fog=new THREE.Fog(0xe9edf2,1000,3200);
+
+  camera=new THREE.PerspectiveCamera(45,holder.clientWidth/holder.clientHeight,1,6000);
+  scene.add(new THREE.HemisphereLight(0xf2f5f9,0x9aa0a8,0.95));
+  var dir=new THREE.DirectionalLight(0xffffff,0.7);dir.position.set(-320,520,260);scene.add(dir);
+  var dir2=new THREE.DirectionalLight(0xffffff,0.25);dir2.position.set(300,260,-300);scene.add(dir2);
+
+  var ground=new THREE.Mesh(new THREE.PlaneGeometry(3600,3600),new THREE.MeshLambertMaterial({color:0x5a606a}));
+  ground.rotateX(-Math.PI/2);ground.position.y=-0.1;scene.add(ground);
+
+  var city=new THREE.Group();
+  var plateMat=new THREE.MeshLambertMaterial({color:0xd6dae0});
+  cityLayout.plates.forEach(function(p){
+    var m=new THREE.Mesh(new THREE.BoxGeometry(p.w,0.5,p.d),plateMat);
+    m.position.set(p.x,0.25,p.z);city.add(m);
+  });
+  var parkMat=new THREE.MeshLambertMaterial({color:C.green});
+  cityLayout.parks.forEach(function(p){
+    var m=new THREE.Mesh(new THREE.BoxGeometry(p.w,0.6,p.d),parkMat);
+    m.position.set(p.x,0.3,p.z);city.add(m);
+  });
+  var bMats={};
+  cityLayout.buildings.forEach(function(b){
+    var key=b.glass?'g':b.c;
+    if(!bMats[key])bMats[key]=new THREE.MeshLambertMaterial({color:b.glass?C.glass:b.c});
+    var m=new THREE.Mesh(new THREE.BoxGeometry(b.w,b.h,b.d),bMats[key]);
+    m.position.set(b.x,b.h/2+0.5,b.z);city.add(m);
+  });
+  var treeMat=new THREE.MeshLambertMaterial({color:0x6f9c6a});
+  var trunkMat=new THREE.MeshLambertMaterial({color:0x8a6f52});
+  cityLayout.trees.forEach(function(t){
+    var trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,3,6),trunkMat);
+    trunk.position.set(t.x,2,t.z);city.add(trunk);
+    var crown=new THREE.Mesh(new THREE.SphereGeometry(2.6*t.s,8,6),treeMat);
+    crown.position.set(t.x,4.4*t.s+1,t.z);city.add(crown);
+  });
+  groups.city=city;scene.add(city);
+
+  var roads=new THREE.Group();
+  var roadMat=new THREE.MeshBasicMaterial({color:C.road,transparent:true,opacity:0.9});
+  var rm1=new THREE.Mesh(new THREE.PlaneGeometry(2600,26),roadMat);rm1.rotateX(-Math.PI/2);rm1.position.y=0.15;roads.add(rm1);
+  var rm2=new THREE.Mesh(new THREE.PlaneGeometry(26,2600),roadMat);rm2.rotateX(-Math.PI/2);rm2.position.y=0.15;roads.add(rm2);
+  scene.add(roads);
+
+  groups.zone=new THREE.Group();scene.add(groups.zone);
+  groups.regulation=new THREE.Group();scene.add(groups.regulation);
+  groups.detour=new THREE.Group();scene.add(groups.detour);
+  groups.pedestrian=new THREE.Group();scene.add(groups.pedestrian);
+  groups.completion=new THREE.Group();scene.add(groups.completion);
+  groups.markers=new THREE.Group();scene.add(groups.markers);
+  LAYER_KEYS.forEach(function(k){groups[k]=new THREE.Group();scene.add(groups[k]);});
+
+  PROJECTS.forEach(function(p){
+    var poly=localPoly(p,p.zone);
+    var zm=flatPolyMesh(poly,statusColor(statusAt(p,dateAt(state.idx))),0.3);
+    zm.userData={projectId:p.id};
+    groups.zone.add(zm);zoneMeshes[p.id]=zm;
+    var outline=lineMesh(poly.concat([poly[0]]),statusColor(statusAt(p,dateAt(state.idx))),false,2);
+    outline.material=new THREE.LineBasicMaterial({color:statusColor(statusAt(p,dateAt(state.idx)))});
+    outline.position.y=0.7;zm.add(outline);
+
+    if(p.regulation)groups.regulation.add(lineMesh(localPoly(p,p.regulation),C.reg,true,2));
+    if(p.detour)groups.detour.add(lineMesh(localPoly(p,p.detour),C.detour,true,2));
+    if(p.pedestrian)groups.pedestrian.add(lineMesh(localPoly(p,p.pedestrian),'#2f7d74',false,2));
+
+    var mk=new THREE.Group();
+    var pole=new THREE.Mesh(new THREE.CylinderGeometry(1,1,26,8),new THREE.MeshLambertMaterial({color:0x2b3038}));
+    pole.position.y=13;mk.add(pole);
+    var head=new THREE.Mesh(new THREE.ConeGeometry(7,12,12),new THREE.MeshLambertMaterial({color:statusColor(statusAt(p,dateAt(state.idx)))}));
+    head.position.y=32;head.rotation.x=Math.PI;mk.add(head);
+    mk.position.set(p.cx,0,p.cz);
+    mk.userData={projectId:p.id};
+    groups.markers.add(mk);markerMeshes[p.id]=mk;
+
+    var comp=buildCompletion(p);groups.completion.add(comp);p._nodes=[comp];
+    buildSiteModel(p);
+  });
+
+  camCtl=new Orbit(camera,renderer.domElement);
+  camCtl.set({x:state.selected?projectById(state.selected).cx:0,z:state.selected?projectById(state.selected).cz:0},620,-0.72,0.85);
+  clock=new THREE.Clock();
+
+  window.addEventListener('resize',onResize);
+  if(window.ResizeObserver)new ResizeObserver(onResize).observe(holder);
+
+  renderer.domElement.addEventListener('click',onCanvasClick3D,true);
+  syncLayers();
+  refreshMapColors();
+  animate();
+  return true;
+}
+
+function buildCompletion(p){
+  var g=new THREE.Group();
+  var cx=p.cx,cz=p.cz,w=p.siteW,d=p.siteD,type=p.completion;
+  var base=flatPolyMesh(localPoly(p,p.zone),0xd9dde3,0.85);
+  base.position.y=1.0;g.add(base);
+  var newMat=mat(0xeef1f5),glass=mat(0x9fb6c9),green=mat(0x7fae76),pave=mat(0xd2d6dc),lineMat=mat(0xf0f0f0);
+  if(type==='tower'){
+    var H=(p.floors||10)*3.4+4;
+    addBox(g,w*0.5,H,d*0.5,cx,H/2,cz,glass);
+    addBox(g,w*0.78,7,d*0.78,cx,3.5,cz,newMat);
+    addTree(g,cx-w/2+6,cz+d/2-6,green,1.1);addTree(g,cx+w/2-6,cz-d/2+6,green,1.1);
+  }else if(type==='rural'){
+    addBox(g,w*0.52,9,d*0.5,cx,4.5,cz,newMat);
+    addBox(g,w*0.34,0.4,d*0.5,cx-w*0.32,0.6,cz,pave);
+    addTree(g,cx+w*0.34,cz+d*0.28,green,1.1);addTree(g,cx+w*0.34,cz-d*0.28,green,0.9);
+  }else if(type==='road'){
+    addBox(g,w,0.4,d,cx,0.75,cz,pave);
+    addBox(g,w,0.18,1.1,cx,0.97,cz,lineMat);
+    addBox(g,w,0.5,1.6,cx,0.95,cz-d/2+1,mat(0xd9dde3));
+    addBox(g,w,0.5,1.6,cx,0.95,cz+d/2-1,mat(0xd9dde3));
+  }else if(type==='levee'){
+    addBox(g,w,6,d*0.7,cx,3,cz,mat(0x9db487));
+    addBox(g,w,0.5,0.5,cx,6.2,cz-d*0.35,mat(0xd9dde3));
+    addBox(g,w,0.5,0.5,cx,6.2,cz+d*0.35,mat(0xd9dde3));
+  }else if(type==='plaza'){
+    addBox(g,26,10,18,cx-18,5.5,cz+8,glass);
+    addBox(g,18,7,14,cx+8,4,cz-12,newMat);
+    addTree(g,cx-40,cz-14,green,1);addTree(g,cx-10,cz+22,green,1);addTree(g,cx+24,cz-6,green,1);
+  }else if(type==='park'){
+    addBox(g,14,5,8,cx-20,3,cz+18,newMat);
+    addTree(g,cx-40,cz-14,green,1);addTree(g,cx-10,cz+22,green,1);addTree(g,cx+24,cz-6,green,1);addTree(g,cx+42,cz+18,green,1);addTree(g,cx-30,cz+26,green,1);
+  }else if(type==='sidewalk'){
+    addBox(g,w,0.4,d,cx,0.75,cz,pave);
+    addTree(g,cx-w/2+8,cz,green,0.9);addTree(g,cx+w/2-8,cz,green,0.9);
+  }else{
+    addBox(g,w,0.4,d,cx,0.75,cz,pave);
+  }
+  g.userData={projectId:p.id};
+  g.visible=false;
+  return g;
+}
+
+function onCanvasClick3D(e){
+  var rect=renderer.domElement.getBoundingClientRect();
+  var ndc=new THREE.Vector2(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1);
+  var ray=new THREE.Raycaster();ray.setFromCamera(ndc,camera);
+  var targets=[];
+  groups.zone.children.forEach(function(m){targets.push(m);});
+  groups.markers.children.forEach(function(m){targets.push(m);});
+  var hits=ray.intersectObjects(targets,true);
+  for(var i=0;i<hits.length;i++){
+    var o=hits[i].object;
+    while(o&&!o.userData.projectId)o=o.parent;
+    if(o&&o.userData.projectId){selectProject(o.userData.projectId,true);return;}
+  }
+}
+function onResize(){
+  resizePreview();
+  resizeSV();
+  var holder=document.getElementById('canvas-holder');
+  if(!renderer||!holder||!holder.clientWidth)return;
+  camera.aspect=holder.clientWidth/holder.clientHeight;camera.updateProjectionMatrix();
+  renderer.setSize(holder.clientWidth,holder.clientHeight);
+}
+
+function Orbit(cam,dom){
+  var self=this;
+  this.cam=cam;this.dom=dom;
+  this.tgt=new THREE.Vector3(0,0,0);
+  this.des={tgt:new THREE.Vector3(0,0,0),r:620,theta:-0.72,phi:0.85};
+  this.cur={tgt:new THREE.Vector3(0,0,0),r:620,theta:-0.72,phi:0.85};
+  var down=false,btn=0,lx=0,ly=0;
+  this.set=function(focus,r,theta,phi){
+    if(focus){this.des.tgt.set(focus.x,8,focus.z);}
+    if(r!=null)this.des.r=r;
+    if(theta!=null)this.des.theta=theta;
+    if(phi!=null)this.des.phi=Math.max(0.16,Math.min(1.45,phi));
+  };
+  dom.addEventListener('pointerdown',function(e){down=true;btn=e.button;lx=e.clientX;ly=e.clientY;dom.setPointerCapture(e.pointerId);});
+  dom.addEventListener('pointerup',function(e){down=false;try{dom.releasePointerCapture(e.pointerId);}catch(_){}});
+  dom.addEventListener('pointermove',function(e){
+    if(!down)return;var dx=e.clientX-lx,dy=e.clientY-ly;lx=e.clientX;ly=e.clientY;
+    if(btn===2||e.shiftKey){
+      var right=new THREE.Vector3().setFromMatrixColumn(cam.matrix,0);
+      var up=new THREE.Vector3().setFromMatrixColumn(cam.matrix,1);
+      var k=self.cur.r*0.0016;
+      self.des.tgt.addScaledVector(right,-dx*k);self.des.tgt.addScaledVector(up,dy*k);
+    }else{
+      self.des.theta-=dx*0.005;
+      self.des.phi=Math.max(0.16,Math.min(1.45,self.des.phi-dy*0.005));
+    }
+  });
+  dom.addEventListener('contextmenu',function(e){e.preventDefault();});
+  dom.addEventListener('wheel',function(e){e.preventDefault();self.des.r=Math.max(90,Math.min(2800,self.des.r*Math.exp(e.deltaY*0.0011)));},{passive:false});
+  this.update=function(){
+    var k=0.14;
+    this.cur.tgt.lerp(this.des.tgt,k);
+    this.cur.r+=(this.des.r-this.cur.r)*k;
+    this.cur.theta+=(this.des.theta-this.cur.theta)*k;
+    this.cur.phi+=(this.des.phi-this.cur.phi)*k;
+    var r=this.cur.r,p=this.cur.phi,t=this.cur.theta;
+    cam.position.set(
+      this.cur.tgt.x+r*Math.sin(p)*Math.sin(t),
+      this.cur.tgt.y+r*Math.cos(p),
+      this.cur.tgt.z+r*Math.sin(p)*Math.cos(t)
+    );
+    cam.lookAt(this.cur.tgt);
+  };
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  if(camCtl)camCtl.update();
+  if(renderer&&scene&&camera&&state.view==='3d')renderer.render(scene,camera);
+  renderPreview();
+  renderSV();
+}
+
+function syncLayers(){
+  if(!groups.city)return;
+  groups.city.visible=state.layers.buildings;
+  LAYER_KEYS.concat(['zone','markers','regulation','detour','pedestrian','completion']).forEach(function(k){
+    if(groups[k])groups[k].visible=state.layers[k];
+  });
+  if(pv.ok&&pv.sub){
+    for(var id in pv.sub){var sub=pv.sub[id];for(var i=0;i<LAYER_KEYS.length;i++){var k=LAYER_KEYS[i];if(sub[k])sub[k].visible=state.layers[k];}}
+  }
+}
+
+function refreshMapColors(){
+  if(!groups.zone)return;
+  var vis=visibleProjects(dateAt(state.idx));
+  var date=dateAt(state.idx);
+  PROJECTS.forEach(function(p){
+    var st=statusAt(p,date),col=statusColor(st);
+    var on=vis.indexOf(p)>=0 && (!state.isolate||p.id===state.selected);
+    var zm=zoneMeshes[p.id],mk=markerMeshes[p.id];
+    if(zm){zm.material.color.set(col);zm.visible=on;}
+    if(mk){mk.children[1].material.color.set(col);mk.visible=on;}
+    if(p._nodes)p._nodes.forEach(function(n){n.visible=on;});
+  });
+}
+
+function focusProject(p){
+  if(state.view!=='3d')return;
+  camCtl.set({x:p.cx,z:p.cz},420,-0.72,0.9);
+}
+function setCamera(mode){
+  if(state.view==='cesium'){
+    if(!cesiumViewer)return;
+    if(mode==='top')cesiumViewer.camera.flyTo({destination:Cesium.Rectangle.fromDegrees(128,30,146,46),duration:1.4});
+    else if(mode==='front'){var p=projectById(state.selected);if(p)flyToSiteCesium(p);}
+    else cesiumViewer.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(139.668,35.593,4000),duration:1.1});
+    return;
+  }
+  if(state.view!=='3d')return;
+  var p=projectById(state.selected);
+  if(mode==='top')camCtl.set(p?{x:p.cx,z:p.cz}:null,760,0,0.2);
+  else if(mode==='front')camCtl.set(p?{x:p.cx,z:p.cz}:null,440,-1.57,1.18);
+  else camCtl.set(p?{x:p.cx,z:p.cz}:null,620,-0.72,0.85);
+}
+
+/* ---------- 2D fallback ---------- */
+function render2D(){
+  var svg=document.getElementById('map2d');
+  var W=1760,H=1760;
+  var vb=(-W/2)+' '+(-H/2)+' '+W+' '+H;
+  var s=[];
+  s.push('<rect x="'+(-W/2)+'" y="'+(-H/2)+'" width="'+W+'" height="'+H+'" fill="#5a606a"/>');
+  var step=80;
+  for(var x=-840;x<840;x+=step){for(var z=-840;z<840;z+=step){
+    var mx=x+step/2,mz=z+step/2;
+    if(Math.sqrt(mx*mx+mz*mz)<58)continue;
+    var isPark=(mx>40&&mx<200&&mz>120&&mz<320);
+    s.push('<rect x="'+(x+6)+'" y="'+(z+6)+'" width="'+(step-12)+'" height="'+(step-12)+'" rx="3" fill="'+(isPark?'#8fb98a':'#d6dae0')+'"/>');
+  }}
+  cityLayout.buildings.forEach(function(b){
+    s.push('<rect x="'+(b.x-b.w/2)+'" y="'+(b.z-b.d/2)+'" width="'+b.w+'" height="'+b.d+'" fill="'+(b.glass?'#aeb6c2':'#c4c9d1')+'" stroke="#aab0b9" stroke-width="0.6"/>');
+  });
+  var date=dateAt(state.idx);
+  PROJECTS.forEach(function(p){
+    if(visibleProjects(date).indexOf(p)<0)return;
+    if(state.isolate&&p.id!==state.selected)return;
+    var st=statusAt(p,date),col=statusColor(st);
+    var poly=localPoly(p,p.zone);
+    s.push('<polygon points="'+poly.map(function(q){return q.x+','+q.z;}).join(' ')+'" fill="'+col+'" fill-opacity="0.28" stroke="'+col+'" stroke-width="'+(p.id===state.selected?5:2)+'"/>');
+    if(p.regulation&&state.layers.regulation)s.push('<polyline points="'+localPoly(p,p.regulation).map(function(q){return q.x+','+q.z;}).join(' ')+'" fill="none" stroke="'+C.reg+'" stroke-width="4" stroke-dasharray="8 6" stroke-linecap="round"/>');
+    if(p.detour&&state.layers.detour)s.push('<polyline points="'+localPoly(p,p.detour).map(function(q){return q.x+','+q.z;}).join(' ')+'" fill="none" stroke="'+C.detour+'" stroke-width="4" stroke-dasharray="2 5" stroke-linecap="round" marker-end="url(#arw)"/>');
+    if(p.pedestrian&&state.layers.pedestrian)s.push('<polyline points="'+localPoly(p,p.pedestrian).map(function(q){return q.x+','+q.z;}).join(' ')+'" fill="none" stroke="#2f7d74" stroke-width="3" stroke-dasharray="4 4"/>');
+    var sel=p.id===state.selected;
+    s.push('<circle cx="'+p.cx+'" cy="'+p.cz+'" r="'+(sel?14:9)+'" fill="'+col+'" stroke="#fff" stroke-width="3"/>'+(sel?'<circle cx="'+p.cx+'" cy="'+p.cz+'" r="24" fill="none" stroke="'+col+'" stroke-width="2"/>':''));
+    if(sel){
+      var lw=p.publicTitle.length*28+34,left=p.cx>560;
+      var lx=left?(p.cx-24-lw):(p.cx+30),tx=left?(lx+18):(p.cx+48);
+      s.push('<rect x="'+lx+'" y="'+(p.cz-24)+'" width="'+lw+'" height="48" rx="8" fill="rgba(255,255,255,0.95)" stroke="'+col+'" stroke-width="1.5"/>');
+      s.push('<text x="'+tx+'" y="'+(p.cz+9)+'" font-size="26" font-family="sans-serif" fill="#1c1b1a">'+p.publicTitle+'</text>');
+    }
+  });
+  svg.innerHTML='<defs><marker id="arw" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="'+C.detour+'"/></marker></defs>'+'<g id="m2d-zones">'+s.join('')+'</g>';
+  svg.setAttribute('viewBox',vb);
+}
+function onSvgClick(e){
+  var svg=document.getElementById('map2d');
+  var pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;
+  var loc=pt.matrixTransform(svg.getScreenCTM().inverse());
+  var best=null,bd=1e9;
+  PROJECTS.forEach(function(p){
+    if(visibleProjects(dateAt(state.idx)).indexOf(p)<0)return;
+    var d=Math.hypot(p.cx-loc.x,p.cz-loc.y);
+    if(d<bd){bd=d;best=p;}
+  });
+  if(best&&bd<130)selectProject(best.id,false);
+}
+function showFallback(msg){
+  var sp=document.getElementById('spinner');
+  if(sp)sp.innerHTML='<span style="font-size:12px;color:var(--muted)">'+msg+'。2D表示に切り替えます。</span>';
+  setView('2d');
+  setTimeout(function(){if(sp)sp.hidden=true;},900);
+}
+
+/* ---------- UI render ---------- */
+var FILTERS=[
+  {id:'all',label:'すべて'},
+  {id:'planned',label:'着工前'},
+  {id:'active',label:'施工中'},
+  {id:'reg',label:'規制中'},
+  {id:'done',label:'完成'}
+];
+var DATA_LAYERS=[
+  {k:'bim',n:'BIM（3Dモデル）',c:'#4f8fbf'},
+  {k:'cad',n:'CAD（図面）',c:'#64748b'},
+  {k:'gis',n:'GIS（地理情報）',c:'#2f9d6b'},
+  {k:'points',n:'点群（レーザー）',c:'#8bd450'},
+  {k:'gs3d',n:'3DGS（ガウシアン）',c:'#22d3ee'},
+  {k:'smartphone',n:'スマホ撮影',c:'#8b5cf6'},
+  {k:'photo',n:'写真',c:'#f97316'},
+  {k:'progress',n:'施工進捗',c:'#eab308'},
+  {k:'inspect',n:'点検記録',c:'#14b8a6'},
+  {k:'track',n:'撮影軌跡',c:'#ec4899'},
+  {k:'aipin',n:'AI・指摘ピン',c:'#ef4444'}
+];
+function renderFilters(){
+  var wrap=document.getElementById('filters');
+  wrap.innerHTML='';
+  var date=dateAt(state.idx);
+  var base=PROJECTS.filter(function(p){return !(state.typeFilter&&state.typeFilter!=='all'&&p.siteType!==state.typeFilter);});
+  FILTERS.forEach(function(f){
+    var n=(f.id==='all')?base.length:base.filter(function(p){return statusGroup(p,date)===f.id;}).length;
+    var b=el('button',{class:'fchip'+(state.filter===f.id?' active':''),'data-f':f.id,type:'button'});
+    b.innerHTML='<span class="fa"></span>'+f.label+'<span class="fc-n num">'+n+'</span>';
+    b.addEventListener('click',function(){
+      state.filter=f.id;
+      if(f.id!=='all'){state.isolate=false;var ib=document.getElementById('iso-btn');if(ib)ib.classList.remove('on');}
+      update();
+    });
+    wrap.appendChild(b);
+  });
+}
+function renderPanel(){
+  var body=document.getElementById('panel-body');
+  var date=dateAt(state.idx);
+  if(state.tab==='layers'){
+    var groupDefs=[
+      {h:'背景',items:[{k:'buildings',n:'都市モデル（PLATEAU相当）',t:'tiles',c:'#c4c9d1'}]},
+      {h:'建設用',items:[
+        {k:'structure',n:'建物躯体',t:'mesh',c:'#b7bbc2'},
+        {k:'scaffold',n:'仮設足場・クレーン',t:'mesh',c:'#e08a2e'},
+        {k:'yard',n:'資材ヤード・仮囲い',t:'mesh',c:'#b08d5a'}]},
+      {h:'土木用',items:[
+        {k:'excavation',n:'掘削・開削範囲',t:'mesh',c:'#6b5f4e'},
+        {k:'earthwork',n:'土留め・盛土',t:'mesh',c:'#8a949e'},
+        {k:'utilities',n:'管路・構造物',t:'mesh',c:'#4f8fbf'},
+        {k:'tempRoad',n:'仮設道路',t:'mesh',c:'#c9ced5'}]},
+      {h:'施工管理用',items:[
+        {k:'zone',n:'工区境界',t:'geojson',c:C.active},
+        {k:'markers',n:'工程マーカー',t:'mesh',c:C.active},
+        {k:'safety',n:'安全設備・バリケード',t:'mesh',c:'#e0662b'},
+        {k:'regulation',n:'交通規制区間',t:'geojson',c:C.reg},
+        {k:'detour',n:'迂回路',t:'geojson',c:C.detour},
+        {k:'pedestrian',n:'歩行者動線',t:'geojson',c:'#2f7d74'},
+        {k:'completion',n:'完成予想モデル',t:'glb',c:C.done}]},
+      {h:'現場データ',items:DATA_LAYERS.map(function(d){return {k:d.k,n:d.n,t:'layer',c:d.c};})}
+    ];
+    body.innerHTML='';
+    groupDefs.forEach(function(grp){
+      body.appendChild(el('div',{class:'lg-head'},grp.h));
+      grp.items.forEach(function(d){
+        var row=el('div',{class:'layer-row'+(state.layers[d.k]?' on':''),'data-od-id':'layer-'+d.k});
+        row.innerHTML='<span class="sw" style="background:'+d.c+'"></span><span class="lname">'+d.n+'</span><span class="lg-type">'+d.t+'</span><span class="switch"></span>';
+        row.addEventListener('click',function(){
+          state.layers[d.k]=!state.layers[d.k];
+          syncLayers();refreshMapColors();renderPanel();updateActions();
+        });
+        body.appendChild(row);
+      });
+    });
+    return;
+  }
+  var list=visibleProjects(date);
+  document.getElementById('list-count').textContent=list.length;
+  var tdefs=[['all','すべて'],['arch-urban','都市部建設'],['arch-rural','地方建設'],['civil-urban','都市部土木'],['civil-rural','地方土木']];
+  var tf=el('div',{class:'type-filter'});
+  tdefs.forEach(function(t){
+    var b=el('button',{class:'tchip'+(state.typeFilter===t[0]?' active':''),type:'button'},t[1]);
+    b.addEventListener('click',function(){state.typeFilter=t[0];update();});
+    tf.appendChild(b);
+  });
+  body.innerHTML='';
+  body.appendChild(tf);
+  if(!list.length){body.appendChild(el('p',{class:'empty-note'},'条件に合う工事はありません。'));return;}
+  STATUS_GROUPS.forEach(function(sg){
+    var items=list.filter(function(p){return statusGroup(p,date)===sg.id;});
+    if(!items.length)return;
+    var head=el('div',{class:'grp-head'});
+    head.innerHTML='<span class="gd" style="background:'+sg.color+'"></span>'+sg.label+'<span class="gn num">'+items.length+'</span>';
+    body.appendChild(head);
+    items.forEach(function(p){
+      var card=el('button',{class:'pcard'+(p.id===state.selected?' sel':''),'data-od-id':'project-card-'+p.id,type:'button'});
+      card.innerHTML=
+        '<div class="pc-top"><span class="pc-name">'+p.name+'</span>'+
+        '<span class="pill '+sg.id+'">'+sg.label+'</span></div>'+
+        '<div class="pc-meta"><span>'+SITE_LABEL[p.siteType]+'</span><span>'+fmtDate(parseDate(p.start))+' 〜 '+fmtDate(parseDate(p.end))+'</span></div>'+
+        '<div class="pc-loc">'+ICON.pin+'<span>'+p.addrFull+'</span></div>';
+      card.addEventListener('click',function(){selectProject(p.id,true);});
+      body.appendChild(card);
+    });
+  });
+}
+function renderLegend(){
+  var items=[
+    {c:C.planned,l:'着工前'},
+    {c:C.active,l:'施工中'},
+    {c:C.reg,l:'交通規制中'},
+    {c:C.done,l:'完成・供用中'},
+    {c:C.detour,l:'迂回路',line:true},
+    {c:'#2f7d74',l:'歩行者動線',line:true}
+  ];
+  var h='<h4>凡例 / LEGEND</h4><ul>';
+  items.forEach(function(i){
+    h+='<li>'+(i.line?'<span class="lg-line" style="border-color:'+i.c+'"></span>':'<span class="lg-mark" style="background:'+i.c+'"></span>')+i.l+'</li>';
+  });
+  h+='</ul><div class="lg-sub">現場データ / SURVEY</div><ul>';
+  DATA_LAYERS.forEach(function(d){h+='<li><span class="lg-mark" style="background:'+d.c+'"></span>'+d.n+'</li>';});
+  h+='</ul>';
+  document.getElementById('legend').innerHTML=h;
+}
+function renderDetail(){
+  var p=projectById(state.selected);
+  var d=document.getElementById('detail');
+  if(!p){d.innerHTML='';return;}
+  var date=dateAt(state.idx),st=statusAt(p,date),col=statusColor(st),reg=hasReg(p,date);
+  var imps=p.impacts.map(function(id){return impactById[id];});
+  var stCls=st==='active'?'active':st==='planned'?'planned':'done';
+  var benefits=p.benefits.map(function(b){return '<li>'+ICON.check+'<span>'+b+'</span></li>';}).join('');
+  var impsHtml=imps.map(function(im){
+    var active=date>=parseDate(im.from)&&date<=parseDate(im.to);
+    var sev=im.severity==='warning'?'warning':im.severity==='notice'?'notice':'info';
+    var c=im.severity==='warning'?C.reg:im.severity==='notice'?C.active:C.detour;
+    return '<li class="'+(active?'':'inactive')+'" data-od-id="impact-'+im.id+'" style="--sev:'+c+'">'+
+      '<div class="imp-top"><span class="imp-title">'+im.title+'</span><span class="sev-pill '+sev+'">'+im.type+'</span></div>'+
+      '<div class="imp-desc">'+im.desc+'</div>'+
+      '<div class="imp-period"><span>'+(active?'期間中':'期間外')+'</span><b>'+fmtDate(parseDate(im.from))+' 〜 '+fmtDate(parseDate(im.to))+'</b><span>'+im.rec+'</span></div>'+
+    '</li>';
+  }).join('');
+  d.innerHTML=
+    '<div class="d-hero" style="--status:'+col+'">'+
+      '<div class="d-tags">'+
+        '<span class="pill solid" style="--status:'+col+'">'+statusLabel(st)+'</span>'+
+        '<span class="pill cat">'+SITE_LABEL[p.siteType]+'</span>'+
+        '<span class="pill cat">'+p.category+'</span>'+
+        (reg?'<span class="pill reg">'+ICON.alert+'規制中</span>':'')+
+      '</div>'+
+      '<h1 class="d-title" data-od-id="detail-title">'+p.publicTitle+'</h1>'+
+      '<div class="d-formal">'+p.name+'</div>'+
+      '<div class="d-meta">'+
+        '<div style="grid-column:1/-1"><div class="k">所在地</div><div class="v">'+ICON.pin+' '+p.addrFull+'</div></div>'+
+        '<div><div class="k">工期</div><div class="v num">'+fmtDate(parseDate(p.start))+'<small>〜 '+fmtDate(parseDate(p.end))+'</small></div></div>'+
+        '<div><div class="k">現在の工程</div><div class="v">'+p.phase+'</div></div>'+
+        '<div><div class="k">発注者</div><div class="v">'+p.owner.name+'</div></div>'+
+        '<div><div class="k">施工者</div><div class="v">'+p.contractor.name+'</div></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="d-sec"><h3>現場3D / SITE VIEW</h3><div class="site3d" id="site3d-holder"><span class="s3d-badge">'+SITE_LABEL[p.siteType]+'</span><div class="s3d-ctl"><button type="button" id="s3d-spin">'+(pv.spin?'停止':'回転')+'</button></div></div><p style="font-size:11px;color:var(--muted);margin-top:8px">この現場のみを切り出した3Dモデル（施工中の状態・自動回転）。</p></div>'+
+    (p.photo?'<div class="d-sec"><h3>サンプル写真 / PHOTO</h3><figure class="photo-card"><img src="'+p.photo+'" alt="'+p.name+'の工事イメージ写真（サンプル）" width="800" height="500" loading="lazy"><figcaption><b>'+p.name+'</b> の工事イメージ（サンプル写真）。写真: '+((PHOTO_CREDIT[p.photo]||{}).a||'')+' / '+((PHOTO_CREDIT[p.photo]||{}).l||'')+'（<a href="'+((PHOTO_CREDIT[p.photo]||{}).u||'#')+'" target="_blank" rel="noopener">Wikimedia Commons</a>）</figcaption></figure></div>':'')+
+    '<div class="d-sec"><h3>目的 / PURPOSE</h3><p class="lead">'+p.purpose+'</p>'+
+      '<h3 style="margin-top:14px">整備内容 / SCOPE</h3><ul class="benefits">'+benefits+'</ul></div>'+
+    '<div class="d-sec"><h3>アクション</h3><div class="cta-row" data-od-id="cta-row">'+
+      '<button class="btn ghost" id="act-completion">'+ICON.eye+'完成予想を見る</button>'+
+      '<button class="btn ghost" id="act-reg">'+ICON.cone+'交通規制を見る</button>'+
+      '<button class="btn primary" id="act-official">公式案内を見る '+ICON.ext+'</button>'+
+    '</div></div>'+
+    '<div class="d-sec" data-od-id="impact-section"><h3>交通規制・影響 / IMPACTS</h3>'+
+      (imps.length?'<ul class="imp">'+impsHtml+'</ul>':'<p style="font-size:12px;color:var(--muted)">現在、登録された交通規制はありません。</p>')+
+    '</div>'+
+    '<div class="d-sec"><h3>出典 / SOURCE</h3><div class="src"><span>'+p.owner.name+'</span>'+
+      '<a href="#" id="src-link">公式ページ '+ICON.ext+'</a></div>'+
+      '<div class="src" style="margin-top:8px;color:var(--muted)"><span>最終更新</span><span class="num">'+fmtDateTime(p.updated)+'</span></div></div>'+
+    '<div class="d-sec"><h3>ご注意</h3><div class="disclaimer">'+ICON.alert+'<span>規制内容・工期は変更される場合があります。現地の案内・標識を優先してください。本ページのデータはデモ用サンプルであり、実際の工事情報ではありません。</span></div></div>';
+
+  document.getElementById('act-completion').addEventListener('click',function(){
+    state.layers.completion=!state.layers.completion;
+    syncLayers();refreshMapColors();renderPanel();updateActions();
+    toast(state.layers.completion?'完成予想モデルを表示しました':'完成予想モデルを非表示にしました');
+  });
+  document.getElementById('act-reg').addEventListener('click',function(){
+    state.layers.regulation=true;state.layers.detour=true;state.layers.zone=true;
+    syncLayers();refreshMapColors();renderPanel();updateActions();
+    var sec=document.querySelector('[data-od-id="impact-section"]');
+    if(sec){var d=document.getElementById('detail');d.scrollTop=sec.offsetTop-70;}
+    toast('交通規制・迂回路を地図に表示しました');
+  });
+  document.getElementById('act-official').addEventListener('click',function(){toast('デモ用サンプルのため、公式サイトには遷移しません');});
+  document.getElementById('src-link').addEventListener('click',function(e){e.preventDefault();toast('デモ用サンプルのため、公式ページは無効です');});
+  var holder3d=document.getElementById('site3d-holder');
+  if(holder3d){
+    if(pv.ok){holder3d.appendChild(pv.canvas);showPreview(p.id);resizePreview();}
+    else{holder3d.insertAdjacentHTML('beforeend','<div class="s3d-fallback">この環境では3Dプレビューを表示できません。サンプル写真をご覧ください。</div>');}
+  }
+  var sb=document.getElementById('s3d-spin');
+  if(sb)sb.addEventListener('click',function(){pv.spin=!pv.spin;sb.textContent=pv.spin?'停止':'回転';});
+  updateActions();
+}
+function fmtDateTime(iso){var d=new Date(iso);return d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+function updateActions(){
+  var c=document.getElementById('act-completion'),r=document.getElementById('act-reg');
+  if(c)c.classList.toggle('on',state.layers.completion);
+  if(r)r.classList.toggle('on',state.layers.regulation&&state.layers.detour);
+}
+function renderTimeline(){
+  document.getElementById('tl-date').textContent=fmtDate(dateAt(state.idx));
+  document.getElementById('tl-range').value=state.idx;
+  var axis=['2026/04','2026/07','2026/10','2027/01','2027/03'];
+  document.getElementById('tl-axis').innerHTML=axis.map(function(a){return '<span>'+a+'</span>';}).join('');
+}
+var cesiumViewer=null;
+function localPolyDeg(p,rel){
+  var out=[];
+  rel.forEach(function(q){out.push(p.lon+q[0]/M_LON,p.lat-q[1]/M_LAT);});
+  return out;
+}
+function ensureCesium(){
+  if(cesiumViewer)return true;
+  if(!window.Cesium)return false;
+  try{
+    Cesium.Ion.defaultAccessToken='';
+    cesiumViewer=new Cesium.Viewer('cesium-holder',{
+      baseLayer:false,
+      terrainProvider:new Cesium.EllipsoidTerrainProvider(),
+      baseLayerPicker:false,geocoder:false,homeButton:false,sceneModePicker:false,
+      navigationHelpButton:false,animation:false,timeline:false,fullscreenButton:false,
+      infoBox:false,selectionIndicator:false,
+      requestRenderMode:true,maximumRenderTimeChange:Infinity
+    });
+    cesiumViewer.imageryLayers.addImageryProvider(new Cesium.OpenStreetMapImageryProvider({url:'https://tile.openstreetmap.org/'}));
+    cesiumViewer.scene.globe.enableLighting=false;
+    cesiumViewer.camera.setView({destination:Cesium.Rectangle.fromDegrees(128,30,146,46)});
+    var handler=new Cesium.ScreenSpaceEventHandler(cesiumViewer.scene.canvas);
+    handler.setInputAction(function(click){
+      var picked=cesiumViewer.scene.pick(click.position),pid=null;
+      if(Cesium.defined(picked)&&picked.id)pid=(typeof picked.id==='string')?picked.id:picked.id.id;
+      if(pid&&projectById(pid)){selectProject(pid,false);flyToSiteCesium(projectById(pid));}
+    },Cesium.ScreenSpaceEventType.LEFT_CLICK);
+    return true;
+  }catch(e){cesiumViewer=null;return false;}
+}
+function renderCesiumSites(){
+  if(!cesiumViewer)return;
+  cesiumViewer.entities.removeAll();
+  var date=dateAt(state.idx);
+  visibleProjects(date).forEach(function(p){
+    var col=Cesium.Color.fromCssColorString(statusColor(statusAt(p,date)));
+    var sel=p.id===state.selected;
+    var arch=p.siteType.indexOf('arch')===0;
+    cesiumViewer.entities.add({
+      id:p.id,name:p.name,
+      polygon:{hierarchy:Cesium.Cartesian3.fromDegreesArray(localPolyDeg(p,p.zone)),height:0,extrudedHeight:arch?12:5,material:col.withAlpha(sel?0.46:0.3),outline:true,outlineColor:col,outlineWidth:sel?3:1},
+      position:Cesium.Cartesian3.fromDegrees(p.lon,p.lat,0),
+      point:{pixelSize:9,color:col,outlineColor:Cesium.Color.WHITE,outlineWidth:2},
+      label:{text:p.name+'\n'+p.addrFull,font:'12px "Zen Kaku Gothic New", sans-serif',style:Cesium.LabelStyle.FILL_AND_OUTLINE,fillColor:Cesium.Color.fromCssColorString('#1c1b1a'),outlineColor:Cesium.Color.WHITE,outlineWidth:3,pixelOffset:new Cesium.Cartesian2(0,-20),verticalOrigin:Cesium.VerticalOrigin.BOTTOM,distanceDisplayCondition:new Cesium.DistanceDisplayCondition(0,12000),disableDepthTestDistance:Infinity}
+    });
+  });
+  if(cesiumViewer.scene.requestRender)cesiumViewer.scene.requestRender();
+}
+function flyToSiteCesium(p){
+  if(!cesiumViewer||!p)return;
+  cesiumViewer.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(p.lon,p.lat,1600),duration:0.9});
+}
+function renderMode(){
+  var c=state.view==='cesium';
+  document.getElementById('mode-3d').classList.toggle('active',state.view==='3d');
+  document.getElementById('mode-2d').classList.toggle('active',state.view==='2d');
+  document.getElementById('mode-cesium').classList.toggle('active',c);
+  document.getElementById('canvas-holder').hidden=(state.view!=='3d');
+  document.getElementById('map2d').hidden=(state.view!=='2d');
+  document.getElementById('cesium-holder').hidden=!c;
+  if(state.view==='2d')render2D();
+  else if(state.view==='3d')onResize();
+  if(cesiumViewer){
+    if(c){cesiumViewer.useDefaultRenderLoop=true;setTimeout(function(){try{cesiumViewer.resize();}catch(_){}if(cesiumViewer.scene.requestRender)cesiumViewer.scene.requestRender();},80);}
+    else{cesiumViewer.useDefaultRenderLoop=false;}
+  }
+}
+
+function selectProject(id,fly){
+  state.selected=id;save();
+  renderPanel();renderDetail();refreshMapColors();
+  if(state.view==='2d')render2D();
+  else if(state.view==='cesium'){renderCesiumSites();if(fly!==false)flyToSiteCesium(projectById(id));}
+  else if(fly!==false)focusProject(projectById(id));
+}
+function setView(v){
+  if(v==='cesium'&&!window.Cesium){
+    toast('CesiumJSを読み込み中…');
+    var tries=0,t=setInterval(function(){tries++;if(window.Cesium){clearInterval(t);setView('cesium');}else if(tries>=40){clearInterval(t);toast('CesiumJSを読み込めませんでした。3D表示に切り替えます');state.view='3d';renderMode();}},250);
+    return;
+  }
+  state.view=v;save();renderMode();
+  if(v==='cesium'){
+    if(!ensureCesium()){toast('CesiumJSを初期化できませんでした。3D表示に切り替えます');state.view='3d';renderMode();return;}
+    renderCesiumSites();
+  }else if(v==='2d'){render2D();}
+  renderPanel();
+}
+function update(){renderFilters();renderPanel();renderDetail();refreshMapColors();renderTimeline();if(state.view==='2d')render2D();if(state.view==='cesium')renderCesiumSites();if(state.sv){renderSVList();renderSVMeta();renderSVLayers();}}
+function toast(msg){
+  var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('show');},2200);
+}
+
+/* ---------- events ---------- */
+function wire(){
+  document.querySelectorAll('.tab').forEach(function(b){
+    b.addEventListener('click',function(){
+      state.tab=b.dataset.tab;
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('active',x===b);});
+      renderPanel();
+    });
+  });
+  document.getElementById('search-input').addEventListener('input',function(e){
+    var res=document.getElementById('search-results');
+    var list=searchProjects(e.target.value);
+    if(!e.target.value.trim()){res.hidden=true;return;}
+    if(!list.length){res.innerHTML='<div class="sr-item"><span class="sr-s">該当する工事がありません</span></div>';res.hidden=false;return;}
+    res.innerHTML=list.map(function(p){
+      var st=statusAt(p,dateAt(state.idx));
+      return '<button class="sr-item" data-id="'+p.id+'" type="button"><span class="pill '+(st==='active'?'active':st==='planned'?'planned':'done')+'">'+statusLabel(st)+'</span><span><span class="sr-t">'+p.name+'</span><br><span class="sr-s">'+p.owner.name+'</span></span></button>';
+    }).join('');
+    res.hidden=false;
+    res.querySelectorAll('.sr-item[data-id]').forEach(function(b){
+      b.addEventListener('click',function(){
+        selectProject(b.dataset.id,true);res.hidden=true;
+        document.getElementById('search-input').value='';
+      });
+    });
+  });
+  document.addEventListener('click',function(e){
+    if(!e.target.closest('.search'))document.getElementById('search-results').hidden=true;
+  });
+  document.getElementById('tl-range').addEventListener('input',function(e){
+    state.idx=+e.target.value;save();refreshMapColors();renderTimeline();renderPanel();renderDetail();if(state.view==='2d')render2D();if(state.sv){renderSVList();renderSVMeta();renderSVLayers();}
+  });
+  document.getElementById('tl-now').addEventListener('click',function(){state.idx=TODAY_IDX;save();update();});
+  var playing=false;
+  document.getElementById('play').addEventListener('click',function(){
+    playing=!playing;state.playing=playing;
+    document.getElementById('play-icon').innerHTML=playing?'<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>':'<path d="M8 5v14l11-7z"/>';
+    if(playing)loop();
+  });
+  function loop(){
+    if(!playing)return;
+    state.idx++;if(state.idx>MAXIDX)state.idx=0;
+    refreshMapColors();renderTimeline();renderPanel();renderDetail();
+    setTimeout(loop,90);
+  }
+  document.getElementById('mode-3d').addEventListener('click',function(){setView('3d');});
+  document.getElementById('mode-2d').addEventListener('click',function(){setView('2d');});
+  document.getElementById('mode-cesium').addEventListener('click',function(){setView('cesium');});
+  document.getElementById('iso-btn').addEventListener('click',function(){
+    state.isolate=!state.isolate;
+    this.classList.toggle('on',state.isolate);
+    refreshMapColors();
+    if(state.isolate&&state.view==='3d')focusProject(projectById(state.selected));
+    if(state.view==='2d')render2D();
+  });
+  document.getElementById('map2d').addEventListener('click',onSvgClick,true);
+  document.querySelectorAll('[data-cam]').forEach(function(b){
+    b.addEventListener('click',function(){setCamera(b.dataset.cam);});
+  });
+  document.getElementById('help-btn').addEventListener('click',function(){document.getElementById('help').hidden=false;});
+  document.getElementById('help-close').addEventListener('click',function(){document.getElementById('help').hidden=true;});
+  document.getElementById('help').addEventListener('click',function(e){if(e.target.id==='help')e.target.hidden=true;});
+  document.getElementById('sv-open').addEventListener('click',function(){if(state.sv)closeSV();else openSV(state.selected);});
+  document.getElementById('sv-close').addEventListener('click',closeSV);
+  document.getElementById('sv-prev').addEventListener('click',function(){svStep(-1);});
+  document.getElementById('sv-next').addEventListener('click',function(){svStep(1);});
+  document.getElementById('sv-spin').addEventListener('click',function(){sv.spin=!sv.spin;updateSVToggle();});
+  document.getElementById('sv-reset').addEventListener('click',function(){sv.rot=0.7;sv.tilt=0.5;sv.zoom=1;sv.spin=true;updateSVToggle();});
+  document.addEventListener('keydown',function(e){
+    if(e.target.tagName==='INPUT')return;
+    if(e.key==='Escape'){document.getElementById('help').hidden=true;if(state.sv)closeSV();}
+    if(state.sv&&!e.shiftKey&&e.key==='ArrowRight'){svStep(1);return;}
+    if(state.sv&&!e.shiftKey&&e.key==='ArrowLeft'){svStep(-1);return;}
+    if(e.key==='ArrowRight'&&e.shiftKey){state.idx=Math.min(MAXIDX,state.idx+7);update();}
+    if(e.key==='ArrowLeft'&&e.shiftKey){state.idx=Math.max(0,state.idx-7);update();}
+  });
+}
+var LS='koji-mieru-map-3d:v1';
+function save(){try{localStorage.setItem(LS,JSON.stringify({selected:state.selected,filter:state.filter,typeFilter:state.typeFilter,view:state.view,layers:state.layers,idx:state.idx}));}catch(_){}}
+function load(){try{var d=JSON.parse(localStorage.getItem(LS));if(d){if(d.selected)state.selected=d.selected;if(d.filter)state.filter=d.filter;if(d.typeFilter)state.typeFilter=d.typeFilter;if(d.view==='3d'||d.view==='2d')state.view=d.view;if(d.layers)for(var k in state.layers){if(d.layers[k]!=null)state.layers[k]=d.layers[k];}if(typeof d.idx==='number')state.idx=Math.max(0,Math.min(MAXIDX,d.idx));}}catch(_){}}
+
+/* ---------- boot ---------- */
+load();
+renderFilters();renderLegend();renderTimeline();
+var ok=init3D();
+initPreview();
+initSV();
+syncLayers();
+wire();
+document.getElementById('iso-btn').classList.toggle('on',state.isolate);
+renderMode();renderPanel();renderDetail();
+if(ok){setTimeout(function(){var s=document.getElementById('spinner');if(s)s.hidden=true;},650);}
+else{var s=document.getElementById('spinner');if(s)s.hidden=true;}
+if(state.view==='cesium')setView('cesium');
+openSV(state.selected);
+})();
+</script>
+</body>
+</html>
